@@ -29,6 +29,12 @@ def _kiln_name(db: Session, kiln_id: int) -> str:
     return name
 
 
+@router.get("/")
+def schedule_root():
+    """排程 root redirect — 指向 /result 或 /optimize"""
+    return {"status": "ok", "endpoints": {"optimize": "POST /api/v1/schedule/optimize", "result": "GET /api/v1/schedule/result", "entries": "GET /api/v1/schedule/entries"}}
+
+
 @router.post("/optimize", response_model=ScheduleResult)
 def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
     """執行排程優化，清除舊排程，寫入新結果"""
