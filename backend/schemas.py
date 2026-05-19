@@ -224,7 +224,13 @@ class ScheduleResult(BaseModel):
     summary: Dict[str, Any]
     kiln_summary: List[Dict[str, Any]]
     schedule: List[ScheduleEntryOut]
+    items: List[ScheduleEntryOut] = []  # alias for consistency with PaginatedResponse
     warnings: List[str] = []
+
+    def model_post_init(self, __context):
+        """Backward-compat: populate items from schedule if not set."""
+        if not self.items and self.schedule:
+            object.__setattr__(self, 'items', self.schedule)
 
 
 # ── Dashboard ──────────────────────────────────────────────────────────────

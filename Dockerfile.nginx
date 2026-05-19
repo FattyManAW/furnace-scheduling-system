@@ -1,0 +1,11 @@
+# ── 排爐系統 Nginx 映像（含已構建前端）────────────────────
+FROM nginx:alpine
+
+# 複製構建好的前端 static files
+COPY frontend/dist/ /usr/share/nginx/html/
+
+# 複製 nginx config（可被 bind mount 覆蓋）
+COPY nginx.conf /etc/nginx/nginx.template.conf
+
+# 預設用 8030 port
+EXPOSE 8030

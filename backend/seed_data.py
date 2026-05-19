@@ -5,7 +5,13 @@ from database import engine, SessionLocal, Base
 from models import Order, Mold, Kiln, ProcessStep
 from date_utils import excel_to_date
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+for _cand in [os.path.join(_HERE, "data"), os.path.join(_HERE, "..", "data")]:
+    if os.path.isdir(_cand):
+        DATA_DIR = _cand
+        break
+else:
+    DATA_DIR = os.path.join(_HERE, "data")  # fallback
 
 
 def init_db():
