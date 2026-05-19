@@ -2,32 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Custom utilities ── */
-.spinner {
-  width: 24px;
-  height: 24px;
-  border: 2.5px solid #2a2d3a;
-  border-top-color: #3b82f6;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+/* ── Apple-style smooth baseline ── */
+* {
+  transition-property: background-color, border-color, opacity, transform, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* ── Skeleton loading animation ── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.skeleton {
+  background: linear-gradient(110deg, #22252f 30%, #2e3140 50%, #22252f 70%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: 8px;
 }
 
-/* ── Scrollbar ── */
+/* ── Scrollbar — Industrial minimal ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f1117;
+  background: #181b23;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2d3a;
+  background: #2e3140;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3d4a;
+  background: #3a3e52;
+}
+
+/* ── Glassmorphism utility ── */
+.glass {
+  background: rgba(34, 37, 47, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ── Focus ring — Apple style ── */
+input:focus-visible, button:focus-visible, a:focus-visible, select:focus-visible {
+  outline: 2px solid #4b8cff;
+  outline-offset: 2px;
+  border-radius: 6px;
 }
