@@ -203,6 +203,16 @@ def load_dryers():
                 pass
     if current:
         dryers.append(current)
+    # Deduplicate plans per dryer
+    for d in dryers:
+        seen = {}
+        deduped = []
+        for p in d["plans"]:
+            k = p["plan"]
+            if k not in seen:
+                seen[k] = p
+                deduped.append(p)
+        d["plans"] = deduped
     return dryers
 
 
