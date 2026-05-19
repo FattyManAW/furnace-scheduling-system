@@ -1,0 +1,14 @@
+# Docker ignore
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+README.md
+node_modules/
+frontend/
+frontend-build/
+venv/
+.env
+*.egg-info/
+.DS_Store

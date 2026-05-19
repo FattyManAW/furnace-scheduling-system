@@ -1,7 +1,31 @@
-scheduler.db
+# Python
 __pycache__/
 *.pyc
-.env
-fix_*.py
-check_*.py
-debug_*.py
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+furnace_schedule.db
+*.sqlite3
+
+# Node
+node_modules/
+.npm
+.eslintcache
+dist/
+dist-ssr/
+*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

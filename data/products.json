@@ -1,0 +1,263 @@
+[
+  {
+    "no": 1,
+    "voltage_kv": 10.0,
+    "current_a": 250.0,
+    "mold_od": 210.0,
+    "mold_id": 130.0,
+    "mold_len": 1400.0,
+    "capacity": 1
+  },
+  {
+    "no": 2,
+    "voltage_kv": 24.0,
+    "current_a": 2500.0,
+    "mold_od": 270.0,
+    "mold_id": 180.0,
+    "mold_len": 2000.0,
+    "capacity": 1
+  },
+  {
+    "no": 4,
+    "voltage_kv": 36.0,
+    "current_a": 2000.0,
+    "mold_od": 220.0,
+    "mold_id": 115.0,
+    "mold_len": 2225.0,
+    "capacity": 2
+  },
+  {
+    "no": 5,
+    "voltage_kv": 36.0,
+    "current_a": 3150.0,
+    "mold_od": 215.0,
+    "mold_id": 150.0,
+    "mold_len": 2000.0,
+    "capacity": 1
+  },
+  {
+    "no": 6,
+    "voltage_kv": 40.5,
+    "current_a": 1250.0,
+    "mold_od": 235.0,
+    "mold_id": 140.0,
+    "mold_len": 1600.0,
+    "capacity": 1
+  },
+  {
+    "no": 7,
+    "voltage_kv": 40.5,
+    "current_a": 3150.0,
+    "mold_od": 215.0,
+    "mold_id": 150.0,
+    "mold_len": 2500.0,
+    "capacity": 1
+  },
+  {
+    "no": 8,
+    "voltage_kv": 40.5,
+    "current_a": 5000.0,
+    "mold_od": 270.0,
+    "mold_id": 180.0,
+    "mold_len": 2000.0,
+    "capacity": 1
+  },
+  {
+    "no": 9,
+    "voltage_kv": 52.0,
+    "current_a": 1250.0,
+    "mold_od": 215.0,
+    "mold_id": 150.0,
+    "mold_len": 2000.0,
+    "capacity": 1
+  },
+  {
+    "no": 10,
+    "voltage_kv": 52.0,
+    "current_a": 2500.0,
+    "mold_od": 215.0,
+    "mold_id": 150.0,
+    "mold_len": 2600.0,
+    "capacity": 1
+  },
+  {
+    "no": 11,
+    "voltage_kv": 72.5,
+    "current_a": 630.0,
+    "mold_od": 215.0,
+    "mold_id": 150.0,
+    "mold_len": 1600.0,
+    "capacity": 1
+  },
+  {
+    "no": 12,
+    "voltage_kv": 72.5,
+    "current_a": 2000.0,
+    "mold_od": 255.0,
+    "mold_id": 150.0,
+    "mold_len": 2600.0,
+    "capacity": 1
+  },
+  {
+    "no": 13,
+    "voltage_kv": 72.5,
+    "current_a": 3150.0,
+    "mold_od": 270.0,
+    "mold_id": 180.0,
+    "mold_len": 2000.0,
+    "capacity": 1
+  },
+  {
+    "no": 14,
+    "voltage_kv": 110.0,
+    "current_a": 800.0,
+    "mold_od": 215.0,
+    "mold_id": 150.0,
+    "mold_len": 2500.0,
+    "capacity": 1
+  },
+  {
+    "no": 17,
+    "voltage_kv": 123.0,
+    "current_a": 2000.0,
+    "mold_od": 215.0,
+    "mold_id": 150.0,
+    "mold_len": 3000.0,
+    "capacity": 1
+  },
+  {
+    "no": 18,
+    "voltage_kv": 126.0,
+    "current_a": 2000.0,
+    "mold_od": 270.0,
+    "mold_id": 180.0,
+    "mold_len": 3000.0,
+    "capacity": 1
+  },
+  {
+    "no": 19,
+    "voltage_kv": 126.0,
+    "current_a": 4000.0,
+    "mold_od": 330.0,
+    "mold_id": 230.0,
+    "mold_len": 3900.0,
+    "capacity": 1
+  },
+  {
+    "no": 20,
+    "voltage_kv": 145.0,
+    "current_a": 2700.0,
+    "mold_od": 270.0,
+    "mold_id": 180.0,
+    "mold_len": 3000.0,
+    "capacity": 1
+  },
+  {
+    "no": 21,
+    "voltage_kv": 170.0,
+    "current_a": 630.0,
+    "mold_od": 270.0,
+    "mold_id": 180.0,
+    "mold_len": 2000.0,
+    "capacity": 1
+  },
+  {
+    "no": 22,
+    "voltage_kv": 170.0,
+    "current_a": 2000.0,
+    "mold_od": 270.0,
+    "mold_id": 180.0,
+    "mold_len": 3000.0,
+    "capacity": 1
+  },
+  {
+    "no": 23,
+    "voltage_kv": 172.0,
+    "current_a": 800.0,
+    "mold_od": 270.0,
+    "mold_id": 180.0,
+    "mold_len": 3000.0,
+    "capacity": 1
+  },
+  {
+    "no": 24,
+    "voltage_kv": 245.0,
+    "current_a": 2000.0,
+    "mold_od": 330.0,
+    "mold_id": 230.0,
+    "mold_len": 3900.0,
+    "capacity": 1
+  },
+  {
+    "no": 25,
+    "voltage_kv": 252.0,
+    "current_a": 2500.0,
+    "mold_od": 380.0,
+    "mold_id": 260.0,
+    "mold_len": 4600.0,
+    "capacity": 1
+  },
+  {
+    "no": 26,
+    "voltage_kv": 252.0,
+    "current_a": 5000.0,
+    "mold_od": 410.0,
+    "mold_id": 320.0,
+    "mold_len": 6245.0,
+    "capacity": 1
+  },
+  {
+    "no": 28,
+    "voltage_kv": 300.0,
+    "current_a": 2000.0,
+    "mold_od": 410.0,
+    "mold_id": 320.0,
+    "mold_len": 6245.0,
+    "capacity": 1
+  },
+  {
+    "no": 29,
+    "voltage_kv": 362.0,
+    "current_a": 1250.0,
+    "mold_od": 410.0,
+    "mold_id": 320.0,
+    "mold_len": 6245.0,
+    "capacity": 1
+  },
+  {
+    "no": 30,
+    "voltage_kv": 363.0,
+    "current_a": 1250.0,
+    "mold_od": 410.0,
+    "mold_id": 320.0,
+    "mold_len": 6245.0,
+    "capacity": 1
+  },
+  {
+    "no": 31,
+    "voltage_kv": 420.0,
+    "current_a": 1600.0,
+    "mold_od": 470.0,
+    "mold_id": 370.0,
+    "mold_len": 5200.0,
+    "capacity": 1
+  },
+  {
+    "no": 32,
+    "voltage_kv": 550.0,
+    "current_a": 5000.0,
+    "mold_od": 470.0,
+    "mold_id": 400.0,
+    "mold_len": 7000.0,
+    "capacity": 1
+  },
+  {
+    "no": 33,
+    "voltage_kv": 750.0,
+    "current_a": 2500.0,
+    "mold_od": 600.0,
+    "mold_id": 490.0,
+    "mold_len": 8740.0,
+    "capacity": 1
+  }
+]

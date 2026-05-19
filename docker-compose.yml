@@ -1,0 +1,50 @@
+# ── 干式套管最佳化排爐系統 docker-compose.yml ───────────────────────
+# 前後端一體化部署：nginx (port 8030) serve 前端 + 反向代理後端 API
+#
+# Usage:
+#   docker compose up -d          # 啟動 → http://localhost:8030
+#   docker compose logs -f        # 追蹤日誌
+#   docker compose down           # 關閉
+#   docker compose down -v        # 關閉並清除資料庫
+
+version: "3.8"
+
+services:
+  # ── 後端 API ──────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: furnace-api:latest
+    container_name: furnace-api
+    environment:
+      - TZ=Asia/Taipei
+    volumes:
+      - furnace_data:/app/backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    # No external ports — nginx proxies internally
+    expose:
+      - "8002"
+
+  # ── 前端 Nginx ────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: furnace-nginx
+    ports:
+      - "${PORT:-8030}:8030"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  furnace_data:

@@ -1,0 +1,70 @@
+"""Orders API"""
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from typing import List, Optional
+from database import get_db
+from models import Order
+from schemas import OrderCreate, OrderUpdate, OrderOut
+from crud import (
+    get_orders, get_order, create_order, update_order,
+    delete_order, get_orders_count, bulk_create_orders,
+)
+
+router = APIRouter(prefix="/api/v1/orders", tags=["orders"])
+
+
+@router.get("/", response_model=List[OrderOut])
+def list_orders(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    return get_orders(db, skip=skip, limit=limit, status=status, search=search)
+
+
+@router.get("/count")
+def count_orders(
+    status: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    return {"count": get_orders_count(db, status=status)}
+
+
+@router.get("/{order_id}", response_model=OrderOut)
+def get_order_detail(order_id: int, db: Session = Depends(get_db)):
+    obj = get_order(db, order_id)
+    if not obj:
+        raise HTTPException(404, "訂單不存在")
+    return obj
+
+
+@router.post("/", response_model=OrderOut, status_code=201)
+def add_order(order: OrderCreate, db: Session = Depends(get_db)):
+    existing = db.query(Order).filter(Order.plan_no == order.plan_no).first()
+    if existing:
+        raise HTTPException(400, f"計劃單號 {order.plan_no} 已存在")
+    return create_order(db, order)
+
+
+@router.put("/{order_id}", response_model=OrderOut)
+def modify_order(order_id: int, order: OrderUpdate, db: Session = Depends(get_db)):
+    obj = update_order(db, order_id, order)
+    if not obj:
+        raise HTTPException(404, "訂單不存在")
+    return obj
+
+
+@router.delete("/{order_id}")
+def remove_order(order_id: int, db: Session = Depends(get_db)):
+    ok = delete_order(db, order_id)
+    if not ok:
+        raise HTTPException(404, "訂單不存在")
+    return {"deleted": True, "order_id": order_id}
+
+
+@router.post("/bulk-import")
+def bulk_import_orders(orders_data: List[dict], db: Session = Depends(get_db)):
+    count = bulk_create_orders(db, orders_data)
+    return {"imported": count, "skipped": len(orders_data) - count}
