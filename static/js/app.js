@@ -148,6 +148,7 @@ function filterOrders() {
   const start = document.getElementById("filter-start").value;
   const end = document.getElementById("filter-end").value;
 
+  const today = new Date().toISOString().slice(0,10);
   const filtered = state.orders.filter(o => {
     if (search && !o.order_id.toLowerCase().includes(search) && !o.contract.toLowerCase().includes(search))
       return false;
@@ -175,9 +176,11 @@ function filterOrders() {
       const amp = o.current_a;
       const spec = state.products[`${kv}/${amp}`];
       const specStr = spec ? `${spec.mold_od}×${spec.mold_id}×${spec.mold_length}mm` : "—";
+      const isOverdue = o.delivery_date < today;
+      const rowClass = "order-row" + (isOverdue ? " overdue" : "");
       const checked = state.selectedOrderIds.has(o.order_id) ? "checked" : "";
       return `
-        <div class="order-row">
+        <div class="${rowClass}">
           <div><input type="checkbox" class="order-chk" value="${o.order_id}" ${checked} onchange="toggleOrder('${o.order_id}', this.checked)"></div>
           <div><strong>${o.order_id}</strong></div>
           <div style="color:var(--text2)">${o.contract}</div>
@@ -231,6 +234,11 @@ function toggleFurnace(name, el) {
     state.selectedFurnaces.add(name);
     el.classList.add("active");
   }
+}
+
+function quickRunAll() {
+  document.querySelector('input[name=order-source][value="all"]').checked = true;
+  runOptimize();
 }
 
 async function runOptimize() {
@@ -413,9 +421,9 @@ function renderGantt(r) {
       const durPct = Math.max(8, (1 / maxDay) * 100 * Math.max(1, b.total_molds * 0.3));
       const colors = ["#6c7cff","#00d2a0","#ffb347","#47b3ff","#ff5c7c","#c084fc","#fb923c","#34d399"];
       const bg = colors[b.batch_id.charCodeAt(2) % colors.length];
-      html += `<div style="position:absolute;left:${pct}%;width:${durPct}%;height:28px;background:${bg};border-radius:6px;top:10px;
+      html += `<div class="gantt-block" style="position:absolute;left:${pct}%;width:${durPct}%;height:28px;background:${bg};border-radius:6px;top:10px;
         font-size:0.68rem;color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap;font-weight:600;padding:0 4px"
-        title="${b.batch_id}: ${b.total_molds}根 (${b.molds.map(m=>m.order_id).join(',')})">
+        data-tip="${b.batch_id}: ${b.total_molds}根 (${b.molds.map(m=>m.order_id).join(',')})">
         ${b.batch_id} ${b.total_molds}根
       </div>`;
     });

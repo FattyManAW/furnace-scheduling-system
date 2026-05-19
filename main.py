@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-from database import init_db, Dryer, DryerPlan, MoldType, ProductSpec, Order, Batch, Base
+from database import init_db, make_get_db, Dryer, DryerPlan, MoldType, ProductSpec, Order, Batch, Base
 from engine import run_schedule
 
 # ─── Config ────────────────────────────────────────────────────
@@ -20,15 +20,9 @@ DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scheduler.db
 engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread": False})
 init_db(engine)
 
-from sqlalchemy.orm import sessionmaker
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+get_db = make_get_db(engine)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
 
 # ─── App ───────────────────────────────────────────────────────
 app = FastAPI(
@@ -38,6 +32,7 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
+    # TODO: production → replace with actual frontend origin(s)
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,0 +1,7 @@
+scheduler.db
+__pycache__/
+*.pyc
+.env
+fix_*.py
+check_*.py
+debug_*.py

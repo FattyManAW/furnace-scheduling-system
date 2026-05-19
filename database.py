@@ -120,3 +120,18 @@ class Batch(Base):
 def init_db(engine):
     """Create all tables."""
     Base.metadata.create_all(bind=engine)
+
+
+def make_get_db(engine):
+    """Factory: return FastAPI Depends()-compatible get_db() bound to engine."""
+    from sqlalchemy.orm import sessionmaker
+    _SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
+    def _get_db():
+        db = _SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    return _get_db

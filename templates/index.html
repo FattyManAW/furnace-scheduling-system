@@ -306,14 +306,17 @@
 
     <!-- Step 1: 選擇訂單 -->
     <div class="card" style="margin-bottom:1.25rem">
-      <div class="card-title">第一步：選擇訂單</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+        <div class="card-title" style="margin:0">第一步：選擇訂單</div>
+        <button class="btn btn-success" onclick="quickRunAll()">⚡ 快速執行（全部訂單）</button>
+      </div>
       <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
         <span style="color:var(--text2); font-size:0.85rem">來源：</span>
         <label><input type="radio" name="order-source" value="selected" checked> 從訂單管理選取的訂單</label>
         <label><input type="radio" name="order-source" value="all"> 所有訂單</label>
         <label><input type="radio" name="order-source" value="date"> 依交期範圍</label>
-        <input type="date" id="schedule-date-start" style="width:160px" title="交期起">
-        <input type="date" id="schedule-date-end" style="width:160px" title="交期迄">
+        <input type="date" id="schedule-date-start" style="width:160px" onkeydown="if(event.key=='Enter')runOptimize()" title="交期起">
+        <input type="date" id="schedule-date-end" style="width:160px" onkeydown="if(event.key=='Enter')runOptimize()" title="交期迄">
         <button class="btn btn-primary" id="btn-optimize" onclick="runOptimize()">
           <span id="opt-label">▶ 執行最佳化排爐</span>
         </button>
