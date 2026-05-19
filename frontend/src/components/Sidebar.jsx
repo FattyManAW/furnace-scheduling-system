@@ -3,6 +3,7 @@ import {
   LayoutDashboard, ClipboardList, Warehouse,
   Calendar, BarChart3, Settings, Flame,
 } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 
 const nav = [
   { to: "/", icon: LayoutDashboard, label: "儀表板" },
@@ -52,6 +53,11 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Theme Toggle */}
+      <div className="px-3 py-1 border-t border-furnace-border">
+        <ThemeToggle />
+      </div>
 
       {/* Footer */}
       <div className="p-4 border-t border-furnace-border">

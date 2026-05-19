@@ -3,29 +3,18 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════
-   Canonical CSS Token System v3.2.1 — Power Squad Unified Bridge
+   Canonical CSS Token System v4.0 — Power Squad Unified Bridge
    
    Industrial Dark (Forge, ISA-101) → --c-* prefix
    Office Light (Vesper, Apple HIG)   → --c-* prefix
    
    Theme toggle: [data-theme="dark"] / [data-theme="light"]
    localStorage key: furnace-theme
-   
-   Mapping (Forge → Christina canonical):
-     furnace-bg       → --c-bg
-     furnace-card     → --c-surface
-     furnace-border   → --c-border
-     furnace-text     → --c-t2
-     furnace-heading  → --c-t1
-     furnace-muted    → --c-t3
-     furnace-blue     → --c-teal
-     furnace-green    → --c-success
-     furnace-amber    → --c-warning
-     furnace-red      → --c-error
+   prefers-color-scheme: auto-detect via ThemeToggle.jsx + initTheme()
    ═══════════════════════════════════════════════════════════════════ */
 
-:root {
-  /* ── Default: Industrial Dark (ISA-101) ── */
+:root,
+[data-theme="dark"] {
   --c-bg:          #181b23;
   --c-surface:     #22252f;
   --c-elevated:    #2e3140;
@@ -37,11 +26,48 @@
   --c-teal:        #4b8cff;
   --c-teal-hot:    #6ba0ff;
   --c-teal-dim:    rgba(75,140,255,0.15);
+  --c-teal-a12:    rgba(75,140,255,0.12);
+  --c-teal-a30:    rgba(75,140,255,0.30);
+  --c-teal-a40:    rgba(75,140,255,0.40);
   --c-success:     #3cc97e;
+  --c-success-dim: rgba(60,201,126,0.15);
+  --c-success-a12: rgba(60,201,126,0.12);
+  --c-success-a40: rgba(60,201,126,0.40);
+  --c-success-a95: rgba(60,201,126,0.95);
   --c-warning:     #f0b028;
+  --c-warning-dim: rgba(240,176,40,0.15);
+  --c-warning-a12: rgba(240,176,40,0.12);
   --c-error:       #f44b55;
+  --c-error-dim:   rgba(244,75,85,0.15);
+  --c-error-a12:   rgba(244,75,85,0.12);
+  --c-error-a25:   rgba(244,75,85,0.25);
+  --c-error-a95:   rgba(244,75,85,0.95);
+  --c-purple:      #a78bfa;
+  --c-purple-dim:  rgba(167,139,250,0.15);
+  --c-purple-a12:  rgba(167,139,250,0.12);
+  --c-cyan:        #5ac8fa;
+  --c-cyan-dim:    rgba(90,200,250,0.15);
+  --c-cyan-a12:    rgba(90,200,250,0.12);
   --c-radius:      12px;
   --c-shadow:      0 1px 3px rgba(0,0,0,0.3);
+
+  /* Legacy aliases */
+  --green-12:  var(--c-success-a12);
+  --amber-12:  var(--c-warning-a12);
+  --red-12:    var(--c-error-a12);
+  --blue-12:   var(--c-teal-a12);
+  --purple-12: var(--c-purple-a12);
+  --cyan-12:   var(--c-cyan-a12);
+
+  --ease:        cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out:    cubic-bezier(0, 0, 0.2, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+  --space-xs: 4px;  --space-sm: 8px;
+  --space-md: 16px; --space-lg: 24px;
+  --space-xl: 32px; --space-2xl: 48px;
 }
 
 [data-theme="light"] {
@@ -56,49 +82,150 @@
   --c-teal:        #3b82f6;
   --c-teal-hot:    #2563eb;
   --c-teal-dim:    rgba(59,130,246,0.12);
+  --c-teal-a12:    rgba(59,130,246,0.12);
+  --c-teal-a30:    rgba(59,130,246,0.30);
+  --c-teal-a40:    rgba(59,130,246,0.40);
   --c-success:     #16a34a;
+  --c-success-dim: rgba(22,163,74,0.12);
+  --c-success-a12: rgba(22,163,74,0.12);
+  --c-success-a40: rgba(22,163,74,0.40);
+  --c-success-a95: rgba(22,163,74,0.95);
   --c-warning:     #d97706;
+  --c-warning-dim: rgba(217,119,6,0.12);
+  --c-warning-a12: rgba(217,119,6,0.12);
   --c-error:       #dc2626;
+  --c-error-dim:   rgba(220,38,38,0.12);
+  --c-error-a12:   rgba(220,38,38,0.12);
+  --c-error-a25:   rgba(220,38,38,0.25);
+  --c-error-a95:   rgba(220,38,38,0.95);
+  --c-purple:      #8b5cf6;
+  --c-purple-dim:  rgba(139,92,246,0.12);
+  --c-purple-a12:  rgba(139,92,246,0.12);
+  --c-cyan:        #0891b2;
+  --c-cyan-dim:    rgba(8,145,178,0.12);
+  --c-cyan-a12:    rgba(8,145,178,0.12);
   --c-radius:      12px;
   --c-shadow:      0 1px 2px rgba(0,0,0,0.04);
+
+  --green-12:  var(--c-success-a12);
+  --amber-12:  var(--c-warning-a12);
+  --red-12:    var(--c-error-a12);
+  --blue-12:   var(--c-teal-a12);
+  --purple-12: var(--c-purple-a12);
+  --cyan-12:   var(--c-cyan-a12);
+
+  --ease:        cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out:    cubic-bezier(0, 0, 0.2, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+  --space-xs: 4px;  --space-sm: 8px;
+  --space-md: 16px; --space-lg: 24px;
+  --space-xl: 32px; --space-2xl: 48px;
 }
 
-/* ── Apple-style smooth baseline ── */
-* {
+/* ── Base ── */
+html, body, #root {
+  background: var(--c-bg);
+  color: var(--c-t1);
+  transition: background-color 0.3s var(--ease-out), color 0.3s var(--ease-out);
+}
+
+*, *::before, *::after {
   transition-property: background-color, border-color, opacity, transform, box-shadow;
   transition-duration: 200ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Skeleton loading animation ── */
+/* ═══════════════════════════════════════════════════════════════════
+   ANIMATION SYSTEM v4.0 — Apple HIG motion design
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Skeleton Loading ── */
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50%      { opacity: 0.4; }
 }
 .skeleton {
   background: linear-gradient(110deg, var(--c-surface) 30%, var(--c-elevated) 50%, var(--c-surface) 70%);
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
-  border-radius: var(--c-radius);
+  border-radius: 8px;
+}
+
+/* ── Page Mount (stagger entrance) ── */
+@keyframes fadeSlideUp    { from { opacity:0; transform:translateY(12px); }  to { opacity:1; transform:translateY(0); } }
+@keyframes fadeSlideDown  { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeSlideLeft  { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:translateX(0); } }
+@keyframes fadeSlideRight { from { opacity:0; transform:translateX(12px); }  to { opacity:1; transform:translateX(0); } }
+@keyframes scaleIn        { from { opacity:0; transform:scale(0.95); }      to { opacity:1; transform:scale(1); } }
+
+.animate-in         { animation: fadeSlideUp    0.45s var(--ease-out) backwards; }
+.animate-in-down    { animation: fadeSlideDown  0.45s var(--ease-out) backwards; }
+.animate-in-left    { animation: fadeSlideLeft  0.45s var(--ease-out) backwards; }
+.animate-in-right   { animation: fadeSlideRight 0.45s var(--ease-out) backwards; }
+.animate-in-scale   { animation: scaleIn        0.35s var(--ease-out) backwards; }
+
+.animate-in.delay-1 { animation-delay: 60ms;  }  .animate-in.delay-2 { animation-delay: 120ms; }
+.animate-in.delay-3 { animation-delay: 180ms; }  .animate-in.delay-4 { animation-delay: 240ms; }
+.animate-in.delay-5 { animation-delay: 300ms; }  .animate-in.delay-6 { animation-delay: 360ms; }
+.animate-in.delay-7 { animation-delay: 420ms; }  .animate-in.delay-8 { animation-delay: 480ms; }
+
+/* ── Scroll Reveal ── */
+.reveal { opacity:0; transform:translateY(16px); transition:opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out); }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ── Number Counter ── */
+@keyframes countUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.count-animate { animation: countUp 0.6s var(--ease-spring) backwards; }
+
+/* ── Pulse (attention) ── */
+@keyframes pulse-ring { 0%{box-shadow:0 0 0 0 var(--c-teal-dim)} 70%{box-shadow:0 0 0 6px transparent} 100%{box-shadow:0 0 0 0 transparent} }
+.pulse { animation: pulse-ring 2s ease-out infinite; }
+
+/* ── Spin ── */
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.spin { animation: spin 0.8s linear infinite; }
+
+/* ── Shimmer (data loading) ── */
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+.shimmer {
+  background: linear-gradient(90deg, var(--c-surface) 25%, var(--c-elevated) 50%, var(--c-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* ── Toast ── */
+@keyframes toastSlideIn  { from{opacity:0; transform:translateY(-16px) scale(0.95)} to{opacity:1; transform:translateY(0) scale(1)} }
+@keyframes toastSlideOut { from{opacity:1; transform:translateY(0) scale(1)}     to{opacity:0; transform:translateY(-16px) scale(0.95)} }
+.toast       { animation: toastSlideIn 0.35s var(--ease-spring) forwards; }
+.toast.exit  { animation: toastSlideOut 0.25s var(--ease-out) forwards; }
+
+/* ── Modal ── */
+@keyframes modalEnter    { from{opacity:0; transform:scale(0.95) translateY(8px)} to{opacity:1; transform:scale(1) translateY(0)} }
+@keyframes modalBackdrop { from{opacity:0} to{opacity:1} }
+.modal-backdrop { animation: modalBackdrop 0.2s var(--ease-out) forwards; }
+.modal-panel    { animation: modalEnter 0.3s var(--ease-spring) backwards; }
+
+/* ── Hover Lift ── */
+.hover-lift { transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out); }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+[data-theme="light"] .hover-lift:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+/* ── Button Press ── */
+.btn:active, button:active, [role="button"]:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease-in;
 }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--c-bg);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--c-elevated);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--c-t3);
-}
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:var(--c-bg); }
+::-webkit-scrollbar-thumb { background:var(--c-elevated); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--c-t3); }
 
-/* ── Glassmorphism utility ── */
+/* ── Glassmorphism ── */
 .glass {
   background: color-mix(in srgb, var(--c-surface) 70%, transparent);
   backdrop-filter: blur(16px);
@@ -106,9 +233,18 @@
   border: 1px solid var(--c-border);
 }
 
-/* ── Focus ring ── */
+/* ── Focus Ring ── */
 input:focus-visible, button:focus-visible, a:focus-visible, select:focus-visible {
   outline: 2px solid var(--c-teal);
   outline-offset: 2px;
   border-radius: 6px;
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
