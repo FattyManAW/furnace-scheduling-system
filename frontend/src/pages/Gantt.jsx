@@ -12,15 +12,16 @@ const VIEW_MODES = [
   { label: "1月", days: 30, colW: 48 },
 ];
 
-function timeToLeft(dateStr, minDate) {
-  const d = parseISO(dateStr);
-  const diff = differenceInDays(d, minDate);
-  return diff * 48; // 48px per day
-}
-
-// ── 工具：以工時估算條塊跨度天數（最少 1 天）
+// ── 以工時估算條塊跨度天數（最少 1 天）
 function daysFromHours(hours) {
   return Math.max(1, Math.ceil(hours / 8));
+}
+
+// ── 條塊 X 座標（動態 colW）
+function timeToLeft(dateStr, minDate, colW) {
+  const d = parseISO(dateStr);
+  const diff = differenceInDays(d, minDate);
+  return diff * colW;
 }
 
 // ── 按爐次利用率決定條塊顏色
@@ -53,15 +54,22 @@ function Tooltip({ children, content }) {
 export default function Gantt() {
   const [schedule, setSchedule] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [viewStart, setViewStart] = useState(startOfDay(new Date()));
-  const [viewMode, setViewMode] = useState(0); // index into VIEW_MODES
-
-  const days = VIEW_MODES[viewMode].days;
-  const colW = VIEW_MODES[viewMode].colW;
+  const [viewStart, setViewStart] = useState(null);
+  const [viewMode, setViewMode] = useState(1); // default: 2-week view
 
   useEffect(() => {
     api.getScheduleResult()
-      .then(setSchedule)
+      .then(data => {
+        setSchedule(data);
+        // Anchor view to earliest delivery_date (Day 0)
+        if (data?.schedule?.length) {
+          const dates = data.schedule.map(e => e.delivery_date).filter(Boolean);
+          if (dates.length) {
+            const earliest = dates.sort()[0];
+            setViewStart(startOfDay(parseISO(earliest)));
+          }
+        }
+      })
       .catch(() => setSchedule(null))
       .finally(() => setLoading(false));
   }, []);
@@ -71,8 +79,10 @@ export default function Gantt() {
     return <div className="text-furnace-muted">尚無排程結果，請先在「排程設定」頁面執行排程。</div>;
   }
 
-  const minDate = viewStart;
-  const maxDate = addDays(viewStart, days);
+  const days = VIEW_MODES[viewMode].days;
+  const colW = VIEW_MODES[viewMode].colW;
+  const minDate = viewStart || startOfDay(new Date());
+  const maxDate = addDays(minDate, days);
 
   // Group entries by kiln
   const kilnMap = {};
@@ -106,14 +116,22 @@ export default function Gantt() {
     kilnUsage[k.kiln_id] = k.usage_pct || 0;
   });
 
-  const rowH = 48; // 加高行高
+  // ── 日曆範圍：從排程資料推導最早/最晚日期
+  const allDates = (schedule?.schedule || []).map(e => e.delivery_date).filter(Boolean).sort();
+  const scheduleStart = allDates.length ? allDates[0] : null;
+  const scheduleEnd = allDates.length ? allDates[allDates.length - 1] : null;
+  const navDays = Math.max(1, Math.floor(days / 2));
+
+  const rowH = 48;
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">甘特圖</h1>
-          <p className="text-furnace-muted text-sm mt-0.5">爐次排程視覺化 — 按日期與爐次分組</p>
+          <p className="text-furnace-muted text-sm mt-0.5">
+            爐次排程視覺化 — {scheduleStart || "—"} ~ {scheduleEnd || "—"}（{allDates.length} 筆）
+          </p>
         </div>
         <div className="flex gap-2 items-center">
           <div className="flex gap-1 bg-furnace-card border border-furnace-border rounded-lg p-1">
@@ -130,9 +148,16 @@ export default function Gantt() {
               >{m.label}</button>
             ))}
           </div>
-          <button onClick={() => setViewStart(addDays(viewStart, -30))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronLeft className="w-4 h-4" /></button>
-          <span className="text-sm text-furnace-text px-3 font-semibold">{format(viewStart, "yyyy/MM/dd")} — {format(addDays(viewStart, days), "yyyy/MM/dd")}</span>
-          <button onClick={() => setViewStart(addDays(viewStart, 30))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronRight className="w-4 h-4" /></button>
+          <button onClick={() => setViewStart(addDays(minDate, -navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronLeft className="w-4 h-4" /></button>
+          <span className="text-sm text-furnace-text px-3 font-semibold min-w-[220px] text-center">
+            {format(minDate, "yyyy/MM/dd")} — {format(addDays(minDate, days), "yyyy/MM/dd")}
+          </span>
+          <button onClick={() => setViewStart(addDays(minDate, navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronRight className="w-4 h-4" /></button>
+          <button
+            onClick={() => setViewStart(startOfDay(new Date()))}
+            title="跳轉至今天"
+            className="px-2 py-1 text-xs text-furnace-blue border border-furnace-blue/30 rounded hover:bg-furnace-blue/10"
+          >📅 今天</button>
         </div>
       </div>
 
@@ -176,7 +201,7 @@ export default function Gantt() {
                   {kn.entries.map(e => {
                     const d = parseISO(e.delivery_date);
                     if (d < minDate || d > maxDate) return null;
-                    const left = timeToLeft(e.delivery_date, minDate);
+                    const left = timeToLeft(e.delivery_date, minDate, colW);
                     const spanDays = daysFromHours(e.est_hours || 0);
                     const blockW = Math.max(60, spanDays * colW - 4); // 以時間跨度計算寬度
                     const blkColor = utilizationColor(usage);
