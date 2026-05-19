@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>乾式套管最佳排爐系統</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #212436;
+    --border: #2e3150;
+    --text: #e2e4ed;
+    --text2: #8b8fa8;
+    --accent: #6c7cff;
+    --accent2: #00d2a0;
+    --warn: #ffb347;
+    --danger: #ff5c7c;
+    --success: #00d2a0;
+    --info: #47b3ff;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,.35);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #1a1d27 0%, #252840 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; font-weight: 700; }
+  .logo .icon { font-size: 1.5rem; }
+  .header-right { display: flex; gap: 12px; align-items: center; }
+  .header-badge {
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 4px 12px; border-radius: 20px; font-size: 0.82rem; color: var(--text2);
+  }
+
+  /* ── Nav ── */
+  nav {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; padding: 0 2rem; gap: 0; overflow-x: auto;
+  }
+  nav button {
+    background: none; border: none; color: var(--text2); padding: 14px 20px;
+    font-size: 0.88rem; cursor: pointer; border-bottom: 3px solid transparent;
+    white-space: nowrap; transition: all .2s;
+  }
+  nav button:hover { color: var(--text); }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── Layout ── */
+  .container { max-width: 1440px; margin: 0 auto; padding: 1.5rem 2rem; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+  .card-title { font-size: 0.95rem; font-weight: 600; color: var(--text2); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── Stats Grid ── */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat-card .label { font-size: 0.78rem; color: var(--text2); }
+  .stat-card .value { font-size: 2rem; font-weight: 800; }
+  .stat-card .sub { font-size: 0.78rem; color: var(--text2); }
+
+  /* ── Grid layouts ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; border: none; transition: all .2s;
+    font-family: var(--font);
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #5a6aff; transform: translateY(-1px); }
+  .btn-success { background: var(--accent2); color: #000; }
+  .btn-success:hover { background: #00c090; }
+  .btn-warn { background: var(--warn); color: #000; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+  .btn:disabled { opacity: .4; cursor: default; transform: none; }
+
+  /* ── Form elements ── */
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.82rem; color: var(--text2); margin-bottom: 4px; }
+  input[type=text], input[type=number], input[type=date], select, textarea {
+    width: 100%; padding: 9px 12px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 0.88rem; font-family: var(--font);
+    outline: none; transition: border .2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 0.75rem; color: var(--text2); padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 8px 10px; border-bottom: 1px solid rgba(46,49,80,.4); font-size: 0.85rem; }
+  tr:hover td { background: var(--surface2); }
+
+  /* ── Gantt / Schedule ── */
+  .gantt-wrap { overflow-x: auto; }
+  .gantt-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  .gantt-table th { font-size: 0.78rem; padding: 8px; }
+  .gantt-table td { padding: 6px 8px; font-size: 0.8rem; text-align: center; }
+  .gantt-table .furnace-name { text-align: left; font-weight: 600; white-space: nowrap; }
+  .gantt-block {
+    display: inline-block; padding: 3px 8px; border-radius: 6px;
+    font-size: 0.72rem; font-weight: 600; margin: 1px;
+    cursor: default;
+  }
+
+  /* ── Badges ── */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+  .badge-accent { background: rgba(108,124,255,.15); color: var(--accent); }
+  .badge-success { background: rgba(0,210,160,.15); color: var(--accent2); }
+  .badge-warn { background: rgba(255,179,71,.15); color: var(--warn); }
+  .badge-danger { background: rgba(255,92,124,.15); color: var(--danger); }
+
+  /* ── Checkbox / tag chips ── */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chip {
+    padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text2);
+    transition: all .15s; user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── Order row ── */
+  .order-row {
+    display: grid; grid-template-columns: 40px 1fr 100px 100px 80px 100px 120px 100px auto;
+    gap: 8px; align-items: center; padding: 8px 12px; border-bottom: 1px solid rgba(46,49,80,.4);
+    font-size: 0.85rem;
+  }
+  .order-row.header { font-size: 0.75rem; color: var(--text2); font-weight: 600; border-bottom: 1px solid var(--border); }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 20px;
+    box-shadow: var(--shadow);
+    transform: translateY(80px); opacity: 0;
+    transition: all .3s;
+    z-index: 999; max-width: 400px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── Loader ── */
+  .spinner {
+    width: 20px; height: 20px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin .7s linear infinite; display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Furnace grid ── */
+  .furnace-grid { display: grid; gap: 10px; }
+  .furnace-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 16px;
+  }
+  .furnace-card .fhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .furnace-card .fname { font-weight: 700; }
+  .furnace-card .fspec { font-size: 0.75rem; color: var(--text2); }
+  .furnace-plans { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── Help / Guide ── */
+  .guide-step { display: flex; gap: 16px; margin-bottom: 1.5rem; }
+  .guide-num {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; flex-shrink: 0; font-size: 0.95rem;
+  }
+  .guide-body h4 { margin-bottom: 4px; }
+  .guide-body p { color: var(--text2); font-size: 0.88rem; line-height: 1.6; }
+
+  .section-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="icon">🔥</span> 乾式套管最佳排爐系統</div>
+  <div class="header-right">
+    <span class="header-badge" id="data-loaded">載入中…</span>
+    <span class="header-badge" id="clock"></span>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showPage('page-dashboard')">📊 儀表板</button>
+  <button onclick="showPage('page-orders')">📋 訂單管理</button>
+  <button onclick="showPage('page-schedule')">📅 排爐規劃</button>
+  <button onclick="showPage('page-furnaces')">🏭 乾燥罐</button>
+  <button onclick="showPage('page-molds')">🔧 模具</button>
+  <button onclick="showPage('page-guide')">📖 說明指南</button>
+</nav>
+
+<div class="container">
+
+  <!-- ─── Dashboard ─── -->
+  <div class="page active" id="page-dashboard">
+    <h2 class="section-title">系統概覽</h2>
+    <div class="stats" id="dashboard-stats"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">產品電壓分布</div>
+        <canvas id="chart-voltage" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">訂單交期分布</div>
+        <canvas id="chart-dates" height="200"></canvas>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">模具庫存一覽</div>
+        <div class="table-wrap">
+          <table id="mold-stock-table">
+            <thead><tr><th>外徑</th><th>內徑</th><th>長度</th><th>庫存</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">乾燥罐規格總覽</div>
+        <div class="table-wrap">
+          <table id="dryer-summary-table">
+            <thead><tr><th>罐號</th><th>內徑</th><th>高度</th><th>方案數</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Orders ─── -->
+  <div class="page" id="page-orders">
+    <h2 class="section-title">訂單管理</h2>
+    <div class="card" style="margin-bottom:1.25rem">
+      <div style="display:flex; gap:12px; align-items:end; flex-wrap:wrap">
+        <div class="form-group" style="margin:0; flex:1; min-width:180px">
+          <label>關鍵字搜尋</label>
+          <input type="text" id="order-search" placeholder="訂單號 / 合約編號 / 產品號…" oninput="filterOrders()">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>電壓</label>
+          <select id="filter-kv" onchange="filterOrders()">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>交期起</label>
+          <input type="date" id="filter-start" onchange="filterOrders()">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>交期迄</label>
+          <input type="date" id="filter-end" onchange="filterOrders()">
+        </div>
+        <button class="btn btn-outline" onclick="filterOrders()">🔍 篩選</button>
+        <button class="btn btn-primary" onclick="selectAllOrders()">全選</button>
+        <button class="btn btn-outline" onclick="clearAllOrders()">清除</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">訂單列表 (<span id="order-count">0</span> 筆) &nbsp;
+        <button class="btn btn-sm btn-primary" onclick="goToScheduleWithSelected()">➡ 使用已選訂單排爐</button>
+      </div>
+      <div id="orders-list" class="order-wrap"></div>
+    </div>
+  </div>
+
+  <!-- ─── Schedule ─── -->
+  <div class="page" id="page-schedule">
+    <h2 class="section-title">排爐規劃</h2>
+
+    <!-- Step 1: 選擇訂單 -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-title">第一步：選擇訂單</div>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+        <span style="color:var(--text2); font-size:0.85rem">來源：</span>
+        <label><input type="radio" name="order-source" value="selected" checked> 從訂單管理選取的訂單</label>
+        <label><input type="radio" name="order-source" value="all"> 所有訂單</label>
+        <label><input type="radio" name="order-source" value="date"> 依交期範圍</label>
+        <input type="date" id="schedule-date-start" style="width:160px" title="交期起">
+        <input type="date" id="schedule-date-end" style="width:160px" title="交期迄">
+        <button class="btn btn-primary" id="btn-optimize" onclick="runOptimize()">
+          <span id="opt-label">▶ 執行最佳化排爐</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: 選擇乾燥罐 -->
+    <div class="card" style="margin-bottom:1.25rem" id="furnace-select-card" style="display:none">
+      <div class="card-title">第二步：選擇乾燥罐</div>
+      <div class="chip-group" id="furnace-chips"></div>
+    </div>
+
+    <!-- Step 3: 結果 -->
+    <div id="results-area" style="display:none">
+      <div class="stats" id="result-stats"></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">各罐使用率</div>
+          <canvas id="chart-utilization" height="240"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-title">批次模具數量分布</div>
+          <canvas id="chart-batch-sizes" height="240"></canvas>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1.25rem">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>排爐甘特圖</span>
+          <div>
+            <button class="btn btn-sm btn-outline" onclick="exportCSV()">📥 匯出 CSV</button>
+            <button class="btn btn-sm btn-outline" onclick="window.print()">🖨 列印</button>
+          </div>
+        </div>
+        <div class="gantt-wrap" id="gantt-container"></div>
+      </div>
+      <div class="card" style="margin-top:1.25rem">
+        <div class="card-title">批次明細</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>批次</th><th>乾燥罐</th><th>方案</th>
+                <th>模具規格 (OD×ID×L)</th><th> molds</th>
+                <th>訂單</th><th>電壓/電流</th>
+              </tr>
+            </thead>
+            <tbody id="batch-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="no-result-msg" style="text-align:center; padding:3rem; color:var(--text2); display:none">
+      請先選擇訂單並執行最佳化排爐
+    </div>
+  </div>
+
+  <!-- ─── Furnaces ─── -->
+  <div class="page" id="page-furnaces">
+    <h2 class="section-title">乾燥罐規格一覽</h2>
+    <div class="grid-2" id="furnace-detail-grid"></div>
+  </div>
+
+  <!-- ─── Molds ─── -->
+  <div class="page" id="page-molds">
+    <h2 class="section-title">模具庫存一覽</h2>
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-title">全部模具規格與庫存</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>外徑 mm</th><th>內徑 mm</th><th>長度 mm</th><th>庫存數量</th></tr></thead>
+          <tbody id="mold-table"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">模具容量 vs 產品需求對照</div>
+      <canvas id="chart-mold-coverage" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- ─── Guide ─── -->
+  <div class="page" id="page-guide">
+    <h2 class="section-title">使用說明與案例</h2>
+
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title">系統簡介</div>
+      <p style="color:var(--text2); line-height:1.7; font-size:0.92rem">
+        本系統為<strong>乾式套管乾燥作業最佳化排爐系統</strong>，根據工廠實際資料（乾燥罐規格、模具庫存、產品與模具對照表、
+        加工工時及每日工時上限），自動計算出最具生產效率的排爐規劃方案。
+      </p>
+    </div>
+
+    <h3 style="margin: 1.5rem 0 1rem">📝 操作步驟</h3>
+
+    <div class="guide-step">
+      <div class="guide-num">1</div>
+      <div class="guide-body">
+        <h4>載入與檢視訂單</h4>
+        <p>進入「訂單管理」頁面，系統已自動載入 251 筆生產訂單。您可使用關鍵字篩選、電壓等級篩選、交期範圍篩選，
+        快速找到需要的訂單。</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="guide-num">2</div>
+      <div class="guide-body">
+        <h4>選擇要排程的訂單</h4>
+        <p>在訂單列表中勾選要納入排程的訂單（可全部選、部分選），然後點擊「使用已選訂單排爐」跳至排爐頁面。
+        訂單預設依交期由近到遠排列。</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="guide-num">3</div>
+      <div class="guide-body">
+        <h4>執行最佳化排爐</h4>
+        <p>在「排爐規劃」頁面，系統會依以下優先順序進行最佳化：
+        <br>① <strong>交期優先</strong>：優先滿足最早交期的訂單
+        <br>② <strong>模具匹配</strong>：依產品規格選擇最合適的模具與乾燥罐方案
+        <br>③ <strong>容量最大化</strong>：每次入罐盡量放滿最大模具數量
+        <br>④ <strong>模具存量約束</strong>：不超過庫存數量</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="guide-num">4</div>
+      <div class="guide-body">
+        <h4>檢視與匯出結果</h4>
+        <p>排爐完成後可檢視甘特圖、各罐使用率、批次明細，並可匯出 CSV 檔案供生產部門使用。</p>
+      </div>
+    </div>
+
+    <h3 style="margin: 1.5rem 0 1rem">💡 案例操作：為 36kV 訂單排爐</h3>
+
+    <div class="card">
+      <div class="card-title">案例：36kV/2000A 產品排爐流程</div>
+      <ol style="color:var(--text2); line-height:2; font-size:0.9rem; padding-left:1.5rem">
+        <li>進入 <strong>訂單管理</strong> → 在電壓篩選器選擇 <strong>36kV</strong></li>
+        <li>會顯示 36kV 相關訂單，產品對應模具規格為 <strong>外徑 220mm × 內徑 115mm × 長度 2225mm</strong></li>
+        <li>點擊 <strong>全選</strong> 或個別勾選 36kV 訂單</li>
+        <li>點擊 <strong>使用已選訂單排爐</strong></li>
+        <li>在排爐頁面點擊 <strong>▶ 執行最佳化排爐</strong></li>
+        <li>系統會依交期優先，將訂單分配到 5 號罐、15 號罐等適合放入 220×115×2225 模具的乾燥罐</li>
+        <li>查看甘特圖確認排程，點擊 <strong>📥 匯出 CSV</strong> 下載排爐計劃表</li>
+      </ol>
+    </div>
+
+    <h3 style="margin: 1.5rem 0 1rem">🔑 關鍵術語</h3>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">乾燥罐相關</div>
+        <table>
+          <tr><th>術語</th><th>說明</th></tr>
+          <tr><td>乾燥罐</td><td>進行芯子乾燥/浸漬的大型設備，共 28 個</td></tr>
+          <tr><td>放置方案</td><td>同一乾燥罐的不同模具擺放方式（A/B/C…）</td></tr>
+          <tr><td>上層 / 下層</td><td>模具在罐內分上、下兩層放置</td></tr>
+          <tr><td>排爐</td><td>將模具安排進乾燥罐的過程</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">模具與產品</div>
+        <table>
+          <tr><th>術語</th><th>說明</th></tr>
+          <tr><td>模具規格</td><td>外徑 × 內徑 × 長度（mm）</td></tr>
+          <tr><td>產品容量/根</td><td>每組模具可容納的產品根數</td></tr>
+          <tr><td>加工工時</td><td>每道工序單根/每罐所需工時（小時）</td></tr>
+          <tr><td>交期</td><td>客戶要求完成的日期</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script src="/static/js/app.js?v=2"></script>
+</body>
+</html>
