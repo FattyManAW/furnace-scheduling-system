@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 from database import engine, Base
-from api import orders, molds, kilns, schedule, reports
+from api import orders, molds, kilns, schedule, reports, process_steps
 
 # ── 啟動時建立資料表 ────────────────────────────────────────────────────
 Base.metadata.create_all(bind=engine)
@@ -49,6 +49,7 @@ app.include_router(molds.router)
 app.include_router(kilns.router)
 app.include_router(schedule.router)
 app.include_router(reports.router)
+app.include_router(process_steps.router)
 
 
 # ── 健康檢查 / 首頁 ──────────────────────────────────────────────────────

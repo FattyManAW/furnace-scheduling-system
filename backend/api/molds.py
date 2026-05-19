@@ -1,23 +1,28 @@
-"""Molds API"""
+"""Molds API — 模具完整 CRUD + 庫存調整"""
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
 from database import get_db
 from models import Mold
-from schemas import MoldCreate, MoldUpdate, MoldOut
-from crud import get_molds, get_mold, create_mold, update_mold, delete_mold, adjust_mold_stock, get_molds_count
+from schemas import MoldCreate, MoldUpdate, MoldOut, PaginatedResponse
+from crud import (
+    get_molds, get_mold, create_mold, update_mold,
+    delete_mold, adjust_mold_stock, get_molds_count,
+)
 
 router = APIRouter(prefix="/api/v1/molds", tags=["molds"])
 
 
-@router.get("/", response_model=List[MoldOut])
+@router.get("/", response_model=PaginatedResponse[MoldOut])
 def list_molds(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
     low_stock: bool = Query(False, description="只顯示低庫存"),
     db: Session = Depends(get_db),
 ):
-    return get_molds(db, skip=skip, limit=limit, low_stock=low_stock)
+    """列出模具，支援分頁與低庫存篩選"""
+    items = get_molds(db, skip=skip, limit=limit, low_stock=low_stock)
+    total = get_molds_count(db)
+    return PaginatedResponse(items=items, total=total, skip=skip, limit=limit)
 
 
 @router.get("/count")

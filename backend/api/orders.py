@@ -1,10 +1,13 @@
-"""Orders API"""
+"""Orders API — 訂單完整 CRUD"""
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from database import get_db
 from models import Order
-from schemas import OrderCreate, OrderUpdate, OrderOut
+from schemas import (
+    OrderCreate, OrderUpdate, OrderOut,
+    PaginatedResponse, BulkImportResult,
+)
 from crud import (
     get_orders, get_order, create_order, update_order,
     delete_order, get_orders_count, bulk_create_orders,
@@ -13,15 +16,18 @@ from crud import (
 router = APIRouter(prefix="/api/v1/orders", tags=["orders"])
 
 
-@router.get("/", response_model=List[OrderOut])
+@router.get("/", response_model=PaginatedResponse[OrderOut])
 def list_orders(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
-    status: Optional[str] = None,
+    status: Optional[str] = Query(None, pattern=r"^(pending|scheduled|completed|cancelled)$"),
     search: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
-    return get_orders(db, skip=skip, limit=limit, status=status, search=search)
+    """列出訂單，支援分頁、狀態篩選、全文搜尋"""
+    items = get_orders(db, skip=skip, limit=limit, status=status, search=search)
+    total = get_orders_count(db, status=status, search=search)
+    return PaginatedResponse(items=items, total=total, skip=skip, limit=limit)
 
 
 @router.get("/count")
@@ -64,7 +70,11 @@ def remove_order(order_id: int, db: Session = Depends(get_db)):
     return {"deleted": True, "order_id": order_id}
 
 
-@router.post("/bulk-import")
+@router.post("/bulk-import", response_model=BulkImportResult)
 def bulk_import_orders(orders_data: List[dict], db: Session = Depends(get_db)):
     count = bulk_create_orders(db, orders_data)
-    return {"imported": count, "skipped": len(orders_data) - count}
+    return BulkImportResult(
+        imported=count,
+        skipped=len(orders_data) - count,
+        errors=[],
+    )

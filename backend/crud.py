@@ -2,8 +2,11 @@
 from __future__ import annotations
 from sqlalchemy.orm import Session
 from datetime import datetime
-from models import Order, Mold, Kiln, ScheduleEntry
-from schemas import OrderCreate, OrderUpdate, MoldCreate, MoldUpdate, KilnCreate, KilnUpdate
+from models import Order, Mold, Kiln, ScheduleEntry, ProcessStep
+from schemas import (
+    OrderCreate, OrderUpdate, MoldCreate, MoldUpdate,
+    KilnCreate, KilnUpdate, ProcessStepCreate, ProcessStepUpdate,
+)
 import json
 
 
@@ -29,10 +32,15 @@ def get_orders(db: Session, skip: int = 0, limit: int = 100, status: str | None 
     return q.order_by(Order.id.desc()).offset(skip).limit(limit).all()
 
 
-def get_orders_count(db: Session, status: str | None = None) -> int:
+def get_orders_count(db: Session, status: Optional[str] = None, search: Optional[str] = None) -> int:
     q = db.query(Order)
     if status:
         q = q.filter(Order.status == status)
+    if search:
+        q = q.filter(
+            (Order.plan_no.contains(search)) |
+            (Order.contract_no.contains(search))
+        )
     return q.count()
 
 
@@ -228,3 +236,79 @@ def clear_schedule(db: Session) -> int:
     db.query(ScheduleEntry).delete()
     db.commit()
     return cnt
+
+
+# ── Process Steps ─────────────────────────────────────────────────────────
+def get_process_step(db: Session, step_id: int):
+    return db.query(ProcessStep).filter(ProcessStep.id == step_id).first()
+
+
+def get_process_steps(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    department: Optional[str] = None,
+    process_type: Optional[str] = None,
+):
+    q = db.query(ProcessStep)
+    if department:
+        q = q.filter(ProcessStep.department == department)
+    if process_type:
+        q = q.filter(ProcessStep.process_type == process_type)
+    return q.order_by(ProcessStep.step_no).offset(skip).limit(limit).all()
+
+
+def get_process_steps_count(
+    db: Session,
+    department: Optional[str] = None,
+    process_type: Optional[str] = None,
+) -> int:
+    q = db.query(ProcessStep)
+    if department:
+        q = q.filter(ProcessStep.department == department)
+    if process_type:
+        q = q.filter(ProcessStep.process_type == process_type)
+    return q.count()
+
+
+def create_process_step(db: Session, step: ProcessStepCreate):
+    db_step = ProcessStep(**step.model_dump())
+    db.add(db_step)
+    db.commit()
+    db.refresh(db_step)
+    return db_step
+
+
+def update_process_step(
+    db: Session, step_id: int, step_update: ProcessStepUpdate
+):
+    db_step = get_process_step(db, step_id)
+    if not db_step:
+        return None
+    update_data = step_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_step, key, value)
+    db.commit()
+    db.refresh(db_step)
+    return db_step
+
+
+def delete_process_step(db: Session, step_id: int) -> bool:
+    db_step = get_process_step(db, step_id)
+    if not db_step:
+        return False
+    db.delete(db_step)
+    db.commit()
+    return True
+
+
+def get_departments(db: Session):
+    rows = (
+        db.query(ProcessStep.department)
+        .filter(ProcessStep.department.isnot(None))
+        .distinct()
+        .order_by(ProcessStep.department)
+        .all()
+    )
+    return [r[0] for r in rows if r[0]]
+

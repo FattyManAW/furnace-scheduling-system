@@ -1,21 +1,40 @@
-"""Pydantic schemas"""
-from pydantic import BaseModel, Field
+"""Pydantic schemas — 統一請求驗證與回應格式"""
+from __future__ import annotations
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Generic, TypeVar
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────
+T = TypeVar("T")
+
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    """統一分頁回應格式"""
+    items: List[T]
+    total: int
+    skip: int
+    limit: int
+
+
+class ErrorDetail(BaseModel):
+    detail: str
+    type: str = "error"
+    request_id: Optional[str] = None
 
 
 # ── Order ──────────────────────────────────────────────────────────────────
 class OrderBase(BaseModel):
-    plan_no: str
-    contract_no: Optional[str] = None
-    voltage_kv: float
-    current_a: float
-    qty: int
-    delivery_date: Optional[str] = None
-    product_from: Optional[str] = None
-    product_to: Optional[str] = None
-    status: str = "pending"
-    notes: Optional[str] = None
+    plan_no: str = Field(..., min_length=1, max_length=50, description="計劃單號")
+    contract_no: Optional[str] = Field(default=None, max_length=50, description="合約編號")
+    voltage_kv: float = Field(..., gt=0, le=500, description="電壓 kV")
+    current_a: float = Field(..., gt=0, le=5000, description="電流 A")
+    qty: int = Field(..., ge=1, le=99999, description="數量")
+    delivery_date: Optional[str] = Field(default=None, max_length=20, description="交期 YYYY-MM-DD")
+    product_from: Optional[str] = Field(default=None, max_length=50, description="產品來源")
+    product_to: Optional[str] = Field(default=None, max_length=50, description="產品去向")
+    status: str = Field(default="pending", pattern=r"^(pending|scheduled|completed|cancelled)$")
+    notes: Optional[str] = Field(default=None, max_length=500)
 
 
 class OrderCreate(OrderBase):
@@ -23,15 +42,25 @@ class OrderCreate(OrderBase):
 
 
 class OrderUpdate(BaseModel):
-    contract_no: Optional[str] = None
-    voltage_kv: Optional[float] = None
-    current_a: Optional[float] = None
-    qty: Optional[int] = None
-    delivery_date: Optional[str] = None
-    product_from: Optional[str] = None
-    product_to: Optional[str] = None
-    status: Optional[str] = None
-    notes: Optional[str] = None
+    contract_no: Optional[str] = Field(default=None, max_length=50)
+    voltage_kv: Optional[float] = Field(default=None, gt=0, le=500)
+    current_a: Optional[float] = Field(default=None, gt=0, le=5000)
+    qty: Optional[int] = Field(default=None, ge=1, le=99999)
+    delivery_date: Optional[str] = Field(default=None, max_length=20)
+    product_from: Optional[str] = Field(default=None, max_length=50)
+    product_to: Optional[str] = Field(default=None, max_length=50)
+    status: Optional[str] = Field(default=None, pattern=r"^(pending|scheduled|completed|cancelled)$")
+    notes: Optional[str] = Field(default=None, max_length=500)
+
+    @field_validator("delivery_date")
+    @classmethod
+    def check_date_format(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        import re
+        if not re.match(r"^\d{4}[-/]\d{2}[-/]\d{2}$", v):
+            raise ValueError(f"無效日期格式: {v}，請使用 YYYY-MM-DD")
+        return v
 
 
 class OrderOut(OrderBase):
@@ -45,14 +74,14 @@ class OrderOut(OrderBase):
 
 # ── Mold ───────────────────────────────────────────────────────────────────
 class MoldBase(BaseModel):
-    mold_no: str
-    outer_dia: float
-    inner_dia: float
-    length: float
-    stock_qty: int = 0
-    location: Optional[str] = None
-    status: str = "available"
-    notes: Optional[str] = None
+    mold_no: str = Field(..., min_length=1, max_length=50, description="模具編號")
+    outer_dia: float = Field(..., gt=0, le=2000, description="外徑 mm")
+    inner_dia: float = Field(..., gt=0, le=2000, description="內徑 mm")
+    length: float = Field(..., gt=0, le=10000, description="長度 mm")
+    stock_qty: int = Field(default=0, ge=0, le=9999, description="庫存量")
+    location: Optional[str] = Field(default=None, max_length=100, description="存放位置")
+    status: str = Field(default="available", pattern=r"^(available|in_use|maintenance)$", description="狀態")
+    notes: Optional[str] = Field(default=None, max_length=500)
 
 
 class MoldCreate(MoldBase):
@@ -60,18 +89,19 @@ class MoldCreate(MoldBase):
 
 
 class MoldUpdate(BaseModel):
-    outer_dia: Optional[float] = None
-    inner_dia: Optional[float] = None
-    length: Optional[float] = None
-    stock_qty: Optional[int] = None
-    location: Optional[str] = None
-    status: Optional[str] = None
-    notes: Optional[str] = None
+    outer_dia: Optional[float] = Field(default=None, gt=0, le=2000)
+    inner_dia: Optional[float] = Field(default=None, gt=0, le=2000)
+    length: Optional[float] = Field(default=None, gt=0, le=10000)
+    stock_qty: Optional[int] = Field(default=None, ge=0, le=9999)
+    location: Optional[str] = Field(default=None, max_length=100)
+    status: Optional[str] = Field(default=None, pattern=r"^(available|in_use|maintenance)$")
+    notes: Optional[str] = Field(default=None, max_length=500)
 
 
 class MoldOut(MoldBase):
     id: int
     created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -79,10 +109,10 @@ class MoldOut(MoldBase):
 
 # ── Kiln ───────────────────────────────────────────────────────────────────
 class KilnBase(BaseModel):
-    kiln_no: str = Field(..., min_length=1, description="干燥罐编号")
-    name: str = Field(..., min_length=1, description="干燥罐名称")
-    inner_dia: float = Field(..., gt=0, description="内径 mm")
-    height: float = Field(..., gt=0, description="高度 mm")
+    kiln_no: str = Field(..., min_length=1, max_length=20, description="干燥罐編號")
+    name: str = Field(..., min_length=1, max_length=50, description="干燥罐名稱")
+    inner_dia: float = Field(..., gt=0, le=5000, description="內徑 mm")
+    height: float = Field(..., gt=0, le=20000, description="高度 mm")
     schemes: Dict[str, Any] = Field(default_factory=dict, description="方案配置")
 
 
@@ -91,9 +121,9 @@ class KilnCreate(KilnBase):
 
 
 class KilnUpdate(BaseModel):
-    name: Optional[str] = None
-    inner_dia: Optional[float] = Field(default=None, gt=0)
-    height: Optional[float] = Field(default=None, gt=0)
+    name: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    inner_dia: Optional[float] = Field(default=None, gt=0, le=5000)
+    height: Optional[float] = Field(default=None, gt=0, le=20000)
     schemes: Optional[Dict[str, Any]] = None
 
 
@@ -106,21 +136,63 @@ class KilnOut(KilnBase):
         from_attributes = True
 
 
+# ── ProcessStep ────────────────────────────────────────────────────────────
+class ProcessStepBase(BaseModel):
+    step_no: int = Field(..., ge=0, description="步驟編號")
+    step_name: str = Field(..., min_length=1, max_length=100, description="步驟名稱")
+    department: Optional[str] = Field(default=None, max_length=50, description="部門")
+    team: Optional[str] = Field(default=None, max_length=50, description="團隊")
+    process_type: Optional[str] = Field(default=None, max_length=50, description="製程類型")
+    calc_basis: Optional[str] = Field(default=None, max_length=20, description="計算基準")
+    h10: float = Field(default=0, ge=0, description="10kV 工時")
+    h24: float = Field(default=0, ge=0, description="24kV 工時")
+    h36: float = Field(default=0, ge=0, description="36kV 工時")
+    h40: float = Field(default=0, ge=0, description="40kV 工時")
+
+
+class ProcessStepCreate(ProcessStepBase):
+    pass
+
+
+class ProcessStepUpdate(BaseModel):
+    step_no: Optional[int] = Field(default=None, ge=0)
+    step_name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    department: Optional[str] = Field(default=None, max_length=50)
+    team: Optional[str] = Field(default=None, max_length=50)
+    process_type: Optional[str] = Field(default=None, max_length=50)
+    calc_basis: Optional[str] = Field(default=None, max_length=20)
+    h10: Optional[float] = Field(default=None, ge=0)
+    h24: Optional[float] = Field(default=None, ge=0)
+    h36: Optional[float] = Field(default=None, ge=0)
+    h40: Optional[float] = Field(default=None, ge=0)
+
+
+class ProcessStepOut(ProcessStepBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
 # ── Schedule ───────────────────────────────────────────────────────────────
 class ScheduleRequest(BaseModel):
-    order_ids: Optional[List[int]] = Field(default=None, description="Order IDs to schedule; all if omitted")
-    strategy: str = Field(default="deadline", description="deadline / fill / balance")
+    order_ids: Optional[List[int]] = Field(default=None, description="要排程的訂單 ID，不傳則全部")
+    strategy: str = Field(
+        default="deadline",
+        pattern=r"^(deadline|fill|balance)$",
+        description="排程策略: deadline=交期優先, fill=窯滿優先, balance=平衡"
+    )
 
 
 class ScheduleEntryOut(BaseModel):
     id: int
     kiln_id: int
     plan_no: str
-    contract_no: Optional[str]
+    contract_no: Optional[str] = None
     voltage_kv: float
     current_a: float
     qty: int
-    delivery_date: Optional[str]
+    delivery_date: Optional[str] = None
     mold_od: float
     mold_len: float
     est_hours: float
@@ -152,9 +224,15 @@ class DashboardStats(BaseModel):
     daily_hour_cap: float
 
 
-# ── Report ────────────────────────────────────────────────────────────────
+# ── Report / Import ───────────────────────────────────────────────────────
 class ReportFilter(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     status: Optional[str] = None
     kiln_id: Optional[int] = None
+
+
+class BulkImportResult(BaseModel):
+    imported: int
+    skipped: int
+    errors: List[str] = []

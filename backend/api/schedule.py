@@ -1,11 +1,12 @@
-"""Schedule API — 排程執行與結果查詢"""
+"""Schedule API — 排程執行與結果查詢 + 單筆管理"""
 import json
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional as _Opt
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from datetime import datetime
 from database import get_db
 from models import Order, ScheduleEntry, Kiln
-from schemas import ScheduleRequest, ScheduleResult, ScheduleEntryOut
+from schemas import ScheduleRequest, ScheduleResult, ScheduleEntryOut, PaginatedResponse
 from crud import (
     get_orders, clear_schedule, create_schedule_entry, get_kilns,
     get_kiln as get_kiln_crud,
@@ -19,7 +20,6 @@ router = APIRouter(prefix="/api/v1/schedule", tags=["schedule"])
 @router.post("/optimize", response_model=ScheduleResult)
 def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
     """執行排程優化，清除舊排程，寫入新結果"""
-    # Fetch orders
     if request.order_ids:
         orders = db.query(Order).filter(Order.id.in_(request.order_ids)).all()
     else:
@@ -41,23 +41,18 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
             "product_to": o.product_to,
         })
 
-    # Run optimizer
     result = schedule_orders(order_dicts)
 
-    # Validate
     validation = validate_schedule(result)
     if not validation["valid"]:
-        # Still return result but include validation errors in warnings
         result["warnings"].extend([f"[驗證錯誤] {e}" for e in validation["errors"]])
 
-    # Save to DB
     clear_schedule(db)
     kiln_map = {str(k.kiln_no): k for k in get_kilns(db)}
-    current_a_map = {}  # plan_no -> computed current_a for response
+    current_a_map = {}
 
     for entry in result["order_schedule"]:
-        kid_str = str(entry["kiln_id"])  # optimizer 回傳的字串 key
-        # 優先從 kiln_map（key=kiln_no）查，fallback 依序比對
+        kid_str = str(entry["kiln_id"])
         db_kiln = kiln_map.get(kid_str)
         if not db_kiln:
             for _k in get_kilns(db):
@@ -69,18 +64,15 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
         db_order = db.query(Order).filter(Order.plan_no == entry["plan_no"]).first()
         order_id = db_order.id if db_order else None
 
-        _raw = db_order  # reuse already-fetched order
-        _current_a = float(_raw.current_a) if _raw and _raw.current_a is not None else float(entry.get("current_a", 0) or 0)
+        _current_a = float(db_order.current_a) if db_order and db_order.current_a is not None else float(entry.get("current_a", 0) or 0)
         current_a_map[entry["plan_no"]] = _current_a
         _deliv = str(entry.get("delivery_date", ""))
         if len(_deliv) >= 10:
             try:
-                from datetime import datetime as _dt
-                _deliv = _dt.strptime(_deliv[:10], "%Y-%m-%d").strftime("%Y-%m-%d")
+                _deliv = datetime.strptime(_deliv[:10], "%Y-%m-%d").strftime("%Y-%m-%d")
             except Exception:
                 try:
-                    from datetime import datetime as _dt2
-                    _deliv = _dt2.strptime(_deliv[:10], "%Y/%m/%d").strftime("%Y-%m-%d")
+                    _deliv = datetime.strptime(_deliv[:10], "%Y/%m/%d").strftime("%Y-%m-%d")
                 except Exception:
                     pass
 
@@ -100,20 +92,17 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
             "notes": "",
         })
 
-        # Update order status
         if db_order:
             db_order.status = "scheduled"
             db_order.updated_at = datetime.utcnow()
 
     db.commit()
 
-    # Re-fetch the schedule entries just created to get real IDs
     _fresh_entries = db.query(ScheduleEntry).order_by(ScheduleEntry.id).all()
-    id_map = {}  # plan_no -> ScheduleEntry id
+    id_map = {}
     for fe in _fresh_entries:
         id_map[fe.plan_no] = fe.id
 
-    # Build response using real DB IDs
     schedule_out = [
         ScheduleEntryOut(
             id=id_map.get(e["plan_no"], 0),
@@ -216,3 +205,47 @@ def get_kiln_schedule(kiln_id: int, db: Session = Depends(get_db)):
             for e in entries
         ],
     }
+
+
+# ── Schedule Entry 單筆管理 ──────────────────────────────────────────────
+@router.get("/entries", response_model=PaginatedResponse[ScheduleEntryOut])
+def list_schedule_entries(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    kiln_id: _Opt[int] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """列出所有排程記錄，支援分頁與窯爐篩選"""
+    q = db.query(ScheduleEntry)
+    if kiln_id is not None:
+        q = q.filter(ScheduleEntry.kiln_id == kiln_id)
+    total = q.count()
+    entries = q.order_by(ScheduleEntry.id).offset(skip).limit(limit).all()
+    return PaginatedResponse(items=entries, total=total, skip=skip, limit=limit)
+
+
+@router.get("/entries/{entry_id}", response_model=ScheduleEntryOut)
+def get_schedule_entry(entry_id: int, db: Session = Depends(get_db)):
+    """取得單筆排程記錄"""
+    entry = db.query(ScheduleEntry).filter(ScheduleEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(404, "排程記錄不存在")
+    return entry
+
+
+@router.delete("/entries/{entry_id}")
+def remove_schedule_entry(entry_id: int, db: Session = Depends(get_db)):
+    """刪除單筆排程記錄"""
+    entry = db.query(ScheduleEntry).filter(ScheduleEntry.id == entry_id).first()
+    if not entry:
+        raise HTTPException(404, "排程記錄不存在")
+    db.delete(entry)
+    db.commit()
+    return {"deleted": True, "entry_id": entry_id}
+
+
+@router.delete("/clear")
+def clear_all_schedule(db: Session = Depends(get_db)):
+    """清除所有排程記錄"""
+    cnt = clear_schedule(db)
+    return {"deleted": True, "count": cnt}
