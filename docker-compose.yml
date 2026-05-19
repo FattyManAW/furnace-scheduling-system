@@ -66,11 +66,11 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8030/"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8030/"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 5s
+      start_period: 10s
 
 volumes:
   furnace_data:

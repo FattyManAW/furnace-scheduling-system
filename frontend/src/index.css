@@ -2,6 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════
+   Canonical CSS Token System v3.2.1 — Power Squad Unified Bridge
+   
+   Industrial Dark (Forge, ISA-101) → --c-* prefix
+   Office Light (Vesper, Apple HIG)   → --c-* prefix
+   
+   Theme toggle: [data-theme="dark"] / [data-theme="light"]
+   localStorage key: furnace-theme
+   
+   Mapping (Forge → Christina canonical):
+     furnace-bg       → --c-bg
+     furnace-card     → --c-surface
+     furnace-border   → --c-border
+     furnace-text     → --c-t2
+     furnace-heading  → --c-t1
+     furnace-muted    → --c-t3
+     furnace-blue     → --c-teal
+     furnace-green    → --c-success
+     furnace-amber    → --c-warning
+     furnace-red      → --c-error
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Default: Industrial Dark (ISA-101) ── */
+  --c-bg:          #181b23;
+  --c-surface:     #22252f;
+  --c-elevated:    #2e3140;
+  --c-border:      rgba(255,255,255,0.06);
+  --c-border-hot:  rgba(255,255,255,0.12);
+  --c-t1:          #f0f2f8;
+  --c-t2:          #e4e6ef;
+  --c-t3:          #747a8c;
+  --c-teal:        #4b8cff;
+  --c-teal-hot:    #6ba0ff;
+  --c-teal-dim:    rgba(75,140,255,0.15);
+  --c-success:     #3cc97e;
+  --c-warning:     #f0b028;
+  --c-error:       #f44b55;
+  --c-radius:      12px;
+  --c-shadow:      0 1px 3px rgba(0,0,0,0.3);
+}
+
+[data-theme="light"] {
+  --c-bg:          #fafafa;
+  --c-surface:     #ffffff;
+  --c-elevated:    #f3f4f6;
+  --c-border:      rgba(0,0,0,0.08);
+  --c-border-hot:  rgba(0,0,0,0.14);
+  --c-t1:          #171717;
+  --c-t2:          #52525b;
+  --c-t3:          #78787d;
+  --c-teal:        #3b82f6;
+  --c-teal-hot:    #2563eb;
+  --c-teal-dim:    rgba(59,130,246,0.12);
+  --c-success:     #16a34a;
+  --c-warning:     #d97706;
+  --c-error:       #dc2626;
+  --c-radius:      12px;
+  --c-shadow:      0 1px 2px rgba(0,0,0,0.04);
+}
+
 /* ── Apple-style smooth baseline ── */
 * {
   transition-property: background-color, border-color, opacity, transform, box-shadow;
@@ -15,39 +76,39 @@
   50% { opacity: 0.4; }
 }
 .skeleton {
-  background: linear-gradient(110deg, #22252f 30%, #2e3140 50%, #22252f 70%);
+  background: linear-gradient(110deg, var(--c-surface) 30%, var(--c-elevated) 50%, var(--c-surface) 70%);
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
-  border-radius: 8px;
+  border-radius: var(--c-radius);
 }
 
-/* ── Scrollbar — Industrial minimal ── */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #181b23;
+  background: var(--c-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #2e3140;
+  background: var(--c-elevated);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3e52;
+  background: var(--c-t3);
 }
 
 /* ── Glassmorphism utility ── */
 .glass {
-  background: rgba(34, 37, 47, 0.7);
+  background: color-mix(in srgb, var(--c-surface) 70%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--c-border);
 }
 
-/* ── Focus ring — Apple style ── */
+/* ── Focus ring ── */
 input:focus-visible, button:focus-visible, a:focus-visible, select:focus-visible {
-  outline: 2px solid #4b8cff;
+  outline: 2px solid var(--c-teal);
   outline-offset: 2px;
   border-radius: 6px;
 }
