@@ -162,7 +162,7 @@ case "$CMD" in
     git pull --rebase origin main
     echo -e "${BLUE}🔨 重建前端...${NC}"
     if [ -f frontend/package.json ]; then
-      cd frontend && npm install --silent && npm run build && cd ..
+      cd frontend && npm install --silent && npm run build && chmod -R 755 dist/ && cd ..
     fi
     echo -e "${BLUE}🔄 重建 Docker + 重啟...${NC}"
     export GIT_COMMIT=$(git rev-parse --short HEAD)
