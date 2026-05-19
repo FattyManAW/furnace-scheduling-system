@@ -34,17 +34,29 @@ def _si(v):
 
 
 def _dkey(o):
+    """Parse delivery_date to date object with Excel serial date support."""
     d = o.get("delivery_date", "")
     if isinstance(d, (int, float)):
-        return (datetime(1899, 12, 30) + timedelta(days=int(float(d)))).date()
+        if d > 10000:
+            return (datetime(1899, 12, 30) + timedelta(days=int(d))).date()
+        return date.today() + timedelta(days=60)
     s = str(d).strip()
+    if not s:
+        return date.today() + timedelta(days=60)
+    # Excel serial date string "46117.0"
     try:
-        return datetime.strptime(s[:10], "%Y-%m-%d").date()
-    except Exception:
+        serial = float(s)
+        if serial > 10000:
+            return (datetime(1899, 12, 30) + timedelta(days=int(serial))).date()
+    except (ValueError, OverflowError):
+        pass
+    # Standard date formats
+    for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y%m%d"):
         try:
-            return datetime.strptime(s[:10], "%Y/%m/%d").date()
+            return datetime.strptime(s[:10], fmt).date()
         except Exception:
-            return date(2099, 1, 1)
+            continue
+    return date.today() + timedelta(days=60)
 
 
 def _load_data(data_dir: str | None = None):

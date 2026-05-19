@@ -3,6 +3,7 @@ import json, os, sys
 from sqlalchemy.orm import Session
 from database import engine, SessionLocal, Base
 from models import Order, Mold, Kiln, ProcessStep
+from date_utils import excel_to_date
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
@@ -29,7 +30,7 @@ def seed_orders(db: Session) -> int:
             voltage_kv=float(od.get("voltage_kv", 0) or 0),
             current_a=float(od.get("current_a", 0) or 0),
             qty=int(float(od.get("qty", 0) or 0)),
-            delivery_date=str(od.get("delivery_date", "") or ""),
+            delivery_date=excel_to_date(od.get("delivery_date", "")),
             product_from=str(od.get("product_from", "") or ""),
             product_to=str(od.get("product_to", "") or ""),
             status="pending",

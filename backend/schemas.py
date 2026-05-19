@@ -27,7 +27,7 @@ class ErrorDetail(BaseModel):
 class OrderBase(BaseModel):
     plan_no: str = Field(..., min_length=1, max_length=50, description="計劃單號")
     contract_no: Optional[str] = Field(default=None, max_length=50, description="合約編號")
-    voltage_kv: float = Field(..., gt=0, le=500, description="電壓 kV")
+    voltage_kv: float = Field(..., gt=0, le=1100, description="電壓 kV")
     current_a: float = Field(..., gt=0, le=5000, description="電流 A")
     qty: int = Field(..., ge=1, le=99999, description="數量")
     delivery_date: Optional[str] = Field(default=None, max_length=20, description="交期 YYYY-MM-DD")
@@ -43,7 +43,7 @@ class OrderCreate(OrderBase):
 
 class OrderUpdate(BaseModel):
     contract_no: Optional[str] = Field(default=None, max_length=50)
-    voltage_kv: Optional[float] = Field(default=None, gt=0, le=500)
+    voltage_kv: Optional[float] = Field(default=None, gt=0, le=1100)
     current_a: Optional[float] = Field(default=None, gt=0, le=5000)
     qty: Optional[int] = Field(default=None, ge=1, le=99999)
     delivery_date: Optional[str] = Field(default=None, max_length=20)
@@ -67,6 +67,22 @@ class OrderOut(OrderBase):
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+    @field_validator('delivery_date', mode='before')
+    @classmethod
+    def normalize_date(cls, v):
+        """Normalize Excel serial dates to ISO format on output."""
+        if v is not None and v != "":
+            s = str(v).strip()
+            if s:
+                try:
+                    serial = float(s)
+                    if serial > 10000:
+                        from date_utils import excel_to_date
+                        return excel_to_date(v)
+                except (ValueError, TypeError):
+                    pass
+        return v
 
     class Config:
         from_attributes = True
@@ -187,6 +203,7 @@ class ScheduleRequest(BaseModel):
 class ScheduleEntryOut(BaseModel):
     id: int
     kiln_id: int
+    kiln_name: Optional[str] = None
     plan_no: str
     contract_no: Optional[str] = None
     voltage_kv: float

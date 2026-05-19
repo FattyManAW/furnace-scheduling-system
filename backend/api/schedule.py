@@ -16,6 +16,18 @@ from engine.validator import validate_schedule
 
 router = APIRouter(prefix="/api/v1/schedule", tags=["schedule"])
 
+_kiln_name_cache: dict = {}
+
+def _kiln_name(db: Session, kiln_id: int) -> str:
+    if not kiln_id:
+        return ""
+    if kiln_id in _kiln_name_cache:
+        return _kiln_name_cache[kiln_id]
+    k = db.query(Kiln).filter(Kiln.id == kiln_id).first()
+    name = k.name if k else ""
+    _kiln_name_cache[kiln_id] = name
+    return name
+
 
 @router.post("/optimize", response_model=ScheduleResult)
 def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
@@ -107,6 +119,7 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
         ScheduleEntryOut(
             id=id_map.get(e["plan_no"], 0),
             kiln_id=int(e["kiln_id"]) if str(e["kiln_id"]).isdigit() else 0,
+            kiln_name=e.get("kiln_name"),
             plan_no=e["plan_no"],
             contract_no=e.get("contract_no"),
             voltage_kv=e["voltage_kv"],
@@ -165,7 +178,9 @@ def get_schedule_result(db: Session = Depends(get_db)):
 
     schedule_out = [
         ScheduleEntryOut(
-            id=e.id, kiln_id=e.kiln_id, plan_no=e.plan_no,
+            id=e.id, kiln_id=e.kiln_id,
+            kiln_name=_kiln_name(db, e.kiln_id),
+            plan_no=e.plan_no,
             contract_no=e.contract_no, voltage_kv=e.voltage_kv,
             current_a=e.current_a, qty=e.qty,
             delivery_date=e.delivery_date, mold_od=e.mold_od,
