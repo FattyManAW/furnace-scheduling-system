@@ -7,11 +7,17 @@ from date_utils import excel_to_date
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 for _cand in [os.path.join(_HERE, "data"), os.path.join(_HERE, "..", "data")]:
-    if os.path.isdir(_cand):
+    _orders = os.path.join(_cand, "orders.json")
+    if os.path.isfile(_orders):
         DATA_DIR = _cand
         break
 else:
-    DATA_DIR = os.path.join(_HERE, "data")  # fallback
+    # Database 可能有 backend/data/ 空目錄 — fallback to ../data
+    _fallback = os.path.join(_HERE, "..", "data")
+    if os.path.isfile(os.path.join(_fallback, "orders.json")):
+        DATA_DIR = _fallback
+    else:
+        DATA_DIR = os.path.join(_HERE, "data")
 
 
 def init_db():
