@@ -118,6 +118,8 @@ case "$CMD" in
     echo "  --reset     清除所有資料 + 重新初始化"
     echo "  --stop      停止所有服務"
     echo "  --status    顯示服務狀態"
+    echo "  --update    從 GitHub 拉取最新 + rebuild + 重啟"
+    echo "  --sync-check 檢查 Docker vs GitHub commit hash 落差"
     echo "  --help      顯示此說明"
     echo ""
     echo "環境變數:"
@@ -139,6 +141,63 @@ case "$CMD" in
       echo -e "${GREEN}✅ 服務已停止${NC}"
     fi
     exit 0
+    ;;
+
+  --update)
+    # ── 從 GitHub 拉取 + rebuild frontend + restart nginx ──────
+    if [ ! -d "$REPO_DIR/.git" ]; then
+      echo -e "${RED}❌ 尚未 clone，請先執行 ./start.sh${NC}"
+      exit 1
+    fi
+    cd "$REPO_DIR"
+    echo -e "${BLUE}📥 從 GitHub 拉取最新代碼...${NC}"
+    git fetch origin 2>/dev/null
+    LOCAL=$(git rev-parse HEAD)
+    REMOTE=$(git rev-parse origin/main 2>/dev/null || echo "$LOCAL")
+    if [ "$LOCAL" = "$REMOTE" ]; then
+      echo -e "${GREEN}✅ 已是最新 (${LOCAL:0:8})${NC}"
+      exit 0
+    fi
+    echo -e "   本機: ${LOCAL:0:8} → 遠端: ${REMOTE:0:8}"
+    git pull --rebase origin main
+    echo -e "${BLUE}🔨 重建前端...${NC}"
+    if [ -f frontend/package.json ]; then
+      cd frontend && npm install --silent && npm run build && cd ..
+    fi
+    echo -e "${BLUE}🔄 重建 Docker + 重啟...${NC}"
+    export GIT_COMMIT=$(git rev-parse --short HEAD)
+    docker compose up -d --build
+    echo -e "${GREEN}✅ 更新完成 (commit: ${GIT_COMMIT})${NC}"
+    exit 0
+    ;;
+
+  --sync-check)
+    # ── 比對 Docker vs GitHub commit hash ──────────────────────
+    if [ ! -d "$REPO_DIR/.git" ]; then
+      echo "UNKNOWN"
+      exit 2
+    fi
+    cd "$REPO_DIR"
+    git fetch origin 2>/dev/null
+    REMOTE=$(git rev-parse origin/main 2>/dev/null || echo "")
+    # 從 Docker API health endpoint 取得 commit
+    if curl -sf "http://localhost:${NGINX_PORT}/health" &>/dev/null; then
+      DOCKER_COMMIT=$(curl -sf "http://localhost:${NGINX_PORT}/health" | python3 -c "import sys,json; print(json.load(sys.stdin).get('commit','unknown'))" 2>/dev/null)
+    else
+      DOCKER_COMMIT="offline"
+    fi
+    if [ "$DOCKER_COMMIT" = "unknown" ] || [ "$DOCKER_COMMIT" = "offline" ]; then
+      echo "WARN: Docker commit=${DOCKER_COMMIT}, remote=${REMOTE:0:8}"
+      exit 1
+    fi
+    REMOTE_SHORT=$(echo "$REMOTE" | cut -c1-8)
+    if [ "$DOCKER_COMMIT" = "$REMOTE_SHORT" ] || [ "$DOCKER_COMMIT" = "${REMOTE:0:7}" ]; then
+      echo "OK: Docker=${DOCKER_COMMIT}, GitHub=${REMOTE_SHORT}"
+      exit 0
+    else
+      echo "STALE: Docker=${DOCKER_COMMIT}, GitHub=${REMOTE_SHORT}"
+      exit 1
+    fi
     ;;
 esac
 
@@ -187,7 +246,8 @@ if [ "$CMD" = "--rebuild" ] || [ "$CMD" = "--reset" ]; then
   echo -e "${YELLOW}🔄 強制重新 build...${NC}"
 fi
 
-echo -e "${CYAN}🐳 啟動容器...${NC}"
+export GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+echo -e "${CYAN}🐳 啟動容器 (commit: ${GIT_COMMIT})...${NC}"
 docker compose up -d $BUILD_FLAG
 
 # ── 健康檢查 ────────────────────────────────────────────────────

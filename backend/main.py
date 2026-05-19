@@ -65,7 +65,14 @@ def root():
 
 @app.get("/health", tags=["health"])
 def health():
-    return {"status": "ok"}
+    # Read commit hash from baked-in file (Dockerfile ARG GIT_COMMIT)
+    commit_hash = "unknown"
+    try:
+        with open("/app/GIT_COMMIT", "r") as f:
+            commit_hash = f.read().strip()
+    except Exception:
+        pass
+    return {"status": "ok", "commit": commit_hash, "version": "2.0.0"}
 
 
 

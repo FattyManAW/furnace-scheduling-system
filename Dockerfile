@@ -15,6 +15,11 @@ ENV PATH=/root/.local/bin:$PATH
 
 COPY backend/ ./backend/
 COPY data/    ./backend/data/
+
+# ── 建置時注入 commit hash（供 /health endpoint 回傳）───────
+ARG GIT_COMMIT=unknown
+RUN echo "${GIT_COMMIT}" > /app/backend/git_commit.txt
+
 WORKDIR /app/backend
 
 RUN python3 -c 'from database import engine, Base; Base.metadata.create_all(bind=engine); from seed_data import seed_all; seed_all(); print("✅ DB seeded")'

@@ -303,9 +303,20 @@ def index():
 #  Health
 # ═══════════════════════════════════════════════════════════════
 
+# 讀取建置時寫入的 git commit hash
+import pathlib
+_GIT_COMMIT_FILE = pathlib.Path(__file__).parent / "git_commit.txt"
+_GIT_COMMIT = _GIT_COMMIT_FILE.read_text().strip() if _GIT_COMMIT_FILE.exists() else "unknown"
+
+
+@app.get("/health")
 @app.get("/healthz")
 def health():
-    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+    return {
+        "status": "ok",
+        "commit": _GIT_COMMIT,
+        "timestamp": datetime.utcnow().isoformat(),
+    }
 
 
 # ═══════════════════════════════════════════════════════════════
