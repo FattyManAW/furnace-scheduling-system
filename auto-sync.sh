@@ -29,9 +29,14 @@ GITHUB_SHA=$(curl -sf "https://api.github.com/repos/FattyManAW/furnace-schedulin
   -H "Accept: application/vnd.github.v3+json" 2>/dev/null \
   | python3 -c "import sys,json; print(json.load(sys.stdin).get('sha','')[:8])" 2>/dev/null || echo "")
 
+# Fallback: GitHub API rate limited → git ls-remote
 if [ -z "$GITHUB_SHA" ]; then
-  log "WARN: 無法取得 GitHub commit (API rate limit?)"
-  exit 2
+  GITHUB_SHA=$(git ls-remote origin refs/heads/main 2>/dev/null | awk '{print substr($1,1,8)}' || echo "")
+fi
+
+if [ -z "$GITHUB_SHA" ]; then
+  # Both GitHub API and git ls-remote failed — skip this round silently
+  exit 0
 fi
 
 # ── 取得 Docker 內 commit ────────────────────────────────────────
