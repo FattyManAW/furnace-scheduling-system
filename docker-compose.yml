@@ -34,6 +34,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+    volumes:
+      - furnace_data:/app/backend/data
     expose:
       - "8002"
     networks:

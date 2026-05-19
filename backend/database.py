@@ -4,7 +4,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
-SQLALCHEMY_DATABASE_URL = os.getenv("FURNACE_DB_URL", "sqlite:///./furnace_schedule.db")
+DB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+os.makedirs(DB_DIR, exist_ok=True)
+SQLALCHEMY_DATABASE_URL = os.getenv("FURNACE_DB_URL", f"sqlite:///{DB_DIR}/furnace_schedule.db")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
