@@ -12,7 +12,6 @@
 #   docker compose down -v               # 停止 + 清除資料
 #   docker compose restart               # 重啟
 
-version: "3.8"
 
 services:
   # ── 後端 API (FastAPI + SQLite) ─────────────────────────────
@@ -26,8 +25,6 @@ services:
       - TZ=${TZ:-Asia/Taipei}
       - PORT=8002
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000,http://localhost:8030}
-    volumes:
-      - furnace_data:/app/backend
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python3", "/healthcheck.py"]
