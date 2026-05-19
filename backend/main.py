@@ -64,6 +64,7 @@ def root():
 
 
 @app.get("/health", tags=["health"])
+@app.get("/healthz", tags=["health"])
 def health():
     # Read commit hash from baked-in file (Dockerfile ARG GIT_COMMIT)
     commit_hash = "unknown"

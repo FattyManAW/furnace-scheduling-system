@@ -18,7 +18,7 @@ COPY data/    ./backend/data/
 
 # ── 建置時注入 commit hash（供 /health endpoint 回傳）───────
 ARG GIT_COMMIT=unknown
-RUN echo "${GIT_COMMIT}" > /app/backend/git_commit.txt
+RUN echo "${GIT_COMMIT}" > /app/GIT_COMMIT
 
 WORKDIR /app/backend
 
