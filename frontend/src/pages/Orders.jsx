@@ -23,9 +23,11 @@ export default function Orders() {
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState("");
   const [bulkMsg, setBulkMsg] = useState("");
+  const [error, setError] = useState(null);
 
   const load = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await api.getOrders({
         skip: (page - 1) * PAGE_SIZE,
@@ -36,7 +38,7 @@ export default function Orders() {
       setOrders(data);
       const cnt = await api.countOrders(statusFilter === "all" ? undefined : statusFilter);
       setTotal(cnt.count);
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error(e); setError(e.message || "載入失敗"); }
     finally { setLoading(false); }
   };
 
@@ -195,7 +197,9 @@ export default function Orders() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {error ? (
+                <tr><td colSpan={9} className="px-4 py-8 text-center"><span className="text-furnace-red bg-furnace-red/5 px-3 py-2 rounded-lg text-sm">{error}</span><button className="ml-3 text-furnace-blue text-sm underline" onClick={load}>重試</button></td></tr>
+              ) : loading ? (
                 <tr><td colSpan={9} className="px-4 py-8 text-center text-furnace-muted">載入中...</td></tr>
               ) : orders.length === 0 ? (
                 <tr><td colSpan={9} className="px-4 py-8 text-center text-furnace-muted">無資料</td></tr>

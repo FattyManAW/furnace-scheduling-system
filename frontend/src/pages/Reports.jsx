@@ -5,11 +5,12 @@ import { Download, FileText, FileSpreadsheet, Calendar as CalIcon } from "lucide
 export default function Reports() {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     api.getDashboard()
       .then(setDashboard)
-      .catch(e => console.error(e))
+      .catch(e => { console.error(e); setError(e.message || "載入失敗"); })
       .finally(() => setLoading(false));
   }, []);
 
@@ -22,6 +23,7 @@ export default function Reports() {
     a.click();
   };
 
+  if (error) return <div className="text-center py-8"><span className="text-furnace-red bg-furnace-red/5 px-3 py-2 rounded-lg text-sm">{error}</span><button className="ml-3 text-furnace-blue text-sm underline" onClick={() => { setError(null); setLoading(true); api.getDashboard().then(setDashboard).catch(e => setError(e.message || "載入失敗")).finally(() => setLoading(false)); }}>重試</button></div>;
   if (loading) return <div className="text-furnace-muted">載入中...</div>;
   if (!dashboard) return <div className="text-furnace-muted">無法載入報表資料</div>;
 

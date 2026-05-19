@@ -56,6 +56,7 @@ export default function Molds() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [lowOnly, setLowOnly] = useState(false);
+  const [error, setError] = useState(null);
   const [adjusting, setAdjusting] = useState(null);
   const [adjustVal, setAdjustVal] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
@@ -65,11 +66,12 @@ export default function Molds() {
 
   const load = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await api.getMolds({ low_stock: lowOnly });
       setMolds(data);
       setCreated(false);
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error(e); setError(e.message || "載入失敗"); }
     finally { setLoading(false); }
   };
 
@@ -164,7 +166,7 @@ export default function Molds() {
       </div>
 
       {/* Grid */}
-      {loading ? <div className="text-furnace-muted">載入中...</div> : (
+      {error ? <div className="text-center py-8"><span className="text-furnace-red bg-furnace-red/5 px-3 py-2 rounded-lg text-sm">{error}</span><button className="ml-3 text-furnace-blue text-sm underline" onClick={load}>重試</button></div> : loading ? <div className="text-furnace-muted">載入中...</div> : (
         <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(m => <MoldCard key={m.id} mold={m} onEdit={openEdit} onAdjust={handleAdjust} />)}
         </div>
