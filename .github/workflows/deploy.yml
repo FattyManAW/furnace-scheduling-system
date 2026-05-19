@@ -121,7 +121,20 @@ jobs:
           name: frontend-dist
           path: frontend/dist/
 
+      - name: Check deploy secrets
+        id: check_deploy
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          if [ -n "$DEPLOY_HOST" ]; then
+            echo "ready=true" >> $GITHUB_OUTPUT
+          else
+            echo "ready=false" >> $GITHUB_OUTPUT
+            echo "⏭️ DEPLOY_HOST not configured — skip SSH deploy"
+          fi
+
       - name: Deploy via SSH
+        if: steps.check_deploy.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
