@@ -1,0 +1,146 @@
+name: CI/CD Deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  # ── Backend Tests ─────────────────────────────────────────────────
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest httpx
+
+      - name: Verify imports
+        run: |
+          cd backend
+          python3 -c "
+          from database import engine, Base; Base.metadata.create_all(bind=engine)
+          from seed_data import seed_all; seed_all()
+          print('✅ Import + DB + Seed OK')
+          "
+
+      - name: API smoke test
+        run: |
+          cd backend
+          python3 -m uvicorn main:app --host 0.0.0.0 --port 8002 &
+          sleep 3
+          curl -sf http://localhost:8002/health
+          curl -sf http://localhost:8002/api/v1/orders/count
+          curl -sf http://localhost:8002/api/v1/molds/
+          curl -sf http://localhost:8002/api/v1/kilns/
+          curl -sf http://localhost:8002/api/v1/schedule/
+          echo "✅ All endpoints OK"
+
+  # ── Backend Docker Build & Push ────────────────────────────────────
+  build-backend:
+    needs: test-backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t furnace-api:ci .
+          docker images furnace-api:ci
+
+      - name: Health check container
+        run: |
+          docker run -d --name furnace-ci -p 8002:8002 furnace-api:ci
+          echo "⏳ Waiting for health check..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8002/health 2>/dev/null; then
+              echo "✅ Container healthy"
+              break
+            fi
+            sleep 2
+          done
+          curl -sf http://localhost:8002/health
+          curl -sf http://localhost:8002/api/v1/orders/count
+          docker stop furnace-ci
+
+  # ── Frontend Build ─────────────────────────────────────────────────
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+          du -sh dist/
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+
+  # ── Deploy (manual trigger or production tag) ──────────────────────
+  deploy:
+    needs: [build-backend, build-frontend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: http://100.107.36.80:8030
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT || '22' }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/furnace-scheduling-system || git clone https://github.com/FattyManAW/furnace-scheduling-system.git ~/furnace-scheduling-system
+            cd ~/furnace-scheduling-system
+            git pull origin main
+            docker compose down
+            docker compose up -d --build
+            echo "⏳ Health check..."
+            for i in $(seq 1 30); do
+              if curl -sf http://localhost:8002/health 2>/dev/null; then
+                echo "✅ Deploy healthy"
+                break
+              fi
+              sleep 2
+            done
+            curl -s http://localhost:8002/health

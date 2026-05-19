@@ -106,23 +106,83 @@ npm run build
 5. **每日工時上限** — 全局 1098 小時（超標時發出警示）
 6. **優先填滿** — 優先分配空閒槽位最多的爐
 
-## 部署
+## 🚀 部署（3 分鐘從零到上線）
 
-### GitHub Pages（前端）
+### 一鍵啟動（推薦）
 
 ```bash
-cd frontend
-npm run build
-# 將 dist/ 部署到 gh-pages
+git clone https://github.com/FattyManAW/furnace-scheduling-system.git
+cd furnace-scheduling-system
+chmod +x start.sh
+./start.sh
 ```
 
-### 後端部署
+啟動後自動完成：
+1. ✅ 檢查 Docker 環境
+2. ✅ Clone / 拉取最新程式碼
+3. ✅ Build Docker 映像
+4. ✅ 初始化資料庫（匯入 251 筆測試訂單）
+5. ✅ 啟動 API + Nginx 前端
+6. ✅ 健康檢查（驗證所有 API 端點）
+7. ✅ 顯示服務 URL + 常用指令
 
-後端需要獨立伺服器，建議使用：
-- [Railway](https://railway.app)
-- [Render](https://render.com)
-- [Fly.io](https://fly.io)
-- 自建伺服器 + uvicorn
+### Docker Compose 手動部署
+
+```bash
+# 啟動（後端 + 前端）
+docker compose up -d
+
+# 查看日誌
+docker compose logs -f
+
+# 重啟
+docker compose restart
+
+# 停止（保留資料）
+docker compose down
+
+# 完全清除（含資料）
+docker compose down -v
+```
+
+### 環境變數
+
+| 變數 | 預設值 | 說明 |
+|------|--------|------|
+| `PORT` | `8002` | 後端 API port |
+| `NGINX_PORT` | `8030` | 前端 nginx port |
+| `TZ` | `Asia/Taipei` | 時區 |
+| `ALLOWED_ORIGINS` | `localhost:5173,3000` | CORS 允許來源 |
+
+### CI/CD 自動部署
+
+Push 到 `main` 分支即觸發 GitHub Actions：
+
+```
+push → test-backend → build-docker → deploy SSH
+            ↓
+     build-frontend → artifact upload
+```
+
+部署目標設定在 `.github/workflows/deploy.yml`，需要設定以下 Secrets：
+- `DEPLOY_HOST` — 部署主機 IP
+- `DEPLOY_USER` — SSH 使用者
+- `DEPLOY_SSH_KEY` — SSH 私鑰
+
+### Docker 健康檢查
+
+雙層健康檢查確保服務可靠：
+
+**後端 API**: 每 30 秒驗證 `/health` + `/api/v1/orders/count`
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD python3 /healthcheck.py
+```
+
+**前端 Nginx**: 每 30 秒驗證首頁可達
+```yaml
+healthcheck:
+  test: ["CMD", "wget", "-qO-", "http://localhost:8030/"]
+```
 
 ## 技術棧
 
