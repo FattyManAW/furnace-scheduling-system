@@ -30,21 +30,21 @@ export default function Reports() {
   const hourPct = s.daily_cap > 0 ? Math.min(s.total_hours / s.daily_cap * 100, 100) : 0;
 
   return (
-    <div className="space-y-5">
+    <div className="fade-slide-up d1 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">報表匯出</h1>
         <p className="text-furnace-muted text-sm mt-0.5">報表匯出與統計資料</p>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="fade-slide-up d2 grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "總訂單", val: o.total, color: "text-furnace-blue" },
           { label: "待排", val: o.pending, color: "text-furnace-amber" },
           { label: "已排", val: o.scheduled, color: "text-furnace-green" },
           { label: "總工時", val: `${s.total_hours.toFixed(0)}h`, color: "text-furnace-purple" },
         ].map(({ label, val, color }) => (
-          <div key={label} className="bg-furnace-card border border-furnace-border rounded-xl p-4">
+          <div key={label} className="fade-slide-up d2 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4">
             <p className="text-furnace-muted text-xs">{label}</p>
             <p className={clsx("text-2xl font-bold mt-1", color)}>{val}</p>
           </div>
@@ -52,9 +52,9 @@ export default function Reports() {
       </div>
 
       {/* CSV Export */}
-      <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+      <div className="fade-slide-up d3 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
         <h2 className="text-sm font-semibold text-furnace-text mb-4">CSV 匯出</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-3 gap-3">
           <button onClick={() => downloadCsv("/api/v1/reports/orders/csv", "orders.csv")}
             className="flex items-center gap-3 p-4 rounded-xl border border-furnace-border hover:border-furnace-green/30 hover:bg-furnace-green/5 transition-colors group">
             <div className="w-10 h-10 rounded-lg bg-furnace-green/10 flex items-center justify-center">
@@ -94,7 +94,7 @@ export default function Reports() {
       </div>
 
       {/* Pending by Contract */}
-      <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+      <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
         <h2 className="text-sm font-semibold text-furnace-text mb-4">待排訂單 — 依合約分類</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -122,9 +122,9 @@ export default function Reports() {
       {dashboard.overdue_orders?.length > 0 && (
         <div className="bg-furnace-red/5 border border-furnace-red/20 rounded-xl p-5">
           <h2 className="text-sm font-semibold text-furnace-red mb-3">逾期訂單</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 gap-2">
             {dashboard.overdue_orders.map(o => (
-              <div key={o.id} className="flex items-center justify-between p-3 bg-furnace-card rounded-lg border border-furnace-border">
+              <div key={o.id} className="fade-slide-up d5 flex items-center justify-between p-3 bg-furnace-card hover-lift rounded-lg border border-furnace-border">
                 <span className="text-sm font-semibold">{o.plan_no}</span>
                 <div className="text-right">
                   <p className="text-xs text-furnace-red">{o.contract_no}</p>

@@ -123,14 +123,14 @@ export default function Orders() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="fade-slide-up d1 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">訂單管理</h1>
           <p className="text-furnace-muted text-sm mt-0.5">管理生產訂單 — 新增、編輯、刪除、批量匯入</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => setBulkOpen(!bulkOpen)} className="btn-secondary px-4 py-2 rounded-lg text-sm flex items-center gap-1.5 border border-furnace-border bg-furnace-card">
+          <button onClick={() => setBulkOpen(!bulkOpen)} className="fade-slide-up d2 btn-secondary px-4 py-2 rounded-lg text-sm flex items-center gap-1.5 border border-furnace-border bg-furnace-card hover-lift">
             <Upload className="w-4 h-4" /> 批量匯入
           </button>
           <button onClick={openCreate} className="px-4 py-2 rounded-lg text-sm bg-furnace-green text-white flex items-center gap-1.5 hover:bg-furnace-green/90">
@@ -141,7 +141,7 @@ export default function Orders() {
 
       {/* Bulk Import */}
       {bulkOpen && (
-        <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d3 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold">批量匯入（每行一個 JSON）</h3>
             <button onClick={() => setBulkOpen(false)}><X className="w-4 h-4 text-furnace-muted" /></button>
@@ -160,7 +160,7 @@ export default function Orders() {
       )}
 
       {/* Filters */}
-      <div className="flex gap-3 items-center bg-furnace-card border border-furnace-border rounded-xl p-4">
+      <div className="fade-slide-up d4 flex gap-3 items-center bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-furnace-muted" />
           <input
@@ -184,7 +184,7 @@ export default function Orders() {
       </div>
 
       {/* Table */}
-      <div className="bg-furnace-card border border-furnace-border rounded-xl overflow-hidden">
+      <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -244,12 +244,12 @@ export default function Orders() {
       {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setModalOpen(false)}>
-          <div className="bg-furnace-card border border-furnace-border rounded-2xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
+          <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-2xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold">{editing ? "編輯訂單" : "新增訂單"}</h2>
               <button onClick={() => setModalOpen(false)} className="text-furnace-muted hover:text-furnace-text"><X className="w-5 h-5" /></button>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="fade-slide-up d2 grid grid-cols-2 gap-4">
               {[
                 ["計劃單號", "plan_no", "text"],
                 ["合約號", "contract_no", "text"],

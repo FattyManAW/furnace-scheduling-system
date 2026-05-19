@@ -71,16 +71,16 @@ export default function Schedule() {
   const sortedOrders = [...orders].sort((a, b) => (a.delivery_date || "").localeCompare(b.delivery_date || ""));
 
   return (
-    <div className="space-y-5">
+    <div className="fade-slide-up d1 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">排程設定</h1>
         <p className="text-furnace-muted text-sm mt-0.5">設定排程策略與執行優化</p>
       </div>
 
       {/* Strategy Selection */}
-      <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+      <div className="fade-slide-up d2 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
         <h2 className="text-sm font-semibold text-furnace-text mb-4">排程策略</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-3 gap-3">
           {STRATEGIES.map(s => (
             <button
               key={s.value}
@@ -100,7 +100,7 @@ export default function Schedule() {
       </div>
 
       {/* Execute */}
-      <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+      <div className="fade-slide-up d3 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-furnace-text">選擇訂單</h2>
           <span className="text-xs text-furnace-muted">已選 {selected.size} / {orders.length} 筆</span>
@@ -120,7 +120,7 @@ export default function Schedule() {
         {/* Order list (scrollable) */}
         <div className="max-h-[300px] overflow-y-auto border border-furnace-border rounded-lg">
           <table className="w-full text-xs">
-            <thead className="sticky top-0 bg-furnace-card">
+            <thead className="fade-slide-up d4 sticky top-0 bg-furnace-card hover-lift">
               <tr className="border-b border-furnace-border">
                 <th className="px-3 py-2 w-10"><input type="checkbox" checked={selected.size === orders.length && orders.length > 0} onChange={toggleAll} /></th>
                 {["計劃單號", "合約號", "電壓", "數量", "交期"].map(h => (
@@ -167,16 +167,16 @@ export default function Schedule() {
 
       {/* Result */}
       {result && (
-        <div className="space-y-4">
+        <div className="fade-slide-up d1 space-y-4">
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="fade-slide-up d2 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: "已排入", val: result.summary.scheduled, color: "text-furnace-green", icon: CheckCircle },
               { label: "未排入", val: result.summary.skipped, color: "text-furnace-red", icon: AlertTriangle },
               { label: "總工時", val: `${result.summary.total_hours.toFixed(0)}h`, color: "text-furnace-blue", icon: Clock },
               { label: "使用爐數", val: result.kiln_summary.length, color: "text-furnace-purple", icon: Zap },
             ].map(({ label, val, color, icon: Icon }) => (
-              <div key={label} className="bg-furnace-card border border-furnace-border rounded-xl p-4">
+              <div key={label} className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-furnace-muted text-xs">{label}</p>
@@ -192,16 +192,16 @@ export default function Schedule() {
           {result.warnings?.length > 0 && (
             <div className="bg-furnace-amber/5 border border-furnace-amber/20 rounded-xl p-4">
               <p className="text-furnace-amber font-semibold text-sm mb-2">⚠️ 排程警示 ({result.warnings.length})</p>
-              <div className="space-y-1 max-h-40 overflow-y-auto">
+              <div className="fade-slide-up d1 space-y-1 max-h-40 overflow-y-auto">
                 {result.warnings.map((w, i) => <p key={i} className="text-xs text-furnace-muted">{w}</p>)}
               </div>
             </div>
           )}
 
           {/* Kiln Results */}
-          <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+          <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-furnace-text mb-4">爐況排程結果</h2>
-            <div className="space-y-2">
+            <div className="fade-slide-up d1 space-y-2">
               {result.kiln_summary.map(k => {
                 const isExpanded = expandedKiln === k.kiln_id;
                 const pct = k.usage_pct;
@@ -256,9 +256,9 @@ export default function Schedule() {
 
       {/* Recent Runs */}
       {recentRuns.length > 0 && (
-        <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-furnace-muted mb-3">最近排程記錄</h2>
-          <div className="space-y-2">
+          <div className="fade-slide-up d1 space-y-2">
             {recentRuns.map((r, i) => (
               <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-furnace-border/30 last:border-0">
                 <span className="text-furnace-muted">{r.time}</span>

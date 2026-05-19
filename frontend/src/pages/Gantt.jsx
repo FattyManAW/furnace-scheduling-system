@@ -42,7 +42,7 @@ function Tooltip({ children, content }) {
       {children}
       {show && (
         <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2
-          bg-furnace-card border border-furnace-border rounded-lg shadow-lg
+          bg-furnace-card hover-lift border border-furnace-border rounded-lg shadow-lg
           text-xs text-furnace-text whitespace-nowrap">
           {content}
         </div>
@@ -125,7 +125,7 @@ export default function Gantt() {
   const rowH = 48;
 
   return (
-    <div className="space-y-5">
+    <div className="fade-slide-up d1 space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">甘特圖</h1>
@@ -134,7 +134,7 @@ export default function Gantt() {
           </p>
         </div>
         <div className="flex gap-2 items-center">
-          <div className="flex gap-1 bg-furnace-card border border-furnace-border rounded-lg p-1">
+          <div className="fade-slide-up d3 flex gap-1 bg-furnace-card hover-lift border border-furnace-border rounded-lg p-1">
             {VIEW_MODES.map((m, i) => (
               <button
                 key={m.label}
@@ -161,10 +161,10 @@ export default function Gantt() {
         </div>
       </div>
 
-      <div className="bg-furnace-card border border-furnace-border rounded-xl overflow-auto">
+      <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl overflow-auto">
         <div className="inline-block min-w-full">
           {/* Header */}
-          <div className="sticky top-0 bg-furnace-card border-b border-furnace-border z-10">
+          <div className="fade-slide-up d5 sticky top-0 bg-furnace-card hover-lift border-b border-furnace-border z-10">
             <div className="flex">
               <div className="w-[140px] min-w-[140px] px-3 py-3 text-sm font-bold text-furnace-muted border-r border-furnace-border flex items-center">
                 爐次

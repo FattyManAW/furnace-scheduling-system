@@ -13,7 +13,7 @@ export default function Settings() {
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="fade-slide-up d1 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">系統設定</h1>
         <p className="text-furnace-muted text-sm mt-0.5">系統配置與偏好設定</p>
@@ -38,10 +38,10 @@ export default function Settings() {
       </div>
 
       {activeTab === "system" && (
-        <div className="space-y-4">
-          <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d1 space-y-4">
+          <div className="fade-slide-up d2 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2"><HardDrive className="w-4 h-4 text-furnace-blue" /> 一般設定</h2>
-            <div className="space-y-4">
+            <div className="fade-slide-up d1 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-furnace-text">每日工時上限</p>
@@ -69,9 +69,9 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+          <div className="fade-slide-up d3 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2"><Shield className="w-4 h-4 text-furnace-purple" /> 排程策略</h2>
-            <div className="space-y-3">
+            <div className="fade-slide-up d1 space-y-3">
               {[
                 { name: "deadline", label: "交期優先", desc: "優先排入最早交期的訂單" },
                 { name: "fill", label: "填滿優先", desc: "優先填滿同一爐的槽位" },
@@ -91,10 +91,10 @@ export default function Settings() {
       )}
 
       {activeTab === "database" && (
-        <div className="space-y-4">
-          <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d1 space-y-4">
+          <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2"><Database className="w-4 h-4 text-furnace-blue" /> 資料庫操作</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="p-4 rounded-xl border border-furnace-border">
                 <h3 className="text-sm font-semibold text-furnace-text mb-2">重新匯入初始資料</h3>
                 <p className="text-xs text-furnace-muted mb-3">從 data/ 目錄的 JSON 檔案重新匯入訂單、模具、干燥罐、製程資料。會跳過已存在的記錄。</p>
@@ -107,9 +107,9 @@ export default function Settings() {
               </div>
             </div>
           </div>
-          <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+          <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-furnace-text mb-3">資料統計</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="fade-slide-up d2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div><p className="text-furnace-muted text-xs">訂單表</p><p className="font-bold text-furnace-text">orders</p></div>
               <div><p className="text-furnace-muted text-xs">模具表</p><p className="font-bold text-furnace-text">molds</p></div>
               <div><p className="text-furnace-muted text-xs">干燥罐表</p><p className="font-bold text-furnace-text">kilns</p></div>
@@ -120,9 +120,9 @@ export default function Settings() {
       )}
 
       {activeTab === "notifications" && (
-        <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2"><Bell className="w-4 h-4 text-furnace-amber" /> 通知設定</h2>
-          <div className="space-y-4">
+          <div className="fade-slide-up d1 space-y-4">
             {[
               { label: "工時超標通知", desc: "排程工時超過每日上限時通知" },
               { label: "逾期訂單提醒", desc: "有逾期訂單時顯示警示" },
@@ -142,9 +142,9 @@ export default function Settings() {
       )}
 
       {activeTab === "about" && (
-        <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2"><Info className="w-4 h-4 text-furnace-cyan" /> 關於本系統</h2>
-          <div className="space-y-3 text-sm text-furnace-muted">
+          <div className="fade-slide-up d1 space-y-3 text-sm text-furnace-muted">
             <p><span className="text-furnace-text font-semibold">系統名稱：</span>干式套管最佳化排爐系統</p>
             <p><span className="text-furnace-text font-semibold">版本：</span>2.0.0</p>
             <p><span className="text-furnace-text font-semibold">架構：</span>React + FastAPI + SQLite</p>

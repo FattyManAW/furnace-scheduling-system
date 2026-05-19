@@ -12,21 +12,21 @@ function Skeleton({ className = "" }) {
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6" role="status" aria-label="載入中">
+    <div className="fade-slide-up d1 space-y-6" role="status" aria-label="載入中">
       <div>
         <Skeleton className="h-8 w-36 mb-2" />
         <Skeleton className="h-4 w-56" />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+          <div key={i} className="fade-slide-up d2 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
             <Skeleton className="h-3 w-20 mb-3" />
             <Skeleton className="h-7 w-16 mb-2" />
             <Skeleton className="h-3 w-24" />
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="fade-slide-up d2 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Skeleton className="h-48 rounded-xl" />
         <Skeleton className="h-48 rounded-xl" />
       </div>
@@ -55,7 +55,7 @@ function KpiCard({ icon: Icon, label, value, sub, accent }) {
   };
 
   return (
-    <div className="bg-furnace-card border border-furnace-border hover:border-furnace-hover rounded-xl p-5 transition-colors">
+    <div className="fade-slide-up d3 bg-furnace-card hover-lift border border-furnace-border hover:border-furnace-hover rounded-xl p-5 transition-colors">
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <p className="text-furnace-muted text-xs uppercase tracking-wider mb-2">{label}</p>
@@ -80,7 +80,7 @@ function ProgressBar({ pct, label, used, cap }) {
   const textColor = pct > 95 ? "text-furnace-red" : pct > 80 ? "text-furnace-amber" : "text-furnace-green";
 
   return (
-    <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+    <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-furnace-heading">{label}</h2>
         <span className={`text-sm font-bold ${textColor}`}>{pct.toFixed(1)}%</span>
@@ -152,7 +152,7 @@ export default function Dashboard() {
   const hourPct = s.daily_cap > 0 ? Math.min(s.total_hours / s.daily_cap * 100, 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="fade-slide-up d1 space-y-6">
       {/* Page Title */}
       <div>
         <h1 className="text-2xl font-bold text-furnace-heading">儀表板</h1>
@@ -163,7 +163,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── KPI Four-Card (Bento Grid) ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard icon={ClipboardList} label="總訂單數" value={o.total} sub={`待排 ${o.pending} 筆`} accent="blue" />
         <KpiCard icon={Factory} label="運作中乾燥罐" value={`${data.kilns.active_today}/${data.kilns.total}`} sub="今日排程" accent="purple" />
         <KpiCard icon={Clock} label="預估總工時" value={`${s.total_hours.toFixed(0)}h`} sub={`每日上限 ${s.daily_cap}h`} accent={hourPct > 80 ? "amber" : "green"} />
@@ -174,9 +174,9 @@ export default function Dashboard() {
       <ProgressBar pct={hourPct} label="工時使用率" used={s.total_hours.toFixed(0)} cap={s.daily_cap} />
 
       {/* ── Orders / Overdue two-col ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="fade-slide-up d2 grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Order Status Breakdown */}
-        <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-furnace-heading mb-4">訂單狀態分佈</h2>
           <div className="divide-y divide-furnace-border">
             <StatusRow label="待排程" count={o.pending} color="amber" total={o.total} />
@@ -187,7 +187,7 @@ export default function Dashboard() {
           {o.pending_by_contract?.length > 0 && (
             <div className="mt-4 pt-4 border-t border-furnace-border">
               <h3 className="text-xs font-semibold text-furnace-muted mb-2 uppercase tracking-wider">合約別（待排）</h3>
-              <div className="space-y-1 max-h-[160px] overflow-y-auto">
+              <div className="fade-slide-up d1 space-y-1 max-h-[160px] overflow-y-auto">
                 {o.pending_by_contract.map(c => (
                   <div key={c.contract} className="flex items-center justify-between text-sm py-1">
                     <span className="text-furnace-muted truncate mr-2">{c.contract}</span>
@@ -200,7 +200,7 @@ export default function Dashboard() {
         </div>
 
         {/* Overdue Alert */}
-        <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-furnace-heading mb-4 flex items-center gap-2">
             {overdueList.length > 0 ? (
               <AlertTriangle className="w-4 h-4 text-furnace-red" />
@@ -215,7 +215,7 @@ export default function Dashboard() {
           {overdueList.length === 0 ? (
             <p className="text-furnace-muted text-sm py-4">目前無逾期訂單</p>
           ) : (
-            <div className="space-y-2 max-h-[370px] overflow-y-auto pr-1">
+            <div className="fade-slide-up d1 space-y-2 max-h-[370px] overflow-y-auto pr-1">
               {overdueList.slice(0, 30).map(o => (
                 <div key={o.id} className="p-3 bg-furnace-red/5 border border-furnace-red/10 rounded-lg hover:border-furnace-red/25 transition-colors">
                   <div className="flex items-center justify-between">

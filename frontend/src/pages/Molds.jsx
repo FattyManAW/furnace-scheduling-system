@@ -10,7 +10,7 @@ function MoldCard({ mold, onEdit, onAdjust }) {
   const low = mold.stock_qty < 10;
   const pct = Math.min((mold.stock_qty / 50) * 100, 100);
   return (
-    <div className="bg-furnace-card border border-furnace-border rounded-xl p-4 hover:border-furnace-blue/30 transition-colors">
+    <div className="fade-slide-up d2 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4 hover:border-furnace-blue/30 transition-colors">
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="font-semibold text-furnace-text">#{mold.mold_no}</h3>
@@ -123,7 +123,7 @@ export default function Molds() {
   const totalStock = molds.reduce((s, m) => s + m.stock_qty, 0);
 
   return (
-    <div className="space-y-5">
+    <div className="fade-slide-up d1 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">模具庫存</h1>
@@ -135,23 +135,23 @@ export default function Molds() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-furnace-card border border-furnace-border rounded-xl p-4">
+      <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="fade-slide-up d3 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4">
           <p className="text-furnace-muted text-xs mb-1">模具型號</p>
           <p className="text-xl font-bold text-furnace-blue">{molds.length} 種</p>
         </div>
-        <div className="bg-furnace-card border border-furnace-border rounded-xl p-4">
+        <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4">
           <p className="text-furnace-muted text-xs mb-1">總存量</p>
           <p className="text-xl font-bold text-furnace-green">{totalStock} 支</p>
         </div>
-        <div className="bg-furnace-card border border-furnace-border rounded-xl p-4">
+        <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4">
           <p className="text-furnace-muted text-xs mb-1">低庫存警示</p>
           <p className={`text-xl font-bold ${lowCount > 0 ? "text-furnace-red" : "text-furnace-muted"}`}>{lowCount} 種</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 bg-furnace-card border border-furnace-border rounded-xl p-4">
+      <div className="fade-slide-up d6 flex gap-3 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-furnace-muted" />
           <input type="text" placeholder="搜尋模具編號或位置..." value={search} onChange={e => setSearch(e.target.value)}
@@ -165,7 +165,7 @@ export default function Molds() {
 
       {/* Grid */}
       {loading ? <div className="text-furnace-muted">載入中...</div> : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(m => <MoldCard key={m.id} mold={m} onEdit={openEdit} onAdjust={handleAdjust} />)}
         </div>
       )}
@@ -173,9 +173,9 @@ export default function Molds() {
       {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setModalOpen(false)}>
-          <div className="bg-furnace-card border border-furnace-border rounded-2xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
+          <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-2xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold mb-5">{editMold ? "編輯模具" : "新增模具"}</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="fade-slide-up d2 grid grid-cols-2 gap-4">
               {[
                 ["模具編號", "mold_no", "text"],
                 ["外徑 OD", "outer_dia", "number"],
