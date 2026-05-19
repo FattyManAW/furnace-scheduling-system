@@ -5,10 +5,11 @@ import { zhTW } from "date-fns/locale";
 import { clsx } from "clsx";
 import { ChevronLeft, ChevronRight, Calendar, Info } from "lucide-react";
 
-// ── View mode: 1週 / 2週 / 1月 ──────────────────────────────
+// ── View mode: 今日/1週/2週/1月（響應式 colW）─────────────────
 const VIEW_MODES = [
-  { label: "1週", days: 7, colW: 80 },
-  { label: "2週", days: 14, colW: 80 },
+  { label: "今日", days: 1, colW: () => typeof window === "undefined" ? 80 : window.innerWidth < 768 ? 40 : window.innerWidth < 1024 ? 56 : 80 },
+  { label: "1週", days: 7, colW: () => typeof window === "undefined" ? 80 : window.innerWidth < 768 ? 40 : window.innerWidth < 1024 ? 56 : 80 },
+  { label: "2週", days: 14, colW: () => typeof window === "undefined" ? 80 : window.innerWidth < 768 ? 40 : window.innerWidth < 1024 ? 56 : 80 },
   { label: "1月", days: 30, colW: 48 },
 ];
 
@@ -55,7 +56,7 @@ export default function Gantt() {
   const [schedule, setSchedule] = useState(null);
   const [loading, setLoading] = useState(true);
   const [viewStart, setViewStart] = useState(null);
-  const [viewMode, setViewMode] = useState(1); // default: 2-week view
+  const [viewMode, setViewMode] = useState(typeof window !== "undefined" && window.innerWidth < 768 ? 0 : 1);
 
   useEffect(() => {
     api.getScheduleResult()
@@ -80,7 +81,7 @@ export default function Gantt() {
   }
 
   const days = VIEW_MODES[viewMode].days;
-  const colW = VIEW_MODES[viewMode].colW;
+  const colW = typeof VIEW_MODES[viewMode].colW === "function" ? VIEW_MODES[viewMode].colW() : VIEW_MODES[viewMode].colW;
   const minDate = viewStart || startOfDay(new Date());
   const maxDate = addDays(minDate, days);
 
