@@ -121,7 +121,7 @@ export default function Settings() {
 
       {activeTab === "notifications" && (
         <div className="bg-furnace-card border border-furnace-border rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2"><Bell className="w-4 h-4 text-furnace-orange" /> 通知設定</h2>
+          <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2"><Bell className="w-4 h-4 text-furnace-amber" /> 通知設定</h2>
           <div className="space-y-4">
             {[
               { label: "工時超標通知", desc: "排程工時超過每日上限時通知" },

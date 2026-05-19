@@ -114,7 +114,7 @@ export default function Orders() {
 
   const statusBadge = (s) => {
     const map = {
-      pending: "bg-furnace-orange/15 text-furnace-orange",
+      pending: "bg-furnace-amber/15 text-furnace-amber",
       scheduled: "bg-furnace-blue/15 text-furnace-blue",
       completed: "bg-furnace-green/15 text-furnace-green",
     };

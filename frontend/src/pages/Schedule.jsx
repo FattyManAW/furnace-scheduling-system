@@ -190,8 +190,8 @@ export default function Schedule() {
 
           {/* Warnings */}
           {result.warnings?.length > 0 && (
-            <div className="bg-furnace-orange/5 border border-furnace-orange/20 rounded-xl p-4">
-              <p className="text-furnace-orange font-semibold text-sm mb-2">⚠️ 排程警示 ({result.warnings.length})</p>
+            <div className="bg-furnace-amber/5 border border-furnace-amber/20 rounded-xl p-4">
+              <p className="text-furnace-amber font-semibold text-sm mb-2">⚠️ 排程警示 ({result.warnings.length})</p>
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {result.warnings.map((w, i) => <p key={i} className="text-xs text-furnace-muted">{w}</p>)}
               </div>
@@ -205,7 +205,7 @@ export default function Schedule() {
               {result.kiln_summary.map(k => {
                 const isExpanded = expandedKiln === k.kiln_id;
                 const pct = k.usage_pct;
-                const barColor = pct > 95 ? "bg-furnace-red" : pct > 80 ? "bg-furnace-orange" : "bg-furnace-green";
+                const barColor = pct > 95 ? "bg-furnace-red" : pct > 80 ? "bg-furnace-amber" : "bg-furnace-green";
                 return (
                   <div key={k.kiln_id} className="border border-furnace-border rounded-xl overflow-hidden">
                     <button
@@ -220,7 +220,7 @@ export default function Schedule() {
                         <div className="w-32 h-2 bg-furnace-border rounded-full overflow-hidden">
                           <div className={clsx("h-full rounded-full", barColor)} style={{ width: `${pct}%` }} />
                         </div>
-                        <span className={clsx("text-xs font-bold", pct > 95 ? "text-furnace-red" : pct > 80 ? "text-furnace-orange" : "text-furnace-green")}>{pct}%</span>
+                        <span className={clsx("text-xs font-bold", pct > 95 ? "text-furnace-red" : pct > 80 ? "text-furnace-amber" : "text-furnace-green")}>{pct}%</span>
                         <ChevronDown className={clsx("w-4 h-4 text-furnace-muted transition-transform", isExpanded && "rotate-180")} />
                       </div>
                     </button>

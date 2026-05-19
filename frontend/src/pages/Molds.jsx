@@ -39,7 +39,7 @@ function MoldCard({ mold, onEdit, onAdjust }) {
         <button onClick={() => onAdjust(mold.id, 1)} className="flex-1 py-1.5 rounded-lg bg-furnace-green/10 text-furnace-green text-xs font-semibold hover:bg-furnace-green/20 flex items-center justify-center gap-1">
           <Plus className="w-3 h-3" /> 入庫
         </button>
-        <button onClick={() => onAdjust(mold.id, -1)} className="flex-1 py-1.5 rounded-lg bg-furnace-orange/10 text-furnace-orange text-xs font-semibold hover:bg-furnace-orange/20 flex items-center justify-center gap-1">
+        <button onClick={() => onAdjust(mold.id, -1)} className="flex-1 py-1.5 rounded-lg bg-furnace-amber/10 text-furnace-amber text-xs font-semibold hover:bg-furnace-amber/20 flex items-center justify-center gap-1">
           <Minus className="w-3 h-3" /> 出庫
         </button>
         <button onClick={() => onEdit(mold)} className="py-1.5 px-3 rounded-lg border border-furnace-border text-furnace-muted hover:text-furnace-blue text-xs">

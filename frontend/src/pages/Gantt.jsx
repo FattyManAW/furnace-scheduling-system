@@ -26,7 +26,7 @@ function daysFromHours(hours) {
 // ── 按爐次利用率決定條塊顏色
 function utilizationColor(pct) {
   if (pct >= 90) return "bg-furnace-red/70";
-  if (pct >= 70) return "bg-furnace-orange/70";
+  if (pct >= 70) return "bg-furnace-amber/70";
   if (pct >= 40) return "bg-furnace-purple/70";
   return "bg-furnace-blue/70";
 }
@@ -163,7 +163,7 @@ export default function Gantt() {
             return (
               <div key={kid} className="flex border-b border-furnace-border/30 hover:bg-furnace-bg/20">
                 <div className="w-[140px] min-w-[140px] px-3 py-4 text-xs font-semibold text-furnace-text border-r border-furnace-border flex items-center gap-2">
-                  <div className={clsx("w-2 h-2 rounded-full", usage >= 90 ? "bg-furnace-red" : usage >= 70 ? "bg-furnace-orange" : usage >= 40 ? "bg-furnace-purple" : "bg-furnace-blue")} />
+                  <div className={clsx("w-2 h-2 rounded-full", usage >= 90 ? "bg-furnace-red" : usage >= 70 ? "bg-furnace-amber" : usage >= 40 ? "bg-furnace-purple" : "bg-furnace-blue")} />
                   {kn.name}
                 </div>
                 <div className="relative flex-shrink-0" style={{ width: days * colW, height: rowH }}>
@@ -210,7 +210,7 @@ export default function Gantt() {
       <div className="flex flex-wrap gap-4">
         {[
           { label: "≥90% 高負載", color: "bg-furnace-red" },
-          { label: "70-90% 中高負載", color: "bg-furnace-orange" },
+          { label: "70-90% 中高負載", color: "bg-furnace-amber" },
           { label: "40-70% 中負載", color: "bg-furnace-purple" },
           { label: "<40% 低負載", color: "bg-furnace-blue" },
         ].map(({ label, color }) => (

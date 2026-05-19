@@ -40,7 +40,7 @@ export default function Reports() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "總訂單", val: o.total, color: "text-furnace-blue" },
-          { label: "待排", val: o.pending, color: "text-furnace-orange" },
+          { label: "待排", val: o.pending, color: "text-furnace-amber" },
           { label: "已排", val: o.scheduled, color: "text-furnace-green" },
           { label: "總工時", val: `${s.total_hours.toFixed(0)}h`, color: "text-furnace-purple" },
         ].map(({ label, val, color }) => (
