@@ -6,7 +6,7 @@ class TestOrderAPI:
     def test_list_orders_empty(self, client):
         resp = client.get("/api/v1/orders/")
         assert resp.status_code == 200
-        assert resp.json() == []
+        assert resp.json()["items"] == []
 
     def test_create_order(self, client):
         resp = client.post("/api/v1/orders/", json={
@@ -92,7 +92,7 @@ class TestOrderAPI:
         })
         resp = client.get("/api/v1/orders/?search=SRCH")
         assert resp.status_code == 200
-        results = resp.json()
+        results = resp.json()["items"]
         assert len(results) == 1
         assert results[0]["plan_no"] == "SRCH-ZZZ"
 
@@ -101,7 +101,7 @@ class TestMoldAPI:
     def test_list_molds_empty(self, client):
         resp = client.get("/api/v1/molds/")
         assert resp.status_code == 200
-        assert resp.json() == []
+        assert resp.json()["items"] == []
 
     def test_create_mold(self, client):
         resp = client.post("/api/v1/molds/", json={

@@ -1,6 +1,6 @@
 """Pydantic schemas — 統一請求驗證與回應格式"""
 from __future__ import annotations
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Generic, TypeVar
 
@@ -84,8 +84,7 @@ class OrderOut(OrderBase):
                     pass
         return v
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ── Mold ───────────────────────────────────────────────────────────────────
@@ -119,8 +118,7 @@ class MoldOut(MoldBase):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ── Kiln ───────────────────────────────────────────────────────────────────
@@ -148,8 +146,7 @@ class KilnOut(KilnBase):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ── Product ────────────────────────────────────────────────────────────────
@@ -163,8 +160,7 @@ class ProductOut(BaseModel):
     mold_len: float
     capacity: int = 1
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ── ProcessStep ────────────────────────────────────────────────────────────
@@ -201,8 +197,7 @@ class ProcessStepUpdate(BaseModel):
 class ProcessStepOut(ProcessStepBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ── Schedule ───────────────────────────────────────────────────────────────
@@ -231,8 +226,7 @@ class ScheduleEntryOut(BaseModel):
     status: str
     created_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ScheduleResult(BaseModel):

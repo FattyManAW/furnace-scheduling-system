@@ -67,7 +67,7 @@ def _load_data(data_dir: str | None = None):
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data"),
         ]
         for d in candidates:
-            if os.path.isdir(d):
+            if os.path.isfile(os.path.join(d, "kilns.json")):
                 data_dir = d
                 break
         if data_dir is None:
