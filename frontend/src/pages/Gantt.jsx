@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { api } from "../lib/api";
 import { format, addDays, startOfDay, differenceInDays, parseISO } from "date-fns";
 import { zhTW } from "date-fns/locale";
@@ -57,6 +57,14 @@ export default function Gantt() {
   const [loading, setLoading] = useState(true);
   const [viewStart, setViewStart] = useState(null);
   const [viewMode, setViewMode] = useState(typeof window !== "undefined" && window.innerWidth < 768 ? 0 : 1);
+  const [, forceUpdate] = useState(0); // trigger re-render on resize for colW
+
+  // ── Responsive colW recalc on resize
+  const onResize = useCallback(() => forceUpdate(n => n + 1), []);
+  useEffect(() => {
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [onResize]);
 
   useEffect(() => {
     api.getScheduleResult()

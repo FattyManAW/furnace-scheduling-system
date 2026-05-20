@@ -10,7 +10,7 @@ export default function Reports() {
   useEffect(() => {
     api.getDashboard()
       .then(setDashboard)
-      .catch(e => { console.error(e); setError(e.message || "載入失敗"); })
+      .catch(e => { setError(e.message || "載入失敗"); })
       .finally(() => setLoading(false));
   }, []);
 
