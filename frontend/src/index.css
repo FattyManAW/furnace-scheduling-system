@@ -48,6 +48,7 @@
   --c-cyan:        #5ac8fa;
   --c-cyan-dim:    rgba(90,200,250,0.15);
   --c-cyan-a12:    rgba(90,200,250,0.12);
+  --c-sidebar-width: 220px;
   --c-radius:      12px;
   --c-shadow:      0 1px 3px rgba(0,0,0,0.3);
 
@@ -104,6 +105,7 @@
   --c-cyan:        #0891b2;
   --c-cyan-dim:    rgba(8,145,178,0.12);
   --c-cyan-a12:    rgba(8,145,178,0.12);
+  --c-sidebar-width: 220px;
   --c-radius:      12px;
   --c-shadow:      0 1px 2px rgba(0,0,0,0.04);
 

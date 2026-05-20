@@ -18,7 +18,7 @@ export default function Sidebar() {
   const { pathname } = useLocation();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[220px] bg-furnace-card border-r border-furnace-border flex flex-col z-50">
+    <aside className="fixed left-0 top-0 h-screen w-[var(--c-sidebar-width)] bg-furnace-card border-r border-furnace-border flex flex-col z-50">
       {/* Logo */}
       <div className="p-5 border-b border-furnace-border">
         <div className="flex items-center gap-2.5">

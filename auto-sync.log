@@ -2,3 +2,4 @@
 [2026-05-20 04:52:05] ALERT_ONLY mode — 需手動重建
 [2026-05-20 04:58:07] STALE: Docker=0c15ef6, GitHub=b432352b
 [2026-05-20 04:58:07] ALERT_ONLY mode — 需手動重建
+[2026-05-20 07:29:44] WARN: 無法取得 GitHub commit (API rate limit?)
