@@ -3,17 +3,75 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════
-   Canonical CSS Token System v4.0 — Power Squad Unified Bridge
+   Canonical CSS Token System v4.1 — 潤思統一開發模式
    
-   Industrial Dark (Forge, ISA-101) → --c-* prefix
-   Office Light (Vesper, Apple HIG)   → --c-* prefix
+   :root (light default) → Apple HIG Office Light
+   [data-theme="dark"]   → ISA-101 Industrial Dark
    
    Theme toggle: [data-theme="dark"] / [data-theme="light"]
    localStorage key: furnace-theme
    prefers-color-scheme: auto-detect via ThemeToggle.jsx + initTheme()
    ═══════════════════════════════════════════════════════════════════ */
 
-:root,
+/* ── Light (default) ── */
+:root {
+  --c-bg:          #fafafa;
+  --c-surface:     #ffffff;
+  --c-elevated:    #f3f4f6;
+  --c-border:      rgba(0,0,0,0.08);
+  --c-border-hot:  rgba(0,0,0,0.14);
+  --c-t1:          #171717;
+  --c-t2:          #52525b;
+  --c-t3:          #78787d;
+  --c-teal:        #3b82f6;
+  --c-teal-hot:    #2563eb;
+  --c-teal-dim:    rgba(59,130,246,0.12);
+  --c-teal-a12:    rgba(59,130,246,0.12);
+  --c-teal-a30:    rgba(59,130,246,0.30);
+  --c-teal-a40:    rgba(59,130,246,0.40);
+  --c-success:     #16a34a;
+  --c-success-dim: rgba(22,163,74,0.12);
+  --c-success-a12: rgba(22,163,74,0.12);
+  --c-success-a40: rgba(22,163,74,0.40);
+  --c-success-a95: rgba(22,163,74,0.95);
+  --c-warning:     #d97706;
+  --c-warning-dim: rgba(217,119,6,0.12);
+  --c-warning-a12: rgba(217,119,6,0.12);
+  --c-error:       #dc2626;
+  --c-error-dim:   rgba(220,38,38,0.12);
+  --c-error-a12:   rgba(220,38,38,0.12);
+  --c-error-a25:   rgba(220,38,38,0.25);
+  --c-error-a95:   rgba(220,38,38,0.95);
+  --c-purple:      #8b5cf6;
+  --c-purple-dim:  rgba(139,92,246,0.12);
+  --c-purple-a12:  rgba(139,92,246,0.12);
+  --c-cyan:        #0891b2;
+  --c-cyan-dim:    rgba(8,145,178,0.12);
+  --c-cyan-a12:    rgba(8,145,178,0.12);
+  --c-sidebar-width: 220px;
+  --c-radius:      12px;
+  --c-shadow:      0 1px 2px rgba(0,0,0,0.04);
+
+  /* Legacy aliases */
+  --green-12:  var(--c-success-a12);
+  --amber-12:  var(--c-warning-a12);
+  --red-12:    var(--c-error-a12);
+  --blue-12:   var(--c-teal-a12);
+  --purple-12: var(--c-purple-a12);
+  --cyan-12:   var(--c-cyan-a12);
+
+  --ease:        cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out:    cubic-bezier(0, 0, 0.2, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+  --space-xs: 4px;  --space-sm: 8px;
+  --space-md: 16px; --space-lg: 24px;
+  --space-xl: 32px; --space-2xl: 48px;
+}
+
+/* ── Dark mode override ── */
 [data-theme="dark"] {
   --c-bg:          #181b23;
   --c-surface:     #22252f;
@@ -52,7 +110,6 @@
   --c-radius:      12px;
   --c-shadow:      0 1px 3px rgba(0,0,0,0.3);
 
-  /* Legacy aliases */
   --green-12:  var(--c-success-a12);
   --amber-12:  var(--c-warning-a12);
   --red-12:    var(--c-error-a12);
@@ -71,6 +128,7 @@
   --space-xl: 32px; --space-2xl: 48px;
 }
 
+/* ── Explicit light override (when data-theme=light on a dark-default :root) ── */
 [data-theme="light"] {
   --c-bg:          #fafafa;
   --c-surface:     #ffffff;
