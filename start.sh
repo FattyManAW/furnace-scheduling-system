@@ -68,25 +68,54 @@ health_check() {
   return 1
 }
 
-verify_api() {
-  echo ""
-  echo -e "${BOLD}📊 API 端點驗證${NC}"
+smoke_test_gate() {
+  # 部署閘門 — 所有端點必須通過才算部署成功
+  local failures=0
   local endpoints=(
     "/health|健康檢查"
     "/api/v1/orders/count|訂單統計"
     "/api/v1/molds/|模具列表"
-    "/api/v1/kilns/|干燥罐列表"
-    "/docs|Swagger 文件"
+    "/api/v1/kilns/|乾燥罐列表"
+    "/api/v1/schedule/|排程 root"
+    "/api/v1/schedule/result|排程結果"
+    "/api/v1/schedule/entries?limit=1|排程記錄"
+    "/api/v1/reports/dashboard|儀表板"
+    "/docs|Swagger"
+    "/openapi.json|OpenAPI"
   )
   for ep in "${endpoints[@]}"; do
     path="${ep%%|*}"
     label="${ep##*|}"
-    if curl -sf "${API_URL}${path}" &>/dev/null; then
-      echo -e "   ${GREEN}✓${NC} ${label} ${API_URL}${path}"
+    if curl -sf --max-time 5 "${API_URL}${path}" &>/dev/null; then
+      echo -e "   ${GREEN}✓${NC} ${label}"
     else
-      echo -e "   ${RED}✗${NC} ${label} ${API_URL}${path}"
+      echo -e "   ${RED}✗${NC} ${label}${RED} FAILED${NC}"
+      failures=$((failures + 1))
     fi
   done
+
+  # 前端閘門
+  if curl -sf --max-time 5 "http://localhost:${NGINX_PORT}/" &>/dev/null; then
+    echo -e "   ${GREEN}✓${NC} 前端 Nginx"
+  else
+    echo -e "   ${RED}✗${NC} 前端 Nginx${RED} FAILED${NC}"
+    failures=$((failures + 1))
+  fi
+
+  echo ""
+  if [ $failures -eq 0 ]; then
+    echo -e "   ${BOLD}${GREEN}SMOKE TEST: ${failures}/11 FAILED → PASS ✅${NC}"
+    return 0
+  else
+    echo -e "   ${BOLD}${RED}SMOKE TEST: ${failures}/11 FAILED → GATE BLOCKED ❌${NC}"
+    return 1
+  fi
+}
+
+verify_api() {
+  echo ""
+  echo -e "${BOLD}🛡️ Smoke Test 部署閘門${NC}"
+  smoke_test_gate
 }
 
 show_status() {
@@ -252,6 +281,8 @@ docker compose up -d $BUILD_FLAG
 
 # ── 健康檢查 ────────────────────────────────────────────────────
 health_check 30 2
+
+# ── Smoke Test Gate ────────────────────────────────────
 verify_api
 
 # ── 結果摘要 ────────────────────────────────────────────────────
