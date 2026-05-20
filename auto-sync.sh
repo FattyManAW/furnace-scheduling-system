@@ -43,19 +43,40 @@ fi
 DOCKER_RESP=$(curl -sf "$HEALTH_URL" 2>/dev/null || echo '{"status":"down"}')
 DOCKER_COMMIT=$(echo "$DOCKER_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('commit','unknown'))" 2>/dev/null || echo "unknown")
 
-# ── 比對 ────────────────────────────────────────────────────────
+# ── 比對（方向感知）────────────────────────────────────────────
 if [ "$DOCKER_COMMIT" = "unknown" ] || [ "$DOCKER_COMMIT" = "offline" ]; then
   log "WARN: Docker 未回傳 commit hash (${DOCKER_COMMIT})，需要 rebuild"
   DOCKER_COMMIT="unknown"
 fi
 
-if [ "$DOCKER_COMMIT" = "${GITHUB_SHA:0:7}" ] || [ "$DOCKER_COMMIT" = "${GITHUB_SHA}" ]; then
-  # Already in sync
+# Exact match → sync
+DOCKER_SHORT=$(echo "$DOCKER_COMMIT" | cut -c1-7)
+if [ "$DOCKER_SHORT" = "${GITHUB_SHA:0:7}" ] || [ "$DOCKER_COMMIT" = "${GITHUB_SHA}" ]; then
   exit 0
 fi
 
-# ── 落後 ────────────────────────────────────────────────────────
-log "STALE: Docker=${DOCKER_COMMIT}, GitHub=${GITHUB_SHA}"
+# Direction-aware comparison: is GitHub ahead of Docker?
+# git rev-list --count <DOCKER>..<GITHUB> → commits GitHub has that Docker doesn't
+GITHUB_BEHIND=$(git rev-list --count "${DOCKER_COMMIT}..${GITHUB_SHA}" 2>/dev/null || echo "-1")
+DOCKER_BEHIND=$(git rev-list --count "${GITHUB_SHA}..${DOCKER_COMMIT}" 2>/dev/null || echo "-1")
+
+if [ "$GITHUB_BEHIND" = "-1" ] || [ "$DOCKER_BEHIND" = "-1" ]; then
+  # Can't resolve one or both → unknown, skip
+  exit 0
+fi
+
+if [ "$DOCKER_BEHIND" -gt 0 ]; then
+  log "AHEAD: Docker=${DOCKER_COMMIT} ahead of GitHub=${GITHUB_SHA} by ${DOCKER_BEHIND} commit(s) — OK (local fix deployed before push)"
+  exit 0
+fi
+
+if [ "$GITHUB_BEHIND" -eq 0 ] && [ "$DOCKER_BEHIND" -eq 0 ]; then
+  # Equal (should have been caught above, but safety)
+  exit 0
+fi
+
+# ── Docker 落後 GitHub ───────────────────────────────────────────
+log "STALE: Docker=${DOCKER_COMMIT} behind GitHub=${GITHUB_SHA} by ${GITHUB_BEHIND} commit(s)"
 
 if $ALERT_ONLY; then
   log "ALERT_ONLY mode — 需手動重建"
