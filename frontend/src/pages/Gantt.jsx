@@ -157,11 +157,11 @@ export default function Gantt() {
               >{m.label}</button>
             ))}
           </div>
-          <button onClick={() => setViewStart(addDays(minDate, -navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronLeft className="w-4 h-4" /></button>
-          <span className="text-sm text-furnace-text px-3 font-semibold min-w-[220px] text-center">
+          <button onClick={() => setViewStart(addDays(minDate, -navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50" aria-label="前一頁"><ChevronLeft className="w-4 h-4" /></button>
+          <span className="text-sm text-furnace-text px-3 font-semibold min-w-[220px] text-center" role="status" aria-live="polite">
             {format(minDate, "yyyy/MM/dd")} — {format(addDays(minDate, days), "yyyy/MM/dd")}
           </span>
-          <button onClick={() => setViewStart(addDays(minDate, navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronRight className="w-4 h-4" /></button>
+          <button onClick={() => setViewStart(addDays(minDate, navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50" aria-label="下一頁"><ChevronRight className="w-4 h-4" /></button>
           <button
             onClick={() => setViewStart(startOfDay(new Date()))}
             title="跳轉至今天"
