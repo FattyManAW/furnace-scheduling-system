@@ -103,8 +103,7 @@ if [ -f frontend/package.json ]; then
   log "npm install + build..."
   cd frontend && npm install --silent 2>&1 | tail -1 >> "$LOG_FILE"
   npm run build 2>&1 | tail -3 | tail -1 >> "$LOG_FILE"
-  log "chmod -R 755 frontend/dist/ (fix npm 600 perms)"
-  chmod -R 755 frontend/dist/
+  [ -d frontend/dist ] && { log "chmod -R 755 frontend/dist/ (fix npm 600 perms)"; chmod -R 755 frontend/dist/; } || true
   cd "$SCRIPT_DIR"
 fi
 
