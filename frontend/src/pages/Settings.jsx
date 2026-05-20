@@ -43,25 +43,25 @@ export default function Settings() {
             <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2"><HardDrive className="w-4 h-4 text-furnace-blue" /> 一般設定</h2>
             <div className="fade-slide-up d1 space-y-4">
               <div className="flex items-center justify-between">
-                <div>
+                <label htmlFor="hours-cap" className="cursor-pointer">
                   <p className="text-sm text-furnace-text">每日工時上限</p>
                   <p className="text-xs text-furnace-muted">全局工時限制（小時）</p>
-                </div>
-                <input type="number" defaultValue={1098} className="w-32 px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text text-center" />
+                </label>
+                <input id="hours-cap" type="number" defaultValue={1098} className="w-32 px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text text-center" />
               </div>
               <div className="flex items-center justify-between">
-                <div>
+                <label htmlFor="large-od-threshold" className="cursor-pointer">
                   <p className="text-sm text-furnace-text">大產品門檻 (OD)</p>
                   <p className="text-xs text-furnace-muted">外徑大於此值只能進大槽爐</p>
-                </div>
-                <input type="number" defaultValue={470} className="w-32 px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text text-center" />
+                </label>
+                <input id="large-od-threshold" type="number" defaultValue={470} className="w-32 px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text text-center" />
               </div>
               <div className="flex items-center justify-between">
-                <div>
+                <label htmlFor="low-stock-threshold" className="cursor-pointer">
                   <p className="text-sm text-furnace-text">低庫存警示 threshold</p>
                   <p className="text-xs text-furnace-muted">存量低於此值顯示警示</p>
-                </div>
-                <input type="number" defaultValue={10} className="w-32 px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text text-center" />
+                </label>
+                <input id="low-stock-threshold" type="number" defaultValue={10} className="w-32 px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text text-center" />
               </div>
             </div>
             <div className="flex justify-end mt-4 pt-4 border-t border-furnace-border">
