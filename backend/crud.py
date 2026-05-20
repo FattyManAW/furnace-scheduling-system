@@ -2,7 +2,7 @@
 from __future__ import annotations
 from sqlalchemy.orm import Session
 from datetime import datetime
-from models import Order, Mold, Kiln, ScheduleEntry, ProcessStep
+from models import Order, Mold, Kiln, ScheduleEntry, Product, ProcessStep
 from schemas import (
     OrderCreate, OrderUpdate, MoldCreate, MoldUpdate,
     KilnCreate, KilnUpdate, ProcessStepCreate, ProcessStepUpdate,
@@ -178,6 +178,19 @@ def get_kilns(db: Session) -> list[Kiln]:
 
 def get_kilns_count(db: Session) -> int:
     return db.query(Kiln).count()
+
+
+# ── Products ───────────────────────────────────────────────────────────────
+def get_products(db: Session) -> list[Product]:
+    return db.query(Product).order_by(Product.voltage_kv).all()
+
+
+def get_products_by_voltage(db: Session, voltage_kv: float) -> list[Product]:
+    return db.query(Product).filter(Product.voltage_kv == voltage_kv).all()
+
+
+def get_products_count(db: Session) -> int:
+    return db.query(Product).count()
 
 
 def create_kiln(db: Session, kiln: KilnCreate) -> Kiln:

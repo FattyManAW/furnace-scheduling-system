@@ -152,6 +152,21 @@ class KilnOut(KilnBase):
         from_attributes = True
 
 
+# ── Product ────────────────────────────────────────────────────────────────
+class ProductOut(BaseModel):
+    id: int
+    product_no: int
+    voltage_kv: float
+    current_a: Optional[float] = None
+    mold_od: float
+    mold_id: Optional[float] = None
+    mold_len: float
+    capacity: int = 1
+
+    class Config:
+        from_attributes = True
+
+
 # ── ProcessStep ────────────────────────────────────────────────────────────
 class ProcessStepBase(BaseModel):
     step_no: int = Field(..., ge=0, description="步驟編號")

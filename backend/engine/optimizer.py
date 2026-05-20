@@ -209,6 +209,9 @@ def schedule_orders(
     get_molds_fn: Callable[[], list] | None = None,
     strategy: str = "deadline",
     max_hours_per_kiln: float | None = None,
+    products_by_voltage: dict | None = None,
+    kilns_data: dict | None = None,
+    hours_per_root: dict | None = None,
 ) -> dict:
     """
     Enhanced scheduling with:
@@ -219,7 +222,12 @@ def schedule_orders(
 
     strategy: "deadline" / "balance" / "fill"
     """
-    kilns, by_v, hours_per_root = _load_data(data_dir)
+    # ── 資料來源：優先使用傳入參數（來自 DB data_layer），fallback 讀 JSON ──
+    if products_by_voltage is not None and kilns_data is not None and hours_per_root is not None:
+        by_v = products_by_voltage
+        kilns = kilns_data
+    else:
+        kilns, by_v, hours_per_root = _load_data(data_dir)
     today = date.today()
 
     # ── priority calculation ───────────────────────────────────────

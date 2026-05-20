@@ -2,7 +2,7 @@
 import json, os, sys
 from sqlalchemy.orm import Session
 from database import engine, SessionLocal, Base
-from models import Order, Mold, Kiln, ProcessStep
+from models import Order, Mold, Kiln, Product, ProcessStep
 from date_utils import excel_to_date
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -95,6 +95,29 @@ def seed_kilns(db: Session) -> int:
     return count
 
 
+def seed_products(db: Session) -> int:
+    with open(os.path.join(DATA_DIR, "products.json")) as f:
+        raw = json.load(f)
+    count = 0
+    for pd in raw:
+        v = float(pd.get("voltage_kv", 0) or 0)
+        if v <= 0:
+            continue
+        db.add(Product(
+            product_no=int(pd.get("no", 0) or 0),
+            voltage_kv=v,
+            current_a=float(pd.get("current_a", 0) or 0),
+            mold_od=float(pd.get("mold_od", 0) or 0),
+            mold_id=float(pd.get("mold_id", 0) or 0),
+            mold_len=float(pd.get("mold_len", 0) or 0),
+            capacity=int(pd.get("capacity", 1) or 1),
+        ))
+        count += 1
+    db.commit()
+    print(f"✅ 匯入產品規格: {count} 筆")
+    return count
+
+
 def seed_processes(db: Session) -> int:
     with open(os.path.join(DATA_DIR, "processes.json")) as f:
         raw = json.load(f)
@@ -128,6 +151,7 @@ def seed_all():
         seed_orders(db)
         seed_molds(db)
         seed_kilns(db)
+        seed_products(db)
         seed_processes(db)
     finally:
         db.close()

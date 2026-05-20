@@ -71,6 +71,21 @@ class ScheduleEntry(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class Product(Base):
+    """產品規格對照表 — 電壓等級 → 模具尺寸對應"""
+    __tablename__ = "products"
+
+    id = Column(Integer, primary_key=True, index=True)
+    product_no = Column(Integer, nullable=False)
+    voltage_kv = Column(Float, nullable=False, index=True)
+    current_a = Column(Float)
+    mold_od = Column(Float, nullable=False)
+    mold_id = Column(Float)
+    mold_len = Column(Float, nullable=False)
+    capacity = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class ProcessStep(Base):
     __tablename__ = "process_steps"
 

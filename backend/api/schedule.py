@@ -13,6 +13,7 @@ from crud import (
 )
 from engine.optimizer import schedule_orders, hours_for, DAILY_HOUR_CAP
 from engine.validator import validate_schedule
+from engine.data_layer import load_all_optimizer_data
 
 router = APIRouter(prefix="/api/v1/schedule", tags=["schedule"])
 
@@ -59,7 +60,14 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
             "product_to": o.product_to,
         })
 
-    result = schedule_orders(order_dicts)
+    # Run optimizer with DB-derived reference data (unified data source)
+    products_by_voltage, kilns_data, hours_per_root = load_all_optimizer_data(db)
+    result = schedule_orders(
+        order_dicts,
+        products_by_voltage=products_by_voltage,
+        kilns_data=kilns_data,
+        hours_per_root=hours_per_root,
+    )
 
     validation = validate_schedule(result)
     if not validation["valid"]:
