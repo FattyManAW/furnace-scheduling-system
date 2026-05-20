@@ -1,4 +1,5 @@
 import Sidebar from "./Sidebar";
+import ErrorBoundary from "./ErrorBoundary";
 
 export default function Layout({ children }) {
   return (
@@ -6,7 +7,7 @@ export default function Layout({ children }) {
       <div className="flex">
         <Sidebar />
         <main className="ml-[var(--c-sidebar-width)] flex-1 p-6">
-          {children}
+          <ErrorBoundary>{children}</ErrorBoundary>
         </main>
       </div>
     </div>

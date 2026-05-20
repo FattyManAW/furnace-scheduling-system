@@ -1,9 +1,10 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, ClipboardList, Warehouse,
-  Calendar, BarChart3, Settings, Flame,
+  Calendar, BarChart3, Settings, Flame, Cog,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import { clsx } from "clsx";
 
 const nav = [
   { to: "/", icon: LayoutDashboard, label: "儀表板" },
@@ -12,6 +13,7 @@ const nav = [
   { to: "/schedule", icon: Calendar, label: "排程設定" },
   { to: "/gantt", icon: BarChart3, label: "甘特圖" },
   { to: "/reports", icon: Settings, label: "報表匯出" },
+  { to: "/settings", icon: Cog, label: "系統設定" },
 ];
 
 export default function Sidebar() {
@@ -22,7 +24,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="p-5 border-b border-furnace-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-furnace-amber to-furnace-red flex items-center justify-center">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-furnace-orange to-furnace-red flex items-center justify-center">
             <Flame className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -54,17 +56,17 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="p-3 border-t border-furnace-border space-y-2">
+      {/* Theme Toggle */}
+      <div className="px-3 py-1 border-t border-furnace-border">
         <ThemeToggle />
+      </div>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-furnace-border">
         <p className="text-[10px] text-furnace-muted text-center">
           干式套管最佳化排爐系統
         </p>
       </div>
     </aside>
   );
-}
-
-function clsx(...args) {
-  return args.filter(Boolean).join(" ");
 }
