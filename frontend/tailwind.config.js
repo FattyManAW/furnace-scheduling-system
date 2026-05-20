@@ -24,8 +24,8 @@ export default {
           green:   "var(--c-success)",
           amber:   "var(--c-warning)",
           red:     "var(--c-error)",
-          purple:  "#a78bfa",   // Auxiliary (no canonical mapping)
-          cyan:    "#38bdf8",   // Info (no canonical mapping)
+          purple:  "var(--c-purple)",   // Canonical bridge v3.2.1
+          cyan:    "var(--c-cyan)",     // Canonical bridge v3.2.1
         },
       },
     },
