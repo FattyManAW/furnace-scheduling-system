@@ -10,6 +10,10 @@
 # ═══════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
+# launchd 沒有 shell rc PATH → npm/docker 找不到
+# 手動補齊 Homebrew node 路徑
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
@@ -91,14 +95,14 @@ git fetch origin 2>/dev/null
 LOCAL=$(git rev-parse HEAD 2>/dev/null || echo "")
 REMOTE=$(git rev-parse origin/main 2>/dev/null || echo "$LOCAL")
 if [ "$LOCAL" != "$REMOTE" ] && [ -n "$LOCAL" ]; then
-  git pull --rebase origin main 2>&1 | tee -a "$LOG_FILE"
+  git pull --rebase origin main 2>&1 | tail -1 >> "$LOG_FILE"
 fi
 
 # build frontend
 if [ -f frontend/package.json ]; then
   log "npm install + build..."
-  cd frontend && npm install --silent 2>&1 | tail -1 | tee -a "$LOG_FILE"
-  npm run build 2>&1 | tail -3 | tee -a "$LOG_FILE"
+  cd frontend && npm install --silent 2>&1 | tail -1 >> "$LOG_FILE"
+  npm run build 2>&1 | tail -3 | tail -1 >> "$LOG_FILE"
   log "chmod -R 755 frontend/dist/ (fix npm 600 perms)"
   chmod -R 755 frontend/dist/
   cd "$SCRIPT_DIR"
@@ -107,6 +111,6 @@ fi
 # docker rebuild
 export GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 log "docker compose up -d --build (commit: ${GIT_COMMIT})..."
-docker compose up -d --build 2>&1 | tail -5 | tee -a "$LOG_FILE"
+docker compose up -d --build 2>&1 | tail -5 | tail -1 >> "$LOG_FILE"
 
 log "✅ 自動修復完成"
