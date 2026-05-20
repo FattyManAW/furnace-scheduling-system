@@ -22,11 +22,13 @@ export default function Schedule() {
   const [recentRuns, setRecentRuns] = useState([]);
   const [expandedKiln, setExpandedKiln] = useState(null);
   const [err, setErr] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([api.getKilns(), api.getOrders({ limit: 500 })])
       .then(([ks, os]) => { setKilns(ks); setOrders(os); })
-      .catch(e => setErr(e.message));
+      .catch(e => setErr(e.message))
+      .finally(() => setLoading(false));
   }, []);
 
   const toggleSelect = (id) => {
@@ -75,6 +77,13 @@ export default function Schedule() {
         <h1 className="text-2xl font-bold">排程設定</h1>
         <p className="text-furnace-muted text-sm mt-0.5">設定排程策略與執行優化</p>
       </div>
+
+      {loading ? (
+        <div className="text-furnace-muted py-12 text-center">載入中...</div>
+      ) : err && orders.length === 0 ? (
+        <div className="text-center py-8"><span className="text-furnace-red bg-furnace-red/5 px-3 py-2 rounded-lg text-sm">⚠️ {err}</span></div>
+      ) : (
+      <>
 
       {/* Strategy Selection */}
       <div className="fade-slide-up d2 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
@@ -269,6 +278,8 @@ export default function Schedule() {
             ))}
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );
