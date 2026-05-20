@@ -15,7 +15,7 @@ from api import orders, molds, kilns, schedule, reports, process_steps
 Base.metadata.create_all(bind=engine)
 
 # ── FastAPI app ──────────────────────────────────────────────────────────
-app = FastAPI(
+app = FastAPI(redirect_slashes=False, 
     title="干式套管最佳化排爐系統 API",
     description="RESTful API — 訂單管理、模具庫存、干燥罐、排程優化、報表匯出",
     version="2.0.0",
