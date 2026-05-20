@@ -4,6 +4,7 @@ import {
   Calendar, BarChart3, Settings, Flame,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import { clsx } from "clsx";
 
 const nav = [
   { to: "/", icon: LayoutDashboard, label: "儀表板" },
@@ -67,8 +68,4 @@ export default function Sidebar() {
       </div>
     </aside>
   );
-}
-
-function clsx(...args) {
-  return args.filter(Boolean).join(" ");
 }
