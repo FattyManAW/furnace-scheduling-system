@@ -15,6 +15,18 @@ listenSystemTheme();
 // Scroll-reveal animation observer (global, across all pages)
 initScrollReveal();
 
+// Dynamic <meta name="theme-color"> follows data-theme — browser chrome tint
+(function syncThemeColor() {
+  const el = document.querySelector('meta[name="theme-color"]');
+  if (!el) return;
+  const update = () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    el.setAttribute("content", isDark ? "#181b23" : "#fafafa");
+  };
+  update();
+  new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
