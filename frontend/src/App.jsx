@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
 import Molds from "./pages/Molds";
@@ -9,14 +10,16 @@ import Settings from "./pages/Settings";
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/orders" element={<Orders />} />
-      <Route path="/molds" element={<Molds />} />
-      <Route path="/schedule" element={<Schedule />} />
-      <Route path="/gantt" element={<Gantt />} />
-      <Route path="/reports" element={<Reports />} />
-      <Route path="/settings" element={<Settings />} />
-    </Routes>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/molds" element={<Molds />} />
+        <Route path="/schedule" element={<Schedule />} />
+        <Route path="/gantt" element={<Gantt />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+    </Layout>
   );
 }
