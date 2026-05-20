@@ -1,41 +1,52 @@
-import { Sun, Moon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Sun, Moon, Monitor } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 
 const KEY = "furnace-theme";
+const CYCLE = ["auto", "light", "dark"];
+
+const LABELS = { auto: "跟隨系統", light: "淺色模式", dark: "深色模式" };
+const ICONS = { auto: Monitor, light: Sun, dark: Moon };
 
 export function getSystemTheme() {
   if (typeof window === "undefined") return "dark";
   return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
 }
 
-export function initTheme() {
-  const stored = localStorage.getItem(KEY);
-  const system = getSystemTheme();
-  const theme = stored || system;
-  document.documentElement.setAttribute("data-theme", theme);
+function resolveTheme(stored) {
+  if (stored && CYCLE.includes(stored)) return stored;
+  if (stored === "light" || stored === "dark") return stored;
+  return "auto";
 }
 
-export function toggleTheme() {
-  const current = document.documentElement.getAttribute("data-theme");
-  const next = current === "light" ? "dark" : "light";
-  document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem(KEY, next);
-  return next;
+export function initTheme() {
+  const stored = localStorage.getItem(KEY);
+  const mode = resolveTheme(stored);
+  const actual = mode === "auto" ? getSystemTheme() : mode;
+  document.documentElement.setAttribute("data-theme", actual);
+  if (!stored) localStorage.setItem(KEY, "auto");
 }
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState(() => {
+  const [mode, setMode] = useState(() => {
     if (typeof window === "undefined") return "dark";
-    return document.documentElement.getAttribute("data-theme") || "dark";
+    return resolveTheme(localStorage.getItem(KEY));
   });
+
+  const apply = useCallback((m) => {
+    const actual = m === "auto" ? getSystemTheme() : m;
+    document.documentElement.setAttribute("data-theme", actual);
+    localStorage.setItem(KEY, m);
+    setMode(m);
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: light)");
     const handler = (e) => {
-      if (!localStorage.getItem(KEY)) {
-        const next = e.matches ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", next);
-        setTheme(next);
+      const currentMode = localStorage.getItem(KEY);
+      if (!currentMode || currentMode === "auto") {
+        const actual = e.matches ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", actual);
+        if (currentMode === "auto") setMode("auto");
       }
     };
     mq.addEventListener("change", handler);
@@ -43,26 +54,23 @@ export default function ThemeToggle() {
   }, []);
 
   const handleToggle = () => {
-    const next = toggleTheme();
-    setTheme(next);
+    const idx = CYCLE.indexOf(mode);
+    const next = CYCLE[(idx + 1) % CYCLE.length];
+    apply(next);
   };
 
-  const isLight = theme === "light";
+  const Icon = ICONS[mode];
 
   return (
     <button
       onClick={handleToggle}
       className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all w-full
                  text-furnace-muted hover:bg-furnace-border/50 hover:text-furnace-text"
-      aria-label={isLight ? "切換至深色模式" : "切換至淺色模式"}
-      title={isLight ? "切換至深色模式" : "切換至淺色模式"}
+      aria-label={`主題：${LABELS[mode]} — 點擊切換`}
+      title={`主題：${LABELS[mode]} — 點擊切換`}
     >
-      {isLight ? (
-        <Moon className="w-[18px] h-[18px]" />
-      ) : (
-        <Sun className="w-[18px] h-[18px]" />
-      )}
-      深淺切換
+      <Icon className="w-[18px] h-[18px]" />
+      {LABELS[mode]}
     </button>
   );
 }
