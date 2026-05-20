@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { clsx } from "clsx";
-import { Database, HardDrive, RefreshCw, Shield, Bell, Info } from "lucide-react";
+import { Database, HardDrive, Shield, Bell, Info } from "lucide-react";
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState("system");

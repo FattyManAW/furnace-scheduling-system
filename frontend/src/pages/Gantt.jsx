@@ -3,7 +3,7 @@ import { api } from "../lib/api";
 import { format, addDays, startOfDay, differenceInDays, parseISO } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { clsx } from "clsx";
-import { ChevronLeft, ChevronRight, Calendar, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // ── View mode: 今日/1週/2週/1月（響應式 colW）─────────────────
 const VIEW_MODES = [
