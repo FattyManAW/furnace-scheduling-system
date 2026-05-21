@@ -23,6 +23,7 @@ export default {
           blue:    "rgb(var(--c-teal-rgb) / <alpha-value>)",
           green:   "rgb(var(--c-success-rgb) / <alpha-value>)",
           amber:   "rgb(var(--c-warning-rgb) / <alpha-value>)",
+          orange:  "rgb(var(--c-warning-rgb) / <alpha-value>)",
           red:     "rgb(var(--c-error-rgb) / <alpha-value>)",
           purple:  "rgb(var(--c-purple-rgb) / <alpha-value>)",
           cyan:    "rgb(var(--c-cyan-rgb) / <alpha-value>)",
