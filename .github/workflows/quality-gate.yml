@@ -32,7 +32,7 @@ jobs:
           pip install ruff
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Ruff lint
-        run: ruff check . || exit 1
+        run: ruff check . --select E,F || exit 1
       - name: Import check
         run: |
           python -c "
