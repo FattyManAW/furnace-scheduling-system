@@ -36,8 +36,8 @@ services:
       start_period: 15s
     volumes:
       - furnace_data:/app/backend/data
-    expose:
-      - "8002"
+    ports:
+      - "8002:8002"
     networks:
       - furnace-net
     logging:
