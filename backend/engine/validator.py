@@ -17,14 +17,14 @@ def validate_schedule(result: dict) -> dict:
     total_h = result["summary"].get("total_hours", 0)
     kiln_count = len(result.get("kiln_schedule", {}))
     scheduled_orders = result.get("order_schedule", [])
-    
+
     # 預估排程天數 = 總工時 / (爐數 × 單日上限)
     if kiln_count > 0 and scheduled_orders:
         daily_capacity = DAILY_HOUR_CAP * kiln_count
         estimated_days = total_h / daily_capacity
         report["stats"]["estimated_days"] = round(estimated_days, 1)
         report["stats"]["daily_capacity"] = round(daily_capacity, 1)
-        
+
         # 檢查排程天數合理性（超過 60 天可能產能不足）
         if estimated_days > 90:
             report["errors"].append(
