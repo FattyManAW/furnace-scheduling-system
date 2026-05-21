@@ -68,7 +68,7 @@ jobs:
           pip install pytest pytest-cov
       - name: Run tests
         run: |
-          pytest tests/ -v --cov=. --cov-report=term --cov-report=json:coverage.json
+          cd backend && pytest tests/ -v --cov=. --cov-report=term --cov-report=json:coverage.json
       - name: Coverage check
         run: |
           COV=$(python -c "import json; d=json.load(open('coverage.json')); print(f\"{d['totals']['percent_covered']:.1f}\")")
