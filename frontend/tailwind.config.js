@@ -8,24 +8,24 @@ export default {
     extend: {
       colors: {
         furnace: {
-          // ══ Canonical Bridge (Christina token-map v3.2.1) ══
-          // 所有 furnace-* class 現在引用 --c-* CSS variables
-          // 雙主題 (dark/light) 自動切換，無需額外程式碼
-          bg:      "var(--c-bg)",
-          card:    "var(--c-surface)",
+          // ══ Canonical Bridge (Christina token-map v4.2) ══
+          // Opacity support via <alpha-value> + --c-*-rgb channels
+          // bg-furnace-bg/20 → rgb(var(--c-bg-rgb) / 0.2) → works in all themes
+          bg:      "rgb(var(--c-bg-rgb) / <alpha-value>)",
+          card:    "rgb(var(--c-surface-rgb) / <alpha-value>)",
           border:  "var(--c-border)",
-          hover:   "var(--c-elevated)",
+          hover:   "rgb(var(--c-elevated-rgb) / <alpha-value>)",
           text:    "var(--c-t2)",
           heading: "var(--c-t1)",
           muted:   "var(--c-t3)",
 
-          // ── Semantic ──
-          blue:    "var(--c-teal)",
-          green:   "var(--c-success)",
-          amber:   "var(--c-warning)",
-          red:     "var(--c-error)",
-          purple:  "var(--c-purple)",   // Canonical bridge v3.2.1
-          cyan:    "var(--c-cyan)",     // Canonical bridge v3.2.1
+          // ── Semantic (rgb channels for opacity) ──
+          blue:    "rgb(var(--c-teal-rgb) / <alpha-value>)",
+          green:   "rgb(var(--c-success-rgb) / <alpha-value>)",
+          amber:   "rgb(var(--c-warning-rgb) / <alpha-value>)",
+          red:     "rgb(var(--c-error-rgb) / <alpha-value>)",
+          purple:  "rgb(var(--c-purple-rgb) / <alpha-value>)",
+          cyan:    "rgb(var(--c-cyan-rgb) / <alpha-value>)",
         },
       },
     },
