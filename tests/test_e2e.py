@@ -1,5 +1,8 @@
 """E2E Integration Test — Furnace Scheduling System (Docker API)"""
-import json, os, sys, subprocess
+import json
+import os
+import subprocess
+import sys
 from urllib.parse import urlparse
 
 BACKEND = os.environ.get("FURNACE_BACKEND", "http://100.107.36.80:8030")
@@ -49,7 +52,6 @@ else:
     fail("GET /health", str(body)[:100])
 
 # 2. CORS — strip path from frontend URL for origin check
-from urllib.parse import urlparse
 cors_origin = f"{urlparse(FRONTEND).scheme}://{urlparse(FRONTEND).netloc}"
 if check_cors(f"{BACKEND}/api/v1/orders/?limit=1", cors_origin):
     ok("CORS header present")

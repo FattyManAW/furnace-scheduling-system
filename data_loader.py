@@ -2,8 +2,12 @@
 oven_scheduler/data_loader.py
 Parse all source Excel files into structured JSON-serializable data.
 """
-import xlrd, json, os, math
+import contextlib
+import json
+import os
 from datetime import datetime, timedelta
+
+import xlrd
 
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "data")
 
@@ -123,7 +127,7 @@ def load_orders():
     orders = []
     for r in range(2, sh.nrows):
         row = [sh.cell_value(r, c) for c in range(sh.ncols)]
-        try:
+        with contextlib.suppress(BaseException):
             orders.append({
                 "order_id": str(row[1]) if row[1] else f"ORD-{r}",
                 "contract": str(row[2]),
@@ -135,8 +139,6 @@ def load_orders():
                 "product_start": int(row[8]) if row[8] else 0,
                 "product_end": int(row[9]) if row[9] else 0,
             })
-        except:
-            pass
     return orders
 
 # ─── 5. 模具庫存 (File 6) ───────────────────────────────────────────
@@ -146,7 +148,7 @@ def load_mold_inventory():
     molds = []
     for r in range(2, sh.nrows):
         row = [sh.cell_value(r, c) for c in range(sh.ncols)]
-        try:
+        with contextlib.suppress(BaseException):
             molds.append({
                 "id": int(row[0]),
                 "od": float(row[1]),
@@ -154,8 +156,6 @@ def load_mold_inventory():
                 "length": float(row[3]),
                 "qty": int(row[4]),
             })
-        except:
-            pass
     return molds
 
 # ─── 6. 乾燥罐配置 (File 2) ─────────────────────────────────────────
@@ -193,14 +193,12 @@ def load_dryers():
                 "plans": [],
             }
         if current and plan:
-            try:
+            with contextlib.suppress(BaseException):
                 current["plans"].append({
                     "plan": str(plan).strip(),
                     "upper": {"qty": int(u_qty), "od": float(u_od), "id": float(u_id2), "length": float(u_len)},
                     "lower": {"qty": int(l_qty), "od": float(l_od), "id": float(l_id2), "length": float(l_len)},
                 })
-            except:
-                pass
     if current:
         dryers.append(current)
     # Deduplicate plans per dryer

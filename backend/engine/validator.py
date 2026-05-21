@@ -1,7 +1,5 @@
 """排程約束驗證器"""
 from __future__ import annotations
-import json, os
-from datetime import datetime, timedelta
 
 DAILY_HOUR_CAP = 1098.0
 
@@ -63,8 +61,9 @@ def check_overdue(db_session_factory) -> dict:
         db_session_factory: callable that returns a new DB session
                           (e.g. SessionLocal)
     """
-    from models import Order as OrderModel
     from datetime import date
+
+    from models import Order as OrderModel
 
     today = date.today().isoformat()
     db = db_session_factory()

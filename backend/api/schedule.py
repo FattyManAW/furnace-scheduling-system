@@ -1,19 +1,25 @@
 """Schedule API — 排程執行與結果查詢 + 單筆管理"""
-import json
-from typing import Optional as _Opt
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+import contextlib
 from datetime import datetime
-from database import get_db
-from models import Order, ScheduleEntry, Kiln
-from schemas import ScheduleRequest, ScheduleResult, ScheduleEntryOut, PaginatedResponse
+from typing import Optional as _Opt
+
 from crud import (
-    get_orders, clear_schedule, create_schedule_entry, get_kilns,
+    clear_schedule,
+    create_schedule_entry,
+    get_kilns,
+)
+from crud import (
     get_kiln as get_kiln_crud,
 )
-from engine.optimizer import schedule_orders, hours_for, DAILY_HOUR_CAP
-from engine.validator import validate_schedule
 from engine.data_layer import load_all_optimizer_data
+from engine.optimizer import DAILY_HOUR_CAP, schedule_orders
+from engine.validator import validate_schedule
+from fastapi import APIRouter, Depends, HTTPException, Query
+from models import Kiln, Order, ScheduleEntry
+from schemas import PaginatedResponse, ScheduleEntryOut, ScheduleRequest, ScheduleResult
+from sqlalchemy.orm import Session
+
+from database import get_db
 
 router = APIRouter(prefix="/api/v1/schedule", tags=["schedule"])
 
@@ -97,10 +103,8 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
             try:
                 _deliv = datetime.strptime(_deliv[:10], "%Y-%m-%d").strftime("%Y-%m-%d")
             except Exception:
-                try:
+                with contextlib.suppress(Exception):
                     _deliv = datetime.strptime(_deliv[:10], "%Y/%m/%d").strftime("%Y-%m-%d")
-                except Exception:
-                    pass
 
         create_schedule_entry(db, {
             "kiln_id": kiln_id,

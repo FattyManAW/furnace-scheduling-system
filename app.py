@@ -2,11 +2,15 @@
 oven_scheduler/app.py
 Flask backend for the Best-Fit Furnace Scheduling System.
 """
-import json, os, csv, io
+import csv
+import io
 from datetime import datetime
-from flask import Flask, render_template, jsonify, request, make_response
-from data_loader import load_all, load_orders, load_products, load_mold_inventory, load_dryers
-from optimizer import schedule, get_mold_for_product, get_data_summary, _init as opt_init
+
+from flask import Flask, jsonify, make_response, render_template, request
+
+from data_loader import load_all, load_orders
+from optimizer import _init as opt_init
+from optimizer import get_data_summary, get_mold_for_product, schedule
 
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False

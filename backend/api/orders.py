@@ -1,17 +1,27 @@
 """Orders API — 訂單完整 CRUD"""
+from typing import Optional
+
+from crud import (
+    bulk_create_orders,
+    create_order,
+    delete_order,
+    get_order,
+    get_orders,
+    get_orders_count,
+    update_order,
+)
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from typing import List, Optional
-from database import get_db
 from models import Order
 from schemas import (
-    OrderCreate, OrderUpdate, OrderOut,
-    PaginatedResponse, BulkImportResult,
+    BulkImportResult,
+    OrderCreate,
+    OrderOut,
+    OrderUpdate,
+    PaginatedResponse,
 )
-from crud import (
-    get_orders, get_order, create_order, update_order,
-    delete_order, get_orders_count, bulk_create_orders,
-)
+from sqlalchemy.orm import Session
+
+from database import get_db
 
 router = APIRouter(prefix="/api/v1/orders", tags=["orders"])
 
@@ -71,7 +81,7 @@ def remove_order(order_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/bulk-import", response_model=BulkImportResult)
-def bulk_import_orders(orders_data: List[dict], db: Session = Depends(get_db)):
+def bulk_import_orders(orders_data: list[dict], db: Session = Depends(get_db)):
     count = bulk_create_orders(db, orders_data)
     return BulkImportResult(
         imported=count,

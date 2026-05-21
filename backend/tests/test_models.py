@@ -1,8 +1,7 @@
 """Unit tests for ORM models"""
+
 import pytest
-from datetime import datetime
-from models import Order, Mold, Kiln, ScheduleEntry, ProcessStep
-from database import Base
+from models import Kiln, Mold, Order, ProcessStep, ScheduleEntry
 
 
 class TestOrderModel:

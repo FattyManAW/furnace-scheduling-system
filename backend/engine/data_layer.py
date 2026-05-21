@@ -4,9 +4,14 @@
 讓 JSON files 降級為 seed-only。
 """
 from __future__ import annotations
+
+import contextlib
 import json
+
+from models import Kiln as KilnModel
+from models import ProcessStep as ProcessStepModel
+from models import Product as ProductModel
 from sqlalchemy.orm import Session
-from models import Product as ProductModel, ProcessStep as ProcessStepModel, Kiln as KilnModel
 
 
 def load_products_by_voltage(db: Session) -> dict:
@@ -48,10 +53,8 @@ def load_kilns_data(db: Session) -> dict:
     for r in rows:
         schemes = {}
         if r.schemes_json:
-            try:
+            with contextlib.suppress(json.JSONDecodeError, TypeError):
                 schemes = json.loads(r.schemes_json)
-            except (json.JSONDecodeError, TypeError):
-                pass
         kilns[str(r.kiln_no)] = {
             "name": r.name,
             "inner_dia": r.inner_dia,

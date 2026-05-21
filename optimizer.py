@@ -2,8 +2,8 @@
 oven_scheduler/optimizer.py  v2
 Best-fit furnace scheduler — improved multi-pass filling.
 """
-import json, os
 from collections import defaultdict
+
 from data_loader import load_all
 
 
@@ -33,7 +33,7 @@ def get_mold_for_product(voltage_kv, current_a):
     # closest voltage fallback
     best = None
     best_dist = 999
-    for (v, a), p in _PRODUCTS.items():
+    for (v, _a), p in _PRODUCTS.items():
         d = abs(v - voltage_kv)
         if d < best_dist:
             best_dist = d

@@ -1,9 +1,13 @@
 """從 JSON 假資料匯入初始資料到 SQLite 資料庫"""
-import json, os, sys
-from sqlalchemy.orm import Session
-from database import engine, SessionLocal, Base
-from models import Order, Mold, Kiln, Product, ProcessStep
+import json
+import os
+import sys
+
 from date_utils import excel_to_date
+from models import Kiln, Mold, Order, ProcessStep, Product
+from sqlalchemy.orm import Session
+
+from database import Base, SessionLocal, engine
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 for _cand in [os.path.join(_HERE, "data"), os.path.join(_HERE, "..", "data")]:

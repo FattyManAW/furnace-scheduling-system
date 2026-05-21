@@ -1,5 +1,4 @@
 """API integration tests — orders, molds, schedule endpoints"""
-import pytest
 
 
 class TestOrderAPI:

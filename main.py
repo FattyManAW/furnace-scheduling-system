@@ -1,18 +1,33 @@
 from __future__ import annotations
+
 """
 oven_scheduler/main.py
 FastAPI application — Best-Fit Furnace Scheduling System.
 """
-import json, os, csv, io
+import csv
+import io
+import json
+import os
 from datetime import datetime
-from typing import Optional
-from fastapi import FastAPI, Depends, HTTPException, Query
-from fastapi.responses import JSONResponse, StreamingResponse
+
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, field_validator
-from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-from database import init_db, make_get_db, Dryer, DryerPlan, MoldType, ProductSpec, ProcessStep, Order, Batch, Base
+from sqlalchemy.orm import Session
+
+from database import (
+    Batch,
+    Dryer,
+    DryerPlan,
+    MoldType,
+    Order,
+    ProcessStep,
+    ProductSpec,
+    init_db,
+    make_get_db,
+)
 from engine import run_schedule
 from optimizer import get_mold_for_product
 
@@ -113,15 +128,15 @@ class OrderCreate(BaseModel):
 
 
 class OrderUpdate(BaseModel):
-    contract_no: Optional[str] = None
-    voltage_kv: Optional[float] = None
-    current_a: Optional[float] = None
-    unit: Optional[str] = None
-    quantity: Optional[int] = None
-    delivery_date: Optional[str] = None
-    product_start: Optional[int] = None
-    product_end: Optional[int] = None
-    is_selected: Optional[bool] = None
+    contract_no: str | None = None
+    voltage_kv: float | None = None
+    current_a: float | None = None
+    unit: str | None = None
+    quantity: int | None = None
+    delivery_date: str | None = None
+    product_start: int | None = None
+    product_end: int | None = None
+    is_selected: bool | None = None
 
     @field_validator("quantity")
     @classmethod
@@ -152,11 +167,11 @@ class MoldCreate(BaseModel):
 
 
 class MoldUpdate(BaseModel):
-    outer_diameter: Optional[float] = None
-    inner_diameter: Optional[float] = None
-    length: Optional[float] = None
-    quantity: Optional[int] = None
-    is_active: Optional[bool] = None
+    outer_diameter: float | None = None
+    inner_diameter: float | None = None
+    length: float | None = None
+    quantity: int | None = None
+    is_active: bool | None = None
 
 
 class DryerCreate(BaseModel):
@@ -173,8 +188,8 @@ class DryerCreate(BaseModel):
 
 
 class DryerUpdate(BaseModel):
-    inner_diameter: Optional[float] = None
-    height: Optional[float] = None
+    inner_diameter: float | None = None
+    height: float | None = None
 
 
 class ProductCreate(BaseModel):
@@ -188,11 +203,11 @@ class ProductCreate(BaseModel):
 
 
 class ProductUpdate(BaseModel):
-    mold_od: Optional[float] = None
-    mold_id: Optional[float] = None
-    mold_length: Optional[float] = None
-    units_per_bundle: Optional[int] = None
-    label: Optional[str] = None
+    mold_od: float | None = None
+    mold_id: float | None = None
+    mold_length: float | None = None
+    units_per_bundle: int | None = None
+    label: str | None = None
 
 
 class PlanCreate(BaseModel):
@@ -209,8 +224,8 @@ class PlanCreate(BaseModel):
 
 
 class ScheduleRequest(BaseModel):
-    order_ids: Optional[list[str]] = None
-    furnaces: Optional[list[str]] = None
+    order_ids: list[str] | None = None
+    furnaces: list[str] | None = None
 
 
 class BatchUpdate(BaseModel):
@@ -287,8 +302,8 @@ def _serialize_product(p: ProductSpec) -> dict:
 #  Static Files
 # ═══════════════════════════════════════════════════════════════
 
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -332,11 +347,11 @@ def api_summary(db: Session = Depends(get_db)):
 def api_orders(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=500),
-    start: Optional[str] = None,
-    end: Optional[str] = None,
-    selected: Optional[bool] = None,
-    kv: Optional[float] = None,
-    search: Optional[str] = None,
+    start: str | None = None,
+    end: str | None = None,
+    selected: bool | None = None,
+    kv: float | None = None,
+    search: str | None = None,
     db: Session = Depends(get_db),
 ):
     query = db.query(Order)

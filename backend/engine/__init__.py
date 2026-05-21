@@ -1,3 +1,3 @@
 # backend/engine/__init__.py — re-export
-from .optimizer import schedule_orders, hours_for, DAILY_HOUR_CAP
-from .validator import validate_schedule, check_overdue
+from .optimizer import DAILY_HOUR_CAP, hours_for, schedule_orders
+from .validator import check_overdue, validate_schedule

@@ -1,14 +1,19 @@
 """Unit tests for optimizer v2.1 — fit_score, delivery priority, full schedule"""
-import os, sys, json
+import json
+import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "engine"))
 
-from optimizer import (
-    fit_score, delivery_priority, schedule_orders,
-    quality_report, hours_for, _load_data,
-    DAILY_HOUR_CAP,
-)
 from datetime import date
+
+from optimizer import (
+    _load_data,
+    delivery_priority,
+    fit_score,
+    quality_report,
+    schedule_orders,
+)
 
 
 class TestFitScore:

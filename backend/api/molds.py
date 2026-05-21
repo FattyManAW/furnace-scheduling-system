@@ -1,13 +1,19 @@
 """Molds API — 模具完整 CRUD + 庫存調整"""
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from database import get_db
-from models import Mold
-from schemas import MoldCreate, MoldUpdate, MoldOut, PaginatedResponse
 from crud import (
-    get_molds, get_mold, create_mold, update_mold,
-    delete_mold, adjust_mold_stock, get_molds_count,
+    adjust_mold_stock,
+    create_mold,
+    delete_mold,
+    get_mold,
+    get_molds,
+    get_molds_count,
+    update_mold,
 )
+from fastapi import APIRouter, Depends, HTTPException, Query
+from models import Mold
+from schemas import MoldCreate, MoldOut, MoldUpdate, PaginatedResponse
+from sqlalchemy.orm import Session
+
+from database import get_db
 
 router = APIRouter(prefix="/api/v1/molds", tags=["molds"])
 

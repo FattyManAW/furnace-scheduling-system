@@ -2,20 +2,18 @@
 干式套管最佳化排爐系統 — FastAPI 主程式
 前後端分離架構：此檔案只負責 API + CORS，前端由 Vite 獨立服務
 """
+import uvicorn
+from api import kilns, molds, orders, process_steps, reports, schedule
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
-import uvicorn
 
-from database import engine, Base
-from api import orders, molds, kilns, schedule, reports, process_steps
+from database import Base, engine
 
 # ── 啟動時建立資料表 ────────────────────────────────────────────────────
 Base.metadata.create_all(bind=engine)
 
 # ── FastAPI app ──────────────────────────────────────────────────────────
-app = FastAPI(redirect_slashes=False, 
+app = FastAPI(redirect_slashes=False,
     title="干式套管最佳化排爐系統 API",
     description="RESTful API — 訂單管理、模具庫存、干燥罐、排程優化、報表匯出",
     version="2.0.0",
@@ -25,6 +23,7 @@ app = FastAPI(redirect_slashes=False,
 )
 
 import os as _os
+
 # ── CORS — 優先使用環境變數，開發 fallback 允許 localhost ──
 _allowed = _os.getenv("ALLOWED_ORIGINS", "").strip()
 if _allowed:
@@ -69,7 +68,7 @@ def health():
     # Read commit hash from baked-in file (Dockerfile ARG GIT_COMMIT)
     commit_hash = "unknown"
     try:
-        with open("/app/GIT_COMMIT", "r") as f:
+        with open("/app/GIT_COMMIT") as f:
             commit_hash = f.read().strip()
     except Exception:
         pass
@@ -78,11 +77,12 @@ def health():
 
 
 # ── 全域異常處理 ──────────────────────────────────────────────────────────────
+from fastapi.exceptions import RequestValidationError as _RequestValidationError
 from fastapi.requests import Request as _Request
 from fastapi.responses import JSONResponse as _JSONResponse
-from fastapi.exceptions import RequestValidationError as _RequestValidationError
-from starlette.exceptions import HTTPException as _StarletteHTTPException
 from sqlalchemy.exc import SQLAlchemyError as _SQLAlchemyError
+from starlette.exceptions import HTTPException as _StarletteHTTPException
+
 
 @app.exception_handler(_StarletteHTTPException)
 async def http_exc_handler(request: _Request, exc: _StarletteHTTPException):
@@ -117,7 +117,7 @@ async def generic_exc_handler(request: _Request, exc: Exception):
 if __name__ == "__main__":
     import os
     port = int(os.getenv("PORT", 8002))
-    print(f"🔥 干式套管最佳化排爐系統 API")
+    print("🔥 干式套管最佳化排爐系統 API")
     print(f"   http://localhost:{port}")
     print(f"   Swagger UI: http://localhost:{port}/docs")
     uvicorn.run(app, host="0.0.0.0", port=port)

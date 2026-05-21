@@ -2,12 +2,20 @@
 oven_scheduler/database.py
 SQLAlchemy models and database initialization.
 """
+from datetime import datetime
+
 from sqlalchemy import (
-    Column, Integer, String, Float, Boolean, DateTime, ForeignKey, UniqueConstraint
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from datetime import datetime
 
 Base = declarative_base()
 

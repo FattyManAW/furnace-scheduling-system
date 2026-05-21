@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 oven_scheduler/engine.py
 Database-backed scheduling engine.
@@ -6,9 +7,10 @@ Reads from DB, writes Batch records back to DB.
 """
 import json
 from collections import defaultdict
+
 from sqlalchemy.orm import Session
-from database import Dryer, DryerPlan, MoldType, ProductSpec, Order, Batch
-from optimizer import get_mold_for_product
+
+from database import Batch, Dryer, DryerPlan, MoldType, Order, ProductSpec
 
 
 def _plan_capacity(ms, plan: DryerPlan):

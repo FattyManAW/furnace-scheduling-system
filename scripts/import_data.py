@@ -15,13 +15,12 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
-from database import SessionLocal, engine, Base
-from models import Order, Mold, Kiln, ProcessStep
+from models import Kiln, Mold, Order, ProcessStep
 
+from database import Base, SessionLocal, engine
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 MODEL_MAP = {
@@ -245,10 +244,10 @@ def main():
     mode = "DRY-RUN (預覽)" if args.dry_run else "匯入"
     source_type = "JSON" if args.json else "Excel"
 
-    print(f"╔════════════════════════════════════════╗")
+    print("╔════════════════════════════════════════╗")
     print(f"║   排爐系統 — {source_type} 資料匯入   ║")
     print(f"║   模式: {mode:28s} ║")
-    print(f"╚════════════════════════════════════════╝")
+    print("╚════════════════════════════════════════╝")
     print()
 
     totals = {"imported": 0, "skipped": 0, "errors": 0}

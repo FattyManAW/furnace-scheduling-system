@@ -1,14 +1,17 @@
 """Reports API — CSV 匯出與儀表板統計"""
 from __future__ import annotations
-import csv, io, json
-from datetime import datetime, date
-from fastapi import APIRouter, Depends, Query, Response
-from typing import Optional
-from sqlalchemy.orm import Session
-from database import get_db
-from models import Order, ScheduleEntry, Kiln, Mold
+
+import csv
+import io
+from datetime import date, datetime
+
 from crud import get_orders
 from engine.optimizer import DAILY_HOUR_CAP
+from fastapi import APIRouter, Depends, Query, Response
+from models import Kiln, Mold, Order, ScheduleEntry
+from sqlalchemy.orm import Session
+
+from database import get_db
 
 router = APIRouter(prefix="/api/v1/reports", tags=["reports"])
 
@@ -87,7 +90,7 @@ def get_dashboard(db: Session = Depends(get_db)):
 
 @router.get("/orders/csv")
 def export_orders_csv(
-    status: Optional[str] = Query(None),
+    status: str | None = Query(None),
     db: Session = Depends(get_db),
 ):
     orders = get_orders(db, limit=9999, status=status)

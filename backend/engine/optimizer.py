@@ -1,8 +1,9 @@
 """排程優化引擎 v2.1 — 基於 fit_score 的多目標優化"""
 from __future__ import annotations
+
 import json
 import os
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Callable
 
 DAILY_HOUR_CAP = 1098.0
@@ -119,7 +120,7 @@ def fit_score(kiln: dict, mold_od: float, mold_len: float,
     - big slot penalty (don't waste large slots on small products)
     """
     best = 999.0
-    for sname, scheme in kiln.get("schemes", {}).items():
+    for _sname, scheme in kiln.get("schemes", {}).items():
         for pos in ("upper", "lower"):
             slot = scheme[pos]
             sod = _sf(slot.get("od", 0))
@@ -192,7 +193,7 @@ def check_mold_availability(mold_od: float, mold_inner_dia: float | None,
     molds = get_molds_fn()
     for m in molds:
         mod = getattr(m, "outer_dia", 0)
-        mid = getattr(m, "inner_dia", 0)
+        getattr(m, "inner_dia", 0)
         mlen = getattr(m, "length", 0)
         stock = getattr(m, "stock_qty", 0)
         status = getattr(m, "status", "available")
@@ -243,12 +244,12 @@ def schedule_orders(
     furnace_state = {}
     for kid, kiln in kilns.items():
         total_slots = 0
-        for sname, scheme in kiln.get("schemes", {}).items():
+        for _sname, scheme in kiln.get("schemes", {}).items():
             for pos in ("upper", "lower"):
                 total_slots += _si(scheme[pos].get("qty", 0))
         max_sod = 0.0
         max_slen = 0.0
-        for sname, scheme in kiln.get("schemes", {}).items():
+        for _sname, scheme in kiln.get("schemes", {}).items():
             for pos in ("upper", "lower"):
                 max_sod = max(max_sod, _sf(scheme[pos].get("od", 0)))
                 max_slen = max(max_slen, _sf(scheme[pos].get("len", 0)))
@@ -265,7 +266,7 @@ def schedule_orders(
             "schemes": list(kiln.get("schemes", {}).keys()),
         }
 
-    global_slot_cap = sum(s["total_slots"] for s in furnace_state.values())
+    sum(s["total_slots"] for s in furnace_state.values())
     global_hour_cap = DAILY_HOUR_CAP * 28  # 28 kilns × daily cap
 
     total_hours_used = 0.0

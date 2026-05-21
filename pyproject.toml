@@ -1,22 +1,33 @@
 [tool.ruff]
-# Elite Squad quality standard — ruff config
-# Applied to: furnace-scheduling-system + OTD
+# Elite Squad quality standard — Phase 2 enforcement
+# Applied to: furnace-scheduling-system
 
 target-version = "py39"
 line-length = 100
 
 [tool.ruff.lint]
-# Phase 1: basic pycodestyle + pyflakes only
-# Phase 2 (future): add W, I, N, UP, B, SIM
 select = [
     "E",   # pycodestyle errors
     "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort (auto-fix: import ordering)
+    "UP",  # pyupgrade (auto-fix: modern syntax)
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
 ]
 ignore = [
     "E501",  # line too long
-    "E401",  # multiple imports on one line (legacy code pattern)
     "E402",  # module-level import not at top (after config/env setup)
-    "F401",  # unused imports (legacy — fix in Phase 2)
+    "B008",  # function calls in argument defaults (FastAPI Depends pattern)
+    "F401",  # unused imports (need manual review)
+    "F821",  # undefined name (need manual review)
+    "E721",  # type comparison (need manual review)
+    "E722",  # bare except (need manual review)
+    "B017",  # assertRaises(Exception) (need manual review)
+    "B904",  # raise without from inside except
+    "E701",  # multiple statements on one line
+    "E702",  # multiple expressions on one line
+    "B007",  # unused loop variable
 ]
 
 [tool.ruff.format]

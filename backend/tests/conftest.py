@@ -1,14 +1,18 @@
 """Test fixtures — SQLite in-memory for FastAPI TestClient"""
 
-import sys, os, tempfile
+import os
+import sys
+import tempfile
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # 1) Patch database module to use a temp-file DB BEFORE importing anything
 #    (sqlite:///:memory: creates a NEW db per connection — useless for testing)
 
-import database as _db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+import database as _db
 
 # Use a shared temp file so all sessions share the same DB
 _fd, _dbpath = tempfile.mkstemp(suffix=".db", prefix="furnace_test_")
@@ -21,28 +25,26 @@ _db.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_inmem)
 _db.Base.metadata.create_all(bind=_inmem)
 
 # 2) Now safe to import the app — its create_all uses our patched engine
-from main import app
-from database import get_db
+import contextlib
 
 import pytest
+
+from database import get_db
+from main import app
 
 
 def pytest_sessionfinish(session):
     """Clean up temp DB file after all tests."""
-    try:
+    with contextlib.suppress(OSError):
         os.unlink(_dbpath)
-    except OSError:
-        pass
 
 
 @pytest.fixture(scope="function", autouse=True)
 def _clean_db(db_session):
     """Clear all tables before each test."""
     for table in reversed(_db.Base.metadata.sorted_tables):
-        try:
+        with contextlib.suppress(Exception):
             db_session.execute(table.delete())
-        except Exception:
-            pass
     db_session.commit()
 
 
