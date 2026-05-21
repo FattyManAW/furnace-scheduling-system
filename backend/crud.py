@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from typing import Optional
 
 from models import Kiln, Mold, Order, ProcessStep, Product, ScheduleEntry
 from schemas import (
@@ -19,16 +20,16 @@ from sqlalchemy.orm import Session
 
 
 # ── Orders ─────────────────────────────────────────────────────────────────
-def get_order(db: Session, order_id: int) -> Order | None:
+def get_order(db: Session, order_id: int) -> Optional[Order]:
     return db.query(Order).filter(Order.id == order_id).first()
 
 
-def get_order_by_plan_no(db: Session, plan_no: str) -> Order | None:
+def get_order_by_plan_no(db: Session, plan_no: str) -> Optional[Order]:
     return db.query(Order).filter(Order.plan_no == plan_no).first()
 
 
-def get_orders(db: Session, skip: int = 0, limit: int = 100, status: str | None = None,
-               search: str | None = None) -> list[Order]:
+def get_orders(db: Session, skip: int = 0, limit: int = 100, status: Optional[str] = None,
+               search: Optional[str] = None) -> list[Order]:
     q = db.query(Order)
     if status:
         q = q.filter(Order.status == status)
@@ -60,7 +61,7 @@ def create_order(db: Session, order: OrderCreate) -> Order:
     return db_order
 
 
-def update_order(db: Session, order_id: int, order_update: OrderUpdate) -> Order | None:
+def update_order(db: Session, order_id: int, order_update: OrderUpdate) -> Optional[Order]:
     db_order = get_order(db, order_id)
     if not db_order:
         return None
@@ -110,11 +111,11 @@ def bulk_create_orders(db: Session, orders_data: list[dict]) -> int:
 
 
 # ── Molds ──────────────────────────────────────────────────────────────────
-def get_mold(db: Session, mold_id: int) -> Mold | None:
+def get_mold(db: Session, mold_id: int) -> Optional[Mold]:
     return db.query(Mold).filter(Mold.id == mold_id).first()
 
 
-def get_mold_by_no(db: Session, mold_no: str) -> Mold | None:
+def get_mold_by_no(db: Session, mold_no: str) -> Optional[Mold]:
     return db.query(Mold).filter(Mold.mold_no == mold_no).first()
 
 
@@ -137,7 +138,7 @@ def create_mold(db: Session, mold: MoldCreate) -> Mold:
     return db_mold
 
 
-def update_mold(db: Session, mold_id: int, mold_update: MoldUpdate) -> Mold | None:
+def update_mold(db: Session, mold_id: int, mold_update: MoldUpdate) -> Optional[Mold]:
     db_mold = get_mold(db, mold_id)
     if not db_mold:
         return None
@@ -150,7 +151,7 @@ def update_mold(db: Session, mold_id: int, mold_update: MoldUpdate) -> Mold | No
     return db_mold
 
 
-def adjust_mold_stock(db: Session, mold_id: int, delta: int, reason: str = "adjust") -> Mold | None:
+def adjust_mold_stock(db: Session, mold_id: int, delta: int, reason: str = "adjust") -> Optional[Mold]:
     db_mold = get_mold(db, mold_id)
     if not db_mold:
         return None
@@ -172,11 +173,11 @@ def delete_mold(db: Session, mold_id: int) -> bool:
 
 
 # ── Kilns ──────────────────────────────────────────────────────────────────
-def get_kiln(db: Session, kiln_id: int) -> Kiln | None:
+def get_kiln(db: Session, kiln_id: int) -> Optional[Kiln]:
     return db.query(Kiln).filter(Kiln.id == kiln_id).first()
 
 
-def get_kiln_by_no(db: Session, kiln_no: str) -> Kiln | None:
+def get_kiln_by_no(db: Session, kiln_no: str) -> Optional[Kiln]:
     return db.query(Kiln).filter(Kiln.kiln_no == kiln_no).first()
 
 
@@ -211,7 +212,7 @@ def create_kiln(db: Session, kiln: KilnCreate) -> Kiln:
     return db_kiln
 
 
-def update_kiln(db: Session, kiln_id: int, kiln_update: KilnUpdate) -> Kiln | None:
+def update_kiln(db: Session, kiln_id: int, kiln_update: KilnUpdate) -> Optional[Kiln]:
     db_kiln = get_kiln(db, kiln_id)
     if not db_kiln:
         return None
@@ -244,7 +245,7 @@ def create_schedule_entry(db: Session, entry: dict) -> ScheduleEntry:
     return db_entry
 
 
-def get_schedule_entries(db: Session, kiln_id: int | None = None) -> list[ScheduleEntry]:
+def get_schedule_entries(db: Session, kiln_id: Optional[int] = None) -> list[ScheduleEntry]:
     q = db.query(ScheduleEntry)
     if kiln_id:
         q = q.filter(ScheduleEntry.kiln_id == kiln_id)

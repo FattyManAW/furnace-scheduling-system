@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -21,21 +21,21 @@ class PaginatedResponse(BaseModel, Generic[T]):
 class ErrorDetail(BaseModel):
     detail: str
     type: str = "error"
-    request_id: str | None = None
+    request_id: Optional[str] = None
 
 
 # ── Order ──────────────────────────────────────────────────────────────────
 class OrderBase(BaseModel):
     plan_no: str = Field(..., min_length=1, max_length=50, description="計劃單號")
-    contract_no: str | None = Field(default=None, max_length=50, description="合約編號")
+    contract_no: Optional[str] = Field(default=None, max_length=50, description="合約編號")
     voltage_kv: float = Field(..., gt=0, le=1100, description="電壓 kV")
     current_a: float = Field(..., gt=0, le=5000, description="電流 A")
     qty: int = Field(..., ge=1, le=99999, description="數量")
-    delivery_date: str | None = Field(default=None, max_length=20, description="交期 YYYY-MM-DD")
-    product_from: str | None = Field(default=None, max_length=50, description="產品來源")
-    product_to: str | None = Field(default=None, max_length=50, description="產品去向")
+    delivery_date: Optional[str] = Field(default=None, max_length=20, description="交期 YYYY-MM-DD")
+    product_from: Optional[str] = Field(default=None, max_length=50, description="產品來源")
+    product_to: Optional[str] = Field(default=None, max_length=50, description="產品去向")
     status: str = Field(default="pending", pattern=r"^(pending|scheduled|completed|cancelled)$")
-    notes: str | None = Field(default=None, max_length=500)
+    notes: Optional[str] = Field(default=None, max_length=500)
 
 
 class OrderCreate(OrderBase):
@@ -43,19 +43,19 @@ class OrderCreate(OrderBase):
 
 
 class OrderUpdate(BaseModel):
-    contract_no: str | None = Field(default=None, max_length=50)
-    voltage_kv: float | None = Field(default=None, gt=0, le=1100)
-    current_a: float | None = Field(default=None, gt=0, le=5000)
-    qty: int | None = Field(default=None, ge=1, le=99999)
-    delivery_date: str | None = Field(default=None, max_length=20)
-    product_from: str | None = Field(default=None, max_length=50)
-    product_to: str | None = Field(default=None, max_length=50)
-    status: str | None = Field(default=None, pattern=r"^(pending|scheduled|completed|cancelled)$")
-    notes: str | None = Field(default=None, max_length=500)
+    contract_no: Optional[str] = Field(default=None, max_length=50)
+    voltage_kv: Optional[float] = Field(default=None, gt=0, le=1100)
+    current_a: Optional[float] = Field(default=None, gt=0, le=5000)
+    qty: Optional[int] = Field(default=None, ge=1, le=99999)
+    delivery_date: Optional[str] = Field(default=None, max_length=20)
+    product_from: Optional[str] = Field(default=None, max_length=50)
+    product_to: Optional[str] = Field(default=None, max_length=50)
+    status: Optional[str] = Field(default=None, pattern=r"^(pending|scheduled|completed|cancelled)$")
+    notes: Optional[str] = Field(default=None, max_length=500)
 
     @field_validator("delivery_date")
     @classmethod
-    def check_date_format(cls, v: str | None) -> str | None:
+    def check_date_format(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
             return v
         import re
@@ -66,8 +66,8 @@ class OrderUpdate(BaseModel):
 
 class OrderOut(OrderBase):
     id: int
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     @field_validator('delivery_date', mode='before')
     @classmethod
@@ -95,9 +95,9 @@ class MoldBase(BaseModel):
     inner_dia: float = Field(..., gt=0, le=2000, description="內徑 mm")
     length: float = Field(..., gt=0, le=10000, description="長度 mm")
     stock_qty: int = Field(default=0, ge=0, le=9999, description="庫存量")
-    location: str | None = Field(default=None, max_length=100, description="存放位置")
+    location: Optional[str] = Field(default=None, max_length=100, description="存放位置")
     status: str = Field(default="available", pattern=r"^(available|in_use|maintenance)$", description="狀態")
-    notes: str | None = Field(default=None, max_length=500)
+    notes: Optional[str] = Field(default=None, max_length=500)
 
 
 class MoldCreate(MoldBase):
@@ -105,19 +105,19 @@ class MoldCreate(MoldBase):
 
 
 class MoldUpdate(BaseModel):
-    outer_dia: float | None = Field(default=None, gt=0, le=2000)
-    inner_dia: float | None = Field(default=None, gt=0, le=2000)
-    length: float | None = Field(default=None, gt=0, le=10000)
-    stock_qty: int | None = Field(default=None, ge=0, le=9999)
-    location: str | None = Field(default=None, max_length=100)
-    status: str | None = Field(default=None, pattern=r"^(available|in_use|maintenance)$")
-    notes: str | None = Field(default=None, max_length=500)
+    outer_dia: Optional[float] = Field(default=None, gt=0, le=2000)
+    inner_dia: Optional[float] = Field(default=None, gt=0, le=2000)
+    length: Optional[float] = Field(default=None, gt=0, le=10000)
+    stock_qty: Optional[int] = Field(default=None, ge=0, le=9999)
+    location: Optional[str] = Field(default=None, max_length=100)
+    status: Optional[str] = Field(default=None, pattern=r"^(available|in_use|maintenance)$")
+    notes: Optional[str] = Field(default=None, max_length=500)
 
 
 class MoldOut(MoldBase):
     id: int
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -136,16 +136,16 @@ class KilnCreate(KilnBase):
 
 
 class KilnUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=1, max_length=50)
-    inner_dia: float | None = Field(default=None, gt=0, le=5000)
-    height: float | None = Field(default=None, gt=0, le=20000)
-    schemes: dict[str, Any] | None = None
+    name: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    inner_dia: Optional[float] = Field(default=None, gt=0, le=5000)
+    height: Optional[float] = Field(default=None, gt=0, le=20000)
+    schemes: Optional[dict[str, Any]] = None
 
 
 class KilnOut(KilnBase):
     id: int
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -155,9 +155,9 @@ class ProductOut(BaseModel):
     id: int
     product_no: int
     voltage_kv: float
-    current_a: float | None = None
+    current_a: Optional[float] = None
     mold_od: float
-    mold_id: float | None = None
+    mold_id: Optional[float] = None
     mold_len: float
     capacity: int = 1
 
@@ -168,10 +168,10 @@ class ProductOut(BaseModel):
 class ProcessStepBase(BaseModel):
     step_no: int = Field(..., ge=0, description="步驟編號")
     step_name: str = Field(..., min_length=1, max_length=100, description="步驟名稱")
-    department: str | None = Field(default=None, max_length=50, description="部門")
-    team: str | None = Field(default=None, max_length=50, description="團隊")
-    process_type: str | None = Field(default=None, max_length=50, description="製程類型")
-    calc_basis: str | None = Field(default=None, max_length=20, description="計算基準")
+    department: Optional[str] = Field(default=None, max_length=50, description="部門")
+    team: Optional[str] = Field(default=None, max_length=50, description="團隊")
+    process_type: Optional[str] = Field(default=None, max_length=50, description="製程類型")
+    calc_basis: Optional[str] = Field(default=None, max_length=20, description="計算基準")
     h10: float = Field(default=0, ge=0, description="10kV 工時")
     h24: float = Field(default=0, ge=0, description="24kV 工時")
     h36: float = Field(default=0, ge=0, description="36kV 工時")
@@ -183,16 +183,16 @@ class ProcessStepCreate(ProcessStepBase):
 
 
 class ProcessStepUpdate(BaseModel):
-    step_no: int | None = Field(default=None, ge=0)
-    step_name: str | None = Field(default=None, min_length=1, max_length=100)
-    department: str | None = Field(default=None, max_length=50)
-    team: str | None = Field(default=None, max_length=50)
-    process_type: str | None = Field(default=None, max_length=50)
-    calc_basis: str | None = Field(default=None, max_length=20)
-    h10: float | None = Field(default=None, ge=0)
-    h24: float | None = Field(default=None, ge=0)
-    h36: float | None = Field(default=None, ge=0)
-    h40: float | None = Field(default=None, ge=0)
+    step_no: Optional[int] = Field(default=None, ge=0)
+    step_name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    department: Optional[str] = Field(default=None, max_length=50)
+    team: Optional[str] = Field(default=None, max_length=50)
+    process_type: Optional[str] = Field(default=None, max_length=50)
+    calc_basis: Optional[str] = Field(default=None, max_length=20)
+    h10: Optional[float] = Field(default=None, ge=0)
+    h24: Optional[float] = Field(default=None, ge=0)
+    h36: Optional[float] = Field(default=None, ge=0)
+    h40: Optional[float] = Field(default=None, ge=0)
 
 
 class ProcessStepOut(ProcessStepBase):
@@ -203,7 +203,7 @@ class ProcessStepOut(ProcessStepBase):
 
 # ── Schedule ───────────────────────────────────────────────────────────────
 class ScheduleRequest(BaseModel):
-    order_ids: list[int] | None = Field(default=None, description="要排程的訂單 ID，不傳則全部")
+    order_ids: Optional[list[int]] = Field(default=None, description="要排程的訂單 ID，不傳則全部")
     strategy: str = Field(
         default="deadline",
         pattern=r"^(deadline|fill|balance)$",
@@ -214,18 +214,18 @@ class ScheduleRequest(BaseModel):
 class ScheduleEntryOut(BaseModel):
     id: int
     kiln_id: int
-    kiln_name: str | None = None
+    kiln_name: Optional[str] = None
     plan_no: str
-    contract_no: str | None = None
+    contract_no: Optional[str] = None
     voltage_kv: float
     current_a: float
     qty: int
-    delivery_date: str | None = None
+    delivery_date: Optional[str] = None
     mold_od: float
     mold_len: float
     est_hours: float
     status: str
-    created_at: datetime | None = None
+    created_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -259,10 +259,10 @@ class DashboardStats(BaseModel):
 
 # ── Report / Import ───────────────────────────────────────────────────────
 class ReportFilter(BaseModel):
-    start_date: str | None = None
-    end_date: str | None = None
-    status: str | None = None
-    kiln_id: int | None = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    status: Optional[str] = None
+    kiln_id: Optional[int] = None
 
 
 class BulkImportResult(BaseModel):

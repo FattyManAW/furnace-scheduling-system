@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import io
 from datetime import date, datetime
+from typing import Optional
 
 from crud import get_orders
 from engine.optimizer import DAILY_HOUR_CAP
@@ -90,7 +91,7 @@ def get_dashboard(db: Session = Depends(get_db)):
 
 @router.get("/orders/csv")
 def export_orders_csv(
-    status: str | None = Query(None),
+    status: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
     orders = get_orders(db, limit=9999, status=status)
