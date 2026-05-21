@@ -275,6 +275,19 @@ body,
   animation-delay: 480ms;
 }
 
+/* ── fade-slide-up Stagger (d1-d8, site-wide stagger entrance) ── */
+.fade-slide-up {
+  animation: fadeSlideUp 0.45s var(--ease-out) backwards;
+}
+.fade-slide-up.d1 { animation-delay: 0ms; }
+.fade-slide-up.d2 { animation-delay: 60ms; }
+.fade-slide-up.d3 { animation-delay: 120ms; }
+.fade-slide-up.d4 { animation-delay: 180ms; }
+.fade-slide-up.d5 { animation-delay: 240ms; }
+.fade-slide-up.d6 { animation-delay: 300ms; }
+.fade-slide-up.d7 { animation-delay: 360ms; }
+.fade-slide-up.d8 { animation-delay: 420ms; }
+
 /* ── Scroll Reveal ── */
 .reveal {
   opacity: 0;
