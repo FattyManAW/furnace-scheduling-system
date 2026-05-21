@@ -58,6 +58,7 @@ export default function Gantt() {
   const [viewStart, setViewStart] = useState(null);
   const [viewMode, setViewMode] = useState(typeof window !== "undefined" && window.innerWidth < 768 ? 0 : 1);
   const [, forceUpdate] = useState(0); // trigger re-render on resize for colW
+  const [error, setError] = useState(null);
 
   // ── Responsive colW recalc on resize
   const onResize = useCallback(() => forceUpdate(n => n + 1), []);
@@ -79,11 +80,18 @@ export default function Gantt() {
           }
         }
       })
-      .catch(() => setSchedule(null))
+      .catch((e) => { setSchedule(null); setError(e.message || "載入失敗"); })
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-furnace-muted">載入排程資料中...</div>;
+  if (loading) return <div className="text-furnace-muted py-12 text-center">載入排程資料中...</div>;
+  if (error && !schedule) return (
+    <div className="text-center py-12 space-y-3">
+      <p className="text-furnace-red bg-furnace-red/5 inline-block px-4 py-2 rounded-lg text-sm">⚠️ {error}</p>
+      <br />
+      <button className="text-furnace-blue text-sm underline" onClick={() => { setLoading(true); setError(null); api.getScheduleResult().then(setSchedule).catch((e) => { setSchedule(null); setError(e.message); }).finally(() => setLoading(false)); }}>重試</button>
+    </div>
+  );
   if (!schedule || !schedule.schedule?.length) {
     return <div className="text-furnace-muted">尚無排程結果，請先在「排程設定」頁面執行排程。</div>;
   }
