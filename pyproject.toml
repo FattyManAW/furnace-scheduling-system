@@ -5,7 +5,7 @@
 target-version = "py39"
 line-length = 100
 
-[lint]
+[tool.ruff.lint]
 # Phase 1: basic pycodestyle + pyflakes only
 # Phase 2 (future): add W, I, N, UP, B, SIM
 select = [
@@ -18,9 +18,9 @@ ignore = [
     "F401",  # unused imports (legacy — fix in Phase 2)
 ]
 
-[format]
+[tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 
-[lint.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["backend", "frontend", "agents", "erp_sim"]
