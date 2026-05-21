@@ -45,7 +45,9 @@ def schedule_root():
 @router.post("/optimize", response_model=ScheduleResult)
 def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
     """執行排程優化，清除舊排程，寫入新結果"""
-    if request.order_ids:
+    if request.order_ids is not None:
+        if not request.order_ids:
+            raise HTTPException(400, "order_ids 不可為空列表")
         orders = db.query(Order).filter(Order.id.in_(request.order_ids)).all()
     else:
         orders = db.query(Order).order_by(Order.id).all()
