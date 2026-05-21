@@ -60,8 +60,6 @@ export default function Reports() {
 
   const o = dashboard.orders;
   const s = dashboard.schedule;
-  const hourPct =
-    s.daily_cap > 0 ? Math.min((s.total_hours / s.daily_cap) * 100, 100) : 0;
 
   return (
     <div className="fade-slide-up d1 space-y-5">

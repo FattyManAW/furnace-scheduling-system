@@ -188,7 +188,7 @@ export default function Orders() {
         <div className="flex gap-2">
           <button
             onClick={() => setBulkOpen(!bulkOpen)}
-            className="fade-slide-up d2 btn-secondary px-4 py-2 rounded-lg text-sm flex items-center gap-1.5 border border-furnace-border bg-furnace-card hover-lift"
+            className="fade-slide-up d2 px-4 py-2 rounded-lg text-sm flex items-center gap-1.5 border border-furnace-border bg-furnace-card hover-lift"
           >
             <Upload className="w-4 h-4" /> 批量匯入
           </button>
