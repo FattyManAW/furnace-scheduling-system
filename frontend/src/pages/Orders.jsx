@@ -87,7 +87,7 @@ export default function Orders() {
       }
       setModalOpen(false);
       load();
-    } catch (e) { alert(e.message); }
+    } catch (e) { setError(e.message); setTimeout(() => setError(null), 4000); }
   };
 
   const handleDelete = async (id) => {
@@ -95,7 +95,7 @@ export default function Orders() {
     try {
       await api.deleteOrder(id);
       load();
-    } catch (e) { alert(e.message); }
+    } catch (e) { setError(e.message); setTimeout(() => setError(null), 4000); }
   };
 
   const handleBulkImport = async () => {

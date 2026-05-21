@@ -81,7 +81,7 @@ export default function Molds() {
     try {
       await api.adjustStock(id, delta, "manual");
       load();
-    } catch (e) { alert(e.message); }
+    } catch (e) { setError(e.message); setTimeout(() => setError(null), 4000); }
   };
 
   const openCreate = () => {
@@ -114,7 +114,7 @@ export default function Molds() {
       }
       setModalOpen(false);
       load();
-    } catch (e) { alert(e.message); }
+    } catch (e) { setError(e.message); setTimeout(() => setError(null), 4000); }
   };
 
   const filtered = molds.filter(m =>
