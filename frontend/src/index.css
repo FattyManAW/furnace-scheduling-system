@@ -11,7 +11,34 @@
    Theme toggle: [data-theme="dark"] / [data-theme="light"]
    localStorage key: furnace-theme
    prefers-color-scheme: auto-detect via ThemeToggle.jsx + initTheme()
+   CSS fallback: @media (prefers-color-scheme: dark) with :not([data-theme])
+   prevents FOUC (flash of unstyled content) before JS theme init runs.
    ═══════════════════════════════════════════════════════════════════ */
+
+/* ── prefers-color-scheme CSS fallback ──
+   Only applies when data-theme is NOT explicitly set (no user override).
+   Once initTheme() sets data-theme, the attribute selector wins over this. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --c-bg: #181b23;
+    --c-surface: #22252f;
+    --c-elevated: #2e3140;
+    --c-border: rgba(255, 255, 255, 0.06);
+    --c-border-hot: rgba(255, 255, 255, 0.12);
+    --c-t1: #f0f2f8;
+    --c-t2: #e4e6ef;
+    --c-t3: #747a8c;
+    --c-teal: #4b8cff;
+    --c-teal-hot: #6ba0ff;
+    --c-success: #3cc97e;
+    --c-warning: #f0b028;
+    --c-error: #f44b55;
+    --c-purple: #a78bfa;
+    --c-cyan: #5ac8fa;
+    --c-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --c-shadow-lift: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+}
 
 /* ── Light (default) ── */
 :root {
