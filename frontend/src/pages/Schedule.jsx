@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { clsx } from "clsx";
 import {
-  Calendar,
   Play,
-  Pause,
-  RotateCcw,
   AlertTriangle,
   CheckCircle,
   Clock,
