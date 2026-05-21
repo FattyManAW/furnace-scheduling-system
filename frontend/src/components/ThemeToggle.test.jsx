@@ -22,7 +22,7 @@ beforeEach(() => {
     media: query,
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
-    addListener: vi.fn(),   // legacy compat
+    addListener: vi.fn(), // legacy compat
     removeListener: vi.fn(),
   }));
   Object.defineProperty(window, "matchMedia", {
@@ -33,8 +33,12 @@ beforeEach(() => {
   Object.defineProperty(window, "localStorage", {
     value: {
       getItem: (k) => localStorageStore[k] ?? null,
-      setItem: (k, v) => { localStorageStore[k] = v; },
-      removeItem: (k) => { delete localStorageStore[k]; },
+      setItem: (k, v) => {
+        localStorageStore[k] = v;
+      },
+      removeItem: (k) => {
+        delete localStorageStore[k];
+      },
     },
     writable: true,
     configurable: true,
@@ -55,7 +59,9 @@ describe("T1: First load — OS dark → data-theme='dark'", () => {
       media: "(prefers-color-scheme: dark)",
     }));
     Object.defineProperty(window, "matchMedia", {
-      value: mockMatchMedia, writable: true, configurable: true,
+      value: mockMatchMedia,
+      writable: true,
+      configurable: true,
     });
     document.documentElement.removeAttribute("data-theme");
 
@@ -74,7 +80,9 @@ describe("T2: First load — OS light → data-theme='light'", () => {
       media: "(prefers-color-scheme: dark)",
     }));
     Object.defineProperty(window, "matchMedia", {
-      value: mockMatchMedia, writable: true, configurable: true,
+      value: mockMatchMedia,
+      writable: true,
+      configurable: true,
     });
     document.documentElement.removeAttribute("data-theme");
 
@@ -112,7 +120,9 @@ describe("T4: Reload preserves manual choice over OS", () => {
       removeEventListener: vi.fn(),
     }));
     Object.defineProperty(window, "matchMedia", {
-      value: mockMatchMedia, writable: true, configurable: true,
+      value: mockMatchMedia,
+      writable: true,
+      configurable: true,
     });
 
     const { initTheme } = await import("./ThemeToggle");
@@ -127,12 +137,16 @@ describe("T5: OS theme change fires matchMedia listener", () => {
     let mqHandler = null;
     mockMatchMedia = vi.fn(() => ({
       matches: true, // starts dark
-      addEventListener: (ev, handler) => { mqHandler = handler; },
+      addEventListener: (ev, handler) => {
+        mqHandler = handler;
+      },
       removeEventListener: vi.fn(),
       media: "(prefers-color-scheme: dark)",
     }));
     Object.defineProperty(window, "matchMedia", {
-      value: mockMatchMedia, writable: true, configurable: true,
+      value: mockMatchMedia,
+      writable: true,
+      configurable: true,
     });
     document.documentElement.removeAttribute("data-theme");
     localStorageStore = {};
@@ -156,7 +170,9 @@ describe("T5: OS theme change fires matchMedia listener", () => {
       removeEventListener: vi.fn(),
     }));
     Object.defineProperty(window, "matchMedia", {
-      value: mockMatchMedia, writable: true, configurable: true,
+      value: mockMatchMedia,
+      writable: true,
+      configurable: true,
     });
 
     const { initTheme } = await import("./ThemeToggle");

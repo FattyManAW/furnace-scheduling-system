@@ -3,7 +3,8 @@
 //   Docker/Tailscale: http://100.107.36.80:8002
 //   Local dev:        http://localhost:8002
 // Same-origin when served behind nginx; set to backend URL for dev mode
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8002" : "";
+const API_BASE =
+  window.location.hostname === "localhost" ? "http://localhost:8002" : "";
 
 async function req(path, opts = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -28,14 +29,20 @@ export const api = {
     return req(`/api/v1/orders/?${q}`);
   },
   getOrder: (id) => req(`/api/v1/orders/${id}`),
-  createOrder: (data) => req("/api/v1/orders/", { method: "POST", body: JSON.stringify(data) }),
-  updateOrder: (id, data) => req(`/api/v1/orders/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  createOrder: (data) =>
+    req("/api/v1/orders/", { method: "POST", body: JSON.stringify(data) }),
+  updateOrder: (id, data) =>
+    req(`/api/v1/orders/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteOrder: (id) => req(`/api/v1/orders/${id}`, { method: "DELETE" }),
   countOrders: (status) => {
     const q = status ? `?status=${encodeURIComponent(status)}` : "";
     return req(`/api/v1/orders/count${q}`);
   },
-  bulkImportOrders: (orders) => req("/api/v1/orders/bulk-import", { method: "POST", body: JSON.stringify(orders) }),
+  bulkImportOrders: (orders) =>
+    req("/api/v1/orders/bulk-import", {
+      method: "POST",
+      body: JSON.stringify(orders),
+    }),
 
   // ── Molds ──
   getMolds: (params) => {
@@ -46,10 +53,14 @@ export const api = {
     return req(`/api/v1/molds/?${q}`);
   },
   getMold: (id) => req(`/api/v1/molds/${id}`),
-  createMold: (data) => req("/api/v1/molds/", { method: "POST", body: JSON.stringify(data) }),
-  updateMold: (id, data) => req(`/api/v1/molds/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  createMold: (data) =>
+    req("/api/v1/molds/", { method: "POST", body: JSON.stringify(data) }),
+  updateMold: (id, data) =>
+    req(`/api/v1/molds/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   adjustStock: (id, delta, reason) =>
-    req(`/api/v1/molds/${id}/stock?delta=${delta}&reason=${encodeURIComponent(reason)}`),
+    req(
+      `/api/v1/molds/${id}/stock?delta=${delta}&reason=${encodeURIComponent(reason)}`,
+    ),
 
   // ── Kilns ──
   getKilns: () => req("/api/v1/kilns/"),

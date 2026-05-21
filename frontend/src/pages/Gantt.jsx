@@ -1,15 +1,54 @@
 import { useEffect, useState, useCallback } from "react";
 import { api } from "../lib/api";
-import { format, addDays, startOfDay, differenceInDays, parseISO } from "date-fns";
+import {
+  format,
+  addDays,
+  startOfDay,
+  differenceInDays,
+  parseISO,
+} from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { clsx } from "clsx";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // ── View mode: 今日/1週/2週/1月（響應式 colW）─────────────────
 const VIEW_MODES = [
-  { label: "今日", days: 1, colW: () => typeof window === "undefined" ? 80 : window.innerWidth < 768 ? 40 : window.innerWidth < 1024 ? 56 : 80 },
-  { label: "1週", days: 7, colW: () => typeof window === "undefined" ? 80 : window.innerWidth < 768 ? 40 : window.innerWidth < 1024 ? 56 : 80 },
-  { label: "2週", days: 14, colW: () => typeof window === "undefined" ? 80 : window.innerWidth < 768 ? 40 : window.innerWidth < 1024 ? 56 : 80 },
+  {
+    label: "今日",
+    days: 1,
+    colW: () =>
+      typeof window === "undefined"
+        ? 80
+        : window.innerWidth < 768
+          ? 40
+          : window.innerWidth < 1024
+            ? 56
+            : 80,
+  },
+  {
+    label: "1週",
+    days: 7,
+    colW: () =>
+      typeof window === "undefined"
+        ? 80
+        : window.innerWidth < 768
+          ? 40
+          : window.innerWidth < 1024
+            ? 56
+            : 80,
+  },
+  {
+    label: "2週",
+    days: 14,
+    colW: () =>
+      typeof window === "undefined"
+        ? 80
+        : window.innerWidth < 768
+          ? 40
+          : window.innerWidth < 1024
+            ? 56
+            : 80,
+  },
   { label: "1月", days: 30, colW: 48 },
 ];
 
@@ -37,14 +76,18 @@ function utilizationColor(pct) {
 function Tooltip({ children, content }) {
   const [show, setShow] = useState(false);
   return (
-    <div className="relative inline-block"
+    <div
+      className="relative inline-block"
       onMouseEnter={() => setShow(true)}
-      onMouseLeave={() => setShow(false)}>
+      onMouseLeave={() => setShow(false)}
+    >
       {children}
       {show && (
-        <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2
+        <div
+          className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2
           bg-furnace-card hover-lift border border-furnace-border rounded-lg shadow-lg
-          text-xs text-furnace-text whitespace-nowrap">
+          text-xs text-furnace-text whitespace-nowrap"
+        >
           {content}
         </div>
       )}
@@ -56,54 +99,93 @@ export default function Gantt() {
   const [schedule, setSchedule] = useState(null);
   const [loading, setLoading] = useState(true);
   const [viewStart, setViewStart] = useState(null);
-  const [viewMode, setViewMode] = useState(typeof window !== "undefined" && window.innerWidth < 768 ? 0 : 1);
+  const [viewMode, setViewMode] = useState(
+    typeof window !== "undefined" && window.innerWidth < 768 ? 0 : 1,
+  );
   const [, forceUpdate] = useState(0); // trigger re-render on resize for colW
   const [error, setError] = useState(null);
 
   // ── Responsive colW recalc on resize
-  const onResize = useCallback(() => forceUpdate(n => n + 1), []);
+  const onResize = useCallback(() => forceUpdate((n) => n + 1), []);
   useEffect(() => {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [onResize]);
 
   useEffect(() => {
-    api.getScheduleResult()
-      .then(data => {
+    api
+      .getScheduleResult()
+      .then((data) => {
         setSchedule(data);
         // Anchor view to earliest delivery_date (Day 0)
         if (data?.schedule?.length) {
-          const dates = data.schedule.map(e => e.delivery_date).filter(Boolean);
+          const dates = data.schedule
+            .map((e) => e.delivery_date)
+            .filter(Boolean);
           if (dates.length) {
             const earliest = dates.sort()[0];
             setViewStart(startOfDay(parseISO(earliest)));
           }
         }
       })
-      .catch((e) => { setSchedule(null); setError(e.message || "載入失敗"); })
+      .catch((e) => {
+        setSchedule(null);
+        setError(e.message || "載入失敗");
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-furnace-muted py-12 text-center">載入排程資料中...</div>;
-  if (error && !schedule) return (
-    <div className="text-center py-12 space-y-3">
-      <p className="text-furnace-red bg-furnace-red/5 inline-block px-4 py-2 rounded-lg text-sm">⚠️ {error}</p>
-      <br />
-      <button className="text-furnace-blue text-sm underline" onClick={() => { setLoading(true); setError(null); api.getScheduleResult().then(setSchedule).catch((e) => { setSchedule(null); setError(e.message); }).finally(() => setLoading(false)); }}>重試</button>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="text-furnace-muted py-12 text-center">
+        載入排程資料中...
+      </div>
+    );
+  if (error && !schedule)
+    return (
+      <div className="text-center py-12 space-y-3">
+        <p className="text-furnace-red bg-furnace-red/5 inline-block px-4 py-2 rounded-lg text-sm">
+          ⚠️ {error}
+        </p>
+        <br />
+        <button
+          className="text-furnace-blue text-sm underline"
+          onClick={() => {
+            setLoading(true);
+            setError(null);
+            api
+              .getScheduleResult()
+              .then(setSchedule)
+              .catch((e) => {
+                setSchedule(null);
+                setError(e.message);
+              })
+              .finally(() => setLoading(false));
+          }}
+        >
+          重試
+        </button>
+      </div>
+    );
   if (!schedule || !schedule.schedule?.length) {
-    return <div className="text-furnace-muted">尚無排程結果，請先在「排程設定」頁面執行排程。</div>;
+    return (
+      <div className="text-furnace-muted">
+        尚無排程結果，請先在「排程設定」頁面執行排程。
+      </div>
+    );
   }
 
   const days = VIEW_MODES[viewMode].days;
-  const colW = typeof VIEW_MODES[viewMode].colW === "function" ? VIEW_MODES[viewMode].colW() : VIEW_MODES[viewMode].colW;
+  const colW =
+    typeof VIEW_MODES[viewMode].colW === "function"
+      ? VIEW_MODES[viewMode].colW()
+      : VIEW_MODES[viewMode].colW;
   const minDate = viewStart || startOfDay(new Date());
   const maxDate = addDays(minDate, days);
 
   // Group entries by kiln
   const kilnMap = {};
-  schedule.schedule.forEach(e => {
+  schedule.schedule.forEach((e) => {
     const kid = e.kiln_id || "unknown";
     if (!kilnMap[kid]) kilnMap[kid] = { name: "", entries: [] };
     kilnMap[kid].name = "爐 #" + kid;
@@ -111,7 +193,7 @@ export default function Gantt() {
   });
 
   // Use kiln_summary for names
-  (schedule.kiln_summary || []).forEach(k => {
+  (schedule.kiln_summary || []).forEach((k) => {
     if (kilnMap[k.kiln_id]) kilnMap[k.kiln_id].name = k.kiln_name;
   });
 
@@ -129,12 +211,15 @@ export default function Gantt() {
 
   // ── 顏色按爐次利用率分組（非合約號）
   const kilnUsage = {};
-  (schedule.kiln_summary || []).forEach(k => {
+  (schedule.kiln_summary || []).forEach((k) => {
     kilnUsage[k.kiln_id] = k.usage_pct || 0;
   });
 
   // ── 日曆範圍：從排程資料推導最早/最晚日期
-  const allDates = (schedule?.schedule || []).map(e => e.delivery_date).filter(Boolean).sort();
+  const allDates = (schedule?.schedule || [])
+    .map((e) => e.delivery_date)
+    .filter(Boolean)
+    .sort();
   const scheduleStart = allDates.length ? allDates[0] : null;
   const scheduleEnd = allDates.length ? allDates[allDates.length - 1] : null;
   const navDays = Math.max(1, Math.floor(days / 2));
@@ -147,7 +232,8 @@ export default function Gantt() {
         <div>
           <h1 className="text-2xl font-bold">甘特圖</h1>
           <p className="text-furnace-muted text-sm mt-0.5">
-            爐次排程視覺化 — {scheduleStart || "—"} ~ {scheduleEnd || "—"}（{allDates.length} 筆）
+            爐次排程視覺化 — {scheduleStart || "—"} ~ {scheduleEnd || "—"}（
+            {allDates.length} 筆）
           </p>
         </div>
         <div className="flex gap-2 items-center">
@@ -160,21 +246,42 @@ export default function Gantt() {
                   "px-3 py-1 rounded text-xs font-semibold transition-all",
                   viewMode === i
                     ? "bg-furnace-blue text-white"
-                    : "text-furnace-muted hover:text-furnace-text"
+                    : "text-furnace-muted hover:text-furnace-text",
                 )}
-              >{m.label}</button>
+              >
+                {m.label}
+              </button>
             ))}
           </div>
-          <button onClick={() => setViewStart(addDays(minDate, -navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50" aria-label="前一頁"><ChevronLeft className="w-4 h-4" /></button>
-          <span className="text-sm text-furnace-text px-3 font-semibold min-w-[220px] text-center" role="status" aria-live="polite">
-            {format(minDate, "yyyy/MM/dd")} — {format(addDays(minDate, days), "yyyy/MM/dd")}
+          <button
+            onClick={() => setViewStart(addDays(minDate, -navDays))}
+            className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"
+            aria-label="前一頁"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span
+            className="text-sm text-furnace-text px-3 font-semibold min-w-[220px] text-center"
+            role="status"
+            aria-live="polite"
+          >
+            {format(minDate, "yyyy/MM/dd")} —{" "}
+            {format(addDays(minDate, days), "yyyy/MM/dd")}
           </span>
-          <button onClick={() => setViewStart(addDays(minDate, navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50" aria-label="下一頁"><ChevronRight className="w-4 h-4" /></button>
+          <button
+            onClick={() => setViewStart(addDays(minDate, navDays))}
+            className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"
+            aria-label="下一頁"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
           <button
             onClick={() => setViewStart(startOfDay(new Date()))}
             title="跳轉至今天"
             className="px-2 py-1 text-xs text-furnace-blue border border-furnace-blue/30 rounded hover:bg-furnace-blue/10"
-          >📅 今天</button>
+          >
+            📅 今天
+          </button>
         </div>
       </div>
 
@@ -187,11 +294,23 @@ export default function Gantt() {
                 爐次
               </div>
               <div className="flex" style={{ width: days * colW }}>
-                {dates.map(d => (
-                  <div key={d.toISOString()} className={clsx("flex-shrink-0 text-center border-r border-furnace-border/30 py-3", d.getDay() === 0 || d.getDay() === 6 ? "bg-furnace-red/5" : "")}
-                    style={{ width: colW }}>
-                    <div className="text-sm font-bold text-furnace-text">{format(d, "MM/dd")}</div>
-                    <div className="text-xs text-furnace-muted/70">{format(d, "EEE", { locale: zhTW })}</div>
+                {dates.map((d) => (
+                  <div
+                    key={d.toISOString()}
+                    className={clsx(
+                      "flex-shrink-0 text-center border-r border-furnace-border/30 py-3",
+                      d.getDay() === 0 || d.getDay() === 6
+                        ? "bg-furnace-red/5"
+                        : "",
+                    )}
+                    style={{ width: colW }}
+                  >
+                    <div className="text-sm font-bold text-furnace-text">
+                      {format(d, "MM/dd")}
+                    </div>
+                    <div className="text-xs text-furnace-muted/70">
+                      {format(d, "EEE", { locale: zhTW })}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -199,23 +318,51 @@ export default function Gantt() {
           </div>
 
           {/* Rows */}
-          {kilnIds.map(kid => {
+          {kilnIds.map((kid) => {
             const kn = kilnMap[kid];
             const usage = kilnUsage[kid] || 0;
             return (
-              <div key={kid} className="flex border-b border-furnace-border/30 hover:bg-furnace-bg/20">
+              <div
+                key={kid}
+                className="flex border-b border-furnace-border/30 hover:bg-furnace-bg/20"
+              >
                 <div className="w-[140px] min-w-[140px] px-3 py-4 text-xs font-semibold text-furnace-text border-r border-furnace-border flex items-center gap-2">
-                  <div className={clsx("w-2 h-2 rounded-full", usage >= 90 ? "bg-furnace-red" : usage >= 70 ? "bg-furnace-amber" : usage >= 40 ? "bg-furnace-purple" : "bg-furnace-blue")} />
+                  <div
+                    className={clsx(
+                      "w-2 h-2 rounded-full",
+                      usage >= 90
+                        ? "bg-furnace-red"
+                        : usage >= 70
+                          ? "bg-furnace-amber"
+                          : usage >= 40
+                            ? "bg-furnace-purple"
+                            : "bg-furnace-blue",
+                    )}
+                  />
                   {kn.name}
                 </div>
-                <div className="relative flex-shrink-0" style={{ width: days * colW, height: rowH }}>
+                <div
+                  className="relative flex-shrink-0"
+                  style={{ width: days * colW, height: rowH }}
+                >
                   {/* Background grid */}
-                  {dates.map(d => (
-                    <div key={d.toISOString()} className={clsx("absolute top-0 bottom-0 border-r border-furnace-border/15", d.getDay() === 0 || d.getDay() === 6 ? "bg-furnace-red/3" : "")}
-                      style={{ left: differenceInDays(d, minDate) * colW, width: colW }} />
+                  {dates.map((d) => (
+                    <div
+                      key={d.toISOString()}
+                      className={clsx(
+                        "absolute top-0 bottom-0 border-r border-furnace-border/15",
+                        d.getDay() === 0 || d.getDay() === 6
+                          ? "bg-furnace-red/3"
+                          : "",
+                      )}
+                      style={{
+                        left: differenceInDays(d, minDate) * colW,
+                        width: colW,
+                      }}
+                    />
                   ))}
                   {/* Entries */}
-                  {kn.entries.map(e => {
+                  {kn.entries.map((e) => {
                     const d = parseISO(e.delivery_date);
                     if (d < minDate || d > maxDate) return null;
                     const left = timeToLeft(e.delivery_date, minDate, colW);
@@ -223,17 +370,23 @@ export default function Gantt() {
                     const blockW = Math.max(60, spanDays * colW - 4); // 以時間跨度計算寬度
                     const blkColor = utilizationColor(usage);
                     return (
-                      <Tooltip key={e.plan_no + e.id}
+                      <Tooltip
+                        key={e.plan_no + e.id}
                         content={
                           <>
-                            <strong>{e.plan_no}</strong><br />
+                            <strong>{e.plan_no}</strong>
+                            <br />
                             合約: {e.contract_no || "-"} | {e.qty}支<br />
                             {e.voltage_kv}kV | {e.est_hours}h<br />
                             交期: {e.delivery_date}
                           </>
-                        }>
+                        }
+                      >
                         <div
-                          className={clsx("absolute top-2 h-[36px] rounded-lg px-3 flex items-center text-[12px] font-semibold text-white overflow-hidden whitespace-nowrap shadow-md", blkColor)}
+                          className={clsx(
+                            "absolute top-2 h-[36px] rounded-lg px-3 flex items-center text-[12px] font-semibold text-white overflow-hidden whitespace-nowrap shadow-md",
+                            blkColor,
+                          )}
                           style={{ left, width: blockW }}
                         >
                           {e.plan_no}

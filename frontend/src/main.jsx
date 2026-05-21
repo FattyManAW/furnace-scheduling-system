@@ -20,11 +20,15 @@ initScrollReveal();
   const el = document.querySelector('meta[name="theme-color"]');
   if (!el) return;
   const update = () => {
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const isDark =
+      document.documentElement.getAttribute("data-theme") === "dark";
     el.setAttribute("content", isDark ? "#181b23" : "#fafafa");
   };
   update();
-  new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  new MutationObserver(update).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
 })();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
