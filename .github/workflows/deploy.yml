@@ -15,8 +15,22 @@ on:
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
+  # ── Lint (ruff) ───────────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - name: Install ruff
+        run: pip install ruff
+      - name: Ruff check
+        run: ruff check .
+
   # ── Backend Tests ─────────────────────────────────────────────────
   test-backend:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,12 +60,18 @@ jobs:
           cd backend
           python3 -m uvicorn main:app --host 0.0.0.0 --port 8002 &
           sleep 3
-          curl -sf http://localhost:8002/health
-          curl -sf http://localhost:8002/api/v1/orders/count
-          curl -sf http://localhost:8002/api/v1/molds/
-          curl -sf http://localhost:8002/api/v1/kilns/
-          curl -sf http://localhost:8002/api/v1/schedule/
+          curl -sf http://127.0.0.1:8002/health
+          curl -sf http://127.0.0.1:8002/api/v1/orders/count
+          curl -sf http://127.0.0.1:8002/api/v1/molds/
+          curl -sf http://127.0.0.1:8002/api/v1/kilns/
+          curl -sf http://127.0.0.1:8002/api/v1/schedule/
           echo "✅ All endpoints OK"
+
+      - name: Pytest
+        run: |
+          cd backend
+          pip install pytest pytest-cov
+          pytest tests/ -v --tb=short
 
   # ── Backend Docker Build & Push ────────────────────────────────────
   build-backend:

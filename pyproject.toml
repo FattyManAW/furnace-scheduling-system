@@ -1,0 +1,29 @@
+[tool.ruff]
+# Elite Squad quality standard — ruff config
+# Applied to: furnace-scheduling-system + OTD
+
+target-version = "py39"
+line-length = 100
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort (import ordering)
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",  # line too long → handled by formatter
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+
+[lint.isort]
+known-first-party = ["backend", "frontend", "agents", "erp_sim"]
