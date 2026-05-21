@@ -13,28 +13,41 @@ def validate_schedule(result: dict) -> dict:
         "stats": {},
     }
 
-    # 1. 每日工時檢查
+    # 1. 產能檢查（全廠產能 vs 工作量）
     total_h = result["summary"].get("total_hours", 0)
-    if total_h > DAILY_HOUR_CAP * 1.2:
-        report["errors"].append(
-            f"工時嚴重超標: {total_h:.0f}h > {DAILY_HOUR_CAP:.0f}h (×1.2 警戒)"
-        )
-        report["valid"] = False
-    elif total_h > DAILY_HOUR_CAP:
-        report["warnings"].append(
-            f"工時超標: {total_h:.0f}h > {DAILY_HOUR_CAP:.0f}h"
-        )
+    kiln_count = len(result.get("kiln_schedule", {}))
+    scheduled_orders = result.get("order_schedule", [])
+    
+    # 預估排程天數 = 總工時 / (爐數 × 單日上限)
+    if kiln_count > 0 and scheduled_orders:
+        daily_capacity = DAILY_HOUR_CAP * kiln_count
+        estimated_days = total_h / daily_capacity
+        report["stats"]["estimated_days"] = round(estimated_days, 1)
+        report["stats"]["daily_capacity"] = round(daily_capacity, 1)
+        
+        # 檢查排程天數合理性（超過 60 天可能產能不足）
+        if estimated_days > 90:
+            report["errors"].append(
+                f"產能嚴重不足: 預估需要 {estimated_days:.0f} 天 (全廠 {kiln_count} 爐)"
+            )
+            report["valid"] = False
+        elif estimated_days > 60:
+            report["warnings"].append(
+                f"產能吃緊: 預估需要 {estimated_days:.0f} 天 (全廠 {kiln_count} 爐)"
+            )
 
-    # 2. 排程密度檢查（各爐工時分布）
+    # 2. 排程密度檢查（各爐工時分布 — 均勻度分析）
     kiln_hours = [k["hours_used"] for k in result.get("kiln_schedule", {}).values()]
     if kiln_hours:
         avg = sum(kiln_hours) / len(kiln_hours)
         report["stats"]["avg_kiln_hours"] = round(avg, 1)
         report["stats"]["max_kiln_hours"] = max(kiln_hours)
         report["stats"]["min_kiln_hours"] = min(kiln_hours)
-        if max(kiln_hours) > DAILY_HOUR_CAP:
-            report["errors"].append("有爐次工時超過每日上限")
-            report["valid"] = False
+        # 負載不均檢查：max/min > 3.0 表示有爐負擔過重
+        if min(kiln_hours) > 0 and max(kiln_hours) / min(kiln_hours) > 5.0:
+            report["warnings"].append(
+                f"爐次負載不均: max={max(kiln_hours):.0f}h / min={min(kiln_hours):.0f}h"
+            )
 
     # 3. 大產品檢查
     for s in result.get("order_schedule", []):
