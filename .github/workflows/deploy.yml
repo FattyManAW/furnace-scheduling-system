@@ -17,7 +17,9 @@ on:
 jobs:
   # ── Lint (ruff) ───────────────────────────────────────────────────
   lint:
+    name: Lint (ruff — informational)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

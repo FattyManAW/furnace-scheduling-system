@@ -15,6 +15,7 @@ select = [
 ignore = [
     "E501",  # line too long
     "E401",  # multiple imports on one line (legacy code pattern)
+    "E402",  # module-level import not at top (after config/env setup)
     "F401",  # unused imports (legacy — fix in Phase 2)
 ]
 
