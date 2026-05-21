@@ -42,7 +42,7 @@ def get_dashboard(db: Session = Depends(get_db)):
     ).order_by(Order.delivery_date).all()
 
     # Today's schedule
-    today_entries = [e for e in s_entries if e.delivery_date and e.delivery_date == today.isoformat()]
+    today_entries = [e for e in s_entries if e.delivery_date and e.delivery_date == today]
 
     # Pending by contract
     pending_orders = db.query(Order).filter(Order.status == "pending").all()
