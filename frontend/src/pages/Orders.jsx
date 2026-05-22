@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { api } from "../lib/api";
 import { format } from "date-fns";
 import { clsx } from "clsx";
@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 const PAGE_SIZE = 20;
 const STATUSES = ["all", "pending", "scheduled", "completed"];
@@ -26,6 +27,14 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const searchTimer = useRef(null);
+
+  const handleSearch = useCallback((val) => {
+    setSearch(val);
+    clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => setDebouncedSearch(val), 300);
+  }, []);
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -36,6 +45,7 @@ export default function Orders() {
   const [bulkText, setBulkText] = useState("");
   const [bulkMsg, setBulkMsg] = useState("");
   const [error, setError] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -45,7 +55,7 @@ export default function Orders() {
         skip: (page - 1) * PAGE_SIZE,
         limit: PAGE_SIZE,
         status: statusFilter === "all" ? undefined : statusFilter,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
       });
       const items = Array.isArray(data) ? data : (data.items || []);
       setOrders(items);
@@ -62,10 +72,10 @@ export default function Orders() {
 
   useEffect(() => {
     load();
-  }, [page, statusFilter]);
+  }, [page, statusFilter, debouncedSearch]);
   useEffect(() => {
     setPage(1);
-  }, [search, statusFilter]);
+  }, [debouncedSearch, statusFilter]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -99,14 +109,22 @@ export default function Orders() {
   };
 
   const handleSave = async () => {
+    // Validate required fields
+    if (!form.plan_no?.trim()) { setError("計劃單號為必填"); setTimeout(() => setError(null), 4000); return; }
+    const v = parseFloat(form.voltage_kv);
+    const a = parseFloat(form.current_a);
+    const q = parseInt(form.qty);
+    if (!v || v <= 0) { setError("電壓必須大於 0"); setTimeout(() => setError(null), 4000); return; }
+    if (isNaN(q) || q <= 0) { setError("數量必須至少為 1"); setTimeout(() => setError(null), 4000); return; }
+
     const payload = {
-      plan_no: form.plan_no,
-      contract_no: form.contract_no,
-      voltage_kv: parseFloat(form.voltage_kv) || 0,
-      current_a: parseFloat(form.current_a) || 0,
-      qty: parseInt(form.qty) || 0,
-      delivery_date: form.delivery_date,
-      notes: form.notes,
+      plan_no: form.plan_no.trim(),
+      contract_no: form.contract_no?.trim() || "",
+      voltage_kv: v,
+      current_a: a || 0,
+      qty: q,
+      delivery_date: form.delivery_date || "",
+      notes: form.notes || "",
       status: form.status || "pending",
     };
     try {
@@ -123,8 +141,10 @@ export default function Orders() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm("確定刪除？")) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget;
+    setDeleteTarget(null);
     try {
       await api.deleteOrder(id);
       load();
@@ -240,7 +260,7 @@ export default function Orders() {
             type="text"
             placeholder="搜尋計劃單號 / 合約號..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text placeholder:text-furnace-muted"
           />
         </div>
@@ -362,7 +382,7 @@ export default function Orders() {
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => handleDelete(o.id)}
+                          onClick={() => setDeleteTarget(o.id)}
                           className="p-1.5 rounded hover:bg-furnace-border/50 text-furnace-muted hover:text-furnace-red"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -511,6 +531,15 @@ export default function Orders() {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="確定刪除？"
+        message="此操作無法復原。刪除後需重新匯入資料。"
+        confirmLabel="刪除"
+        danger
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
