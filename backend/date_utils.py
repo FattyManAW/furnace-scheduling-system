@@ -21,17 +21,15 @@ def excel_to_date(raw) -> str:
     if isinstance(raw, (int, float)):
         if raw > _EXCEL_THRESHOLD:
             return (_EXCEL_EPOCH + timedelta(days=int(raw))).strftime("%Y-%m-%d")
-        if raw <= 0:
-            return _default
-        return str(raw)
+        # Values ≤ _EXCEL_THRESHOLD (including 0, negatives, 1-9999) are not valid Excel serially
+        return _default
     s = str(raw).strip()
     # Try Excel serial first
     try:
         serial = float(s)
         if serial > _EXCEL_THRESHOLD:
             return (_EXCEL_EPOCH + timedelta(days=int(serial))).strftime("%Y-%m-%d")
-        if serial <= 0:
-            return _default
+        # String-converted values ≤ _EXCEL_THRESHOLD also invalid — fall through to date parsing
     except (ValueError, OverflowError):
         pass
     # Try standard date formats
