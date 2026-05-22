@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 
 import xlrd
 
+from backend.date_utils import excel_to_date
+
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "data")
 
 # ── Module-level caches (populated by load_all()) ──────────────────────────
@@ -20,10 +22,8 @@ _MOLD_INVENTORY = None
 _DRYERS = None
 _MOLD_LOOKUP = None
 
-def _excel_date(v):
-    if isinstance(v, float) and v > 40000:
-        return (datetime(1899, 12, 30) + timedelta(days=int(v))).strftime("%Y-%m-%d")
-    return str(v)
+# Replaced by backend.date_utils.excel_to_date (shared, edge-case-safe)
+_excel_date = excel_to_date
 
 # ─── 1. 產品規格表 (File 5 + File 1 partial) ───────────────────────────
 def load_products():
