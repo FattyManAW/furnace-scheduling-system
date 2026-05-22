@@ -10,6 +10,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { PageSkeleton } from "../components/Skeleton";
+import { observeReveal } from "../lib/anim";
 
 /* ── KPI Card (ISA-101 grey + semantic accents) ── */
 function KpiCard({ icon: Icon, label, value, sub, accent }) {
@@ -38,7 +39,7 @@ function KpiCard({ icon: Icon, label, value, sub, accent }) {
             {label}
           </p>
           <p
-            className={`text-[28px] font-bold leading-tight ${accentText[accent] || "text-furnace-heading"}`}
+            className={`text-[28px] font-bold leading-tight count-animate ${accentText[accent] || "text-furnace-heading"}`}
           >
             {value}
           </p>
@@ -131,6 +132,14 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Trigger scroll-reveal + count-animate after data renders
+  useEffect(() => {
+    if (data) {
+      const t = setTimeout(() => observeReveal(), 100);
+      return () => clearTimeout(t);
+    }
+  }, [data]);
+
   if (loading) return <PageSkeleton variant="dashboard" />;
   if (err)
     return (
@@ -173,7 +182,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── KPI Four-Card (Bento Grid) ── */}
-      <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 reveal">
         <KpiCard
           icon={ClipboardList}
           label="總訂單數"
@@ -213,7 +222,7 @@ export default function Dashboard() {
       />
 
       {/* ── Orders / Overdue two-col ── */}
-      <div className="fade-slide-up d2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="fade-slide-up d2 grid grid-cols-1 lg:grid-cols-2 gap-4 reveal">
         {/* Order Status Breakdown */}
         <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-furnace-heading mb-4">

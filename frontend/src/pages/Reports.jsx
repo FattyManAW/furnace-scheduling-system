@@ -8,6 +8,7 @@ import {
   Calendar as CalIcon,
 } from "lucide-react";
 import { PageSkeleton, EmptyState } from "../components/Skeleton";
+import { observeReveal } from "../lib/anim";
 
 export default function Reports() {
   const [dashboard, setDashboard] = useState(null);
@@ -23,6 +24,13 @@ export default function Reports() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (dashboard) {
+      const t = setTimeout(() => observeReveal(), 100);
+      return () => clearTimeout(t);
+    }
+  }, [dashboard]);
 
   const downloadCsv = async (url, filename) => {
     const res = await fetch(url);
@@ -70,7 +78,7 @@ export default function Reports() {
       </div>
 
       {/* KPI Cards */}
-      <div className="fade-slide-up d2 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="fade-slide-up d2 grid grid-cols-2 md:grid-cols-4 gap-4 reveal">
         {[
           { label: "總訂單", val: o.total, color: "text-furnace-blue" },
           { label: "待排", val: o.pending, color: "text-furnace-amber" },

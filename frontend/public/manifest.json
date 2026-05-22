@@ -1,0 +1,20 @@
+{
+  "name": "干式套管最佳化排爐系統",
+  "short_name": "排爐系統",
+  "description": "智慧排程引擎、甘特圖可視化、訂單管理、模具庫存追蹤",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#181b23",
+  "theme_color": "#181b23",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "zh-TW",
+  "dir": "ltr"
+}
