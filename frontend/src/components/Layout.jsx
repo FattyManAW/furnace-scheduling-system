@@ -1,7 +1,34 @@
 import { useState, useEffect, useCallback } from "react";
-import { Menu, X, ChevronUp } from "lucide-react";
+import { Menu, X, ChevronUp, WifiOff } from "lucide-react";
 import Sidebar from "./Sidebar";
 import ErrorBoundary from "./ErrorBoundary";
+
+/** Offline detection banner — appears when navigator API reports offline */
+function OfflineBanner() {
+  const [offline, setOffline] = useState(
+    typeof navigator !== "undefined" && !navigator.onLine,
+  );
+
+  useEffect(() => {
+    const goOffline = () => setOffline(true);
+    const goOnline = () => setOffline(false);
+    window.addEventListener("offline", goOffline);
+    window.addEventListener("online", goOnline);
+    return () => {
+      window.removeEventListener("offline", goOffline);
+      window.removeEventListener("online", goOnline);
+    };
+  }, []);
+
+  if (!offline) return null;
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[60] bg-furnace-amber/90 text-white text-sm font-semibold py-2 px-4 flex items-center justify-center gap-2">
+      <WifiOff className="w-4 h-4" />
+      目前為離線模式，部分功能可能受限
+    </div>
+  );
+}
 
 /** Back-to-top floating button — appears after 400px scroll */
 function BackToTop() {
@@ -49,6 +76,7 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-furnace-bg text-furnace-text font-sans">
+      <OfflineBanner />
       <div className="flex">
         {/* Desktop Sidebar */}
         <div className="hidden md:block">

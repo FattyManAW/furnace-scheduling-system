@@ -15,6 +15,13 @@ listenSystemTheme();
 // Scroll-reveal animation observer (global, across all pages)
 initScrollReveal();
 
+// Service Worker registration (offline cache)
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
 // Dynamic <meta name="theme-color"> follows data-theme — browser chrome tint
 (function syncThemeColor() {
   const el = document.querySelector('meta[name="theme-color"]');

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 import Layout from "./components/Layout";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -40,9 +40,9 @@ function NotFound() {
     <div className="fade-slide-up d1 flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
       <p className="text-[28px] font-bold text-furnace-muted">404</p>
       <p className="text-furnace-muted">找不到此頁面</p>
-      <a href="/" className="text-furnace-blue hover:text-furnace-blue/80 underline text-sm">
+      <Link to="/" className="text-furnace-blue hover:text-furnace-blue/80 underline text-sm">
         返回儀表板
-      </a>
+      </Link>
     </div>
   );
 }
