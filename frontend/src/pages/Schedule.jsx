@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { clsx } from "clsx";
+import { PageSkeleton, EmptyState } from "../components/Skeleton";
 import {
   Play,
   AlertTriangle,
@@ -99,7 +100,7 @@ export default function Schedule() {
       </div>
 
       {loading ? (
-        <div className="text-furnace-muted py-12 text-center">載入中...</div>
+        <PageSkeleton variant="table" />
       ) : err && orders.length === 0 ? (
         <div className="text-center py-8">
           <span className="text-furnace-red bg-furnace-red/5 px-3 py-2 rounded-lg text-sm">
@@ -118,6 +119,8 @@ export default function Schedule() {
                 <button
                   key={s.value}
                   onClick={() => setStrategy(s.value)}
+                  aria-pressed={strategy === s.value}
+                  aria-label={`排程策略：${s.label}`}
                   className={clsx(
                     "p-4 rounded-xl border-2 text-left transition-all",
                     strategy === s.value
@@ -237,6 +240,7 @@ export default function Schedule() {
             <button
               onClick={handleRun}
               disabled={running || orders.length === 0}
+              aria-label={running ? "排程計算中" : "開始排程優化"}
               className={clsx(
                 "mt-4 px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all",
                 running

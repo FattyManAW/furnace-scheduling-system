@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { format } from "date-fns";
 import { clsx } from "clsx";
+import { PageSkeleton, EmptyState } from "../components/Skeleton";
 import {
   Search,
   Plus,
@@ -11,6 +12,7 @@ import {
   Save,
   Upload,
   Filter,
+  ClipboardList,
   ChevronUp,
   ChevronDown,
   ChevronLeft,
@@ -52,7 +54,6 @@ export default function Orders() {
       );
       setTotal(cnt.count || 0);
     } catch (e) {
-      console.warn("Error loading data:", e.message);
       setError(e.message || "載入失敗");
     } finally {
       setLoading(false);
@@ -308,20 +309,20 @@ export default function Orders() {
                 </tr>
               ) : loading ? (
                 <tr>
-                  <td
-                    colSpan={9}
-                    className="px-4 py-8 text-center text-furnace-muted"
-                  >
-                    載入中...
+                  <td colSpan={9} className="px-4 py-8">
+                    <PageSkeleton variant="table" />
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={9}
-                    className="px-4 py-8 text-center text-furnace-muted"
-                  >
-                    無資料
+                  <td colSpan={9} className="px-4 py-8">
+                    <EmptyState
+                      icon={ClipboardList}
+                      label="尚無訂單資料"
+                      hint="點擊「新增訂單」建立第一筆訂單"
+                      actionLabel="新增訂單"
+                      onAction={openCreate}
+                    />
                   </td>
                 </tr>
               ) : (

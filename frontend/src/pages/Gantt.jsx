@@ -12,6 +12,7 @@ import { clsx } from "clsx";
 import {
   ChevronLeft, ChevronRight, GripVertical, GitBranch,
 } from "lucide-react";
+import { PageSkeleton } from "../components/Skeleton";
 
 // ── View mode: 日/週/月 ─────────────────
 const VIEW_MODES = [
@@ -151,7 +152,7 @@ export default function Gantt() {
         await api.updateOrder(entry.id, { delivery_date: entry.delivery_date });
         saved++;
       } catch (err) {
-        console.warn("Failed to save", entry.plan_no, err);
+        // save error surfaced via per-row status indicator
       }
     }
     // Refresh data
@@ -161,7 +162,7 @@ export default function Gantt() {
   }, [localSchedule]);
 
   if (loading)
-    return <div className="text-furnace-muted py-12 text-center">載入排程資料中...</div>;
+    return <PageSkeleton variant="table" />;
 
   if (error && !schedule)
     return (

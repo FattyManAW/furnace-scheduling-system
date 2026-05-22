@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { clsx } from "clsx";
+import { PageSkeleton, EmptyState } from "../components/Skeleton";
 import {
   Warehouse,
   AlertTriangle,
@@ -106,7 +107,6 @@ export default function Molds() {
       setMolds(Array.isArray(data) ? data : (data.items || []));
       setCreated(false);
     } catch (e) {
-      console.warn("Error loading data:", e.message);
       setError(e.message || "載入失敗");
     } finally {
       setLoading(false);
@@ -269,7 +269,15 @@ export default function Molds() {
           </button>
         </div>
       ) : loading ? (
-        <div className="text-furnace-muted">載入中...</div>
+        <PageSkeleton variant="cards" />
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={Warehouse}
+          label="尚無模具資料"
+          hint="點擊「新增模具」建立第一筆紀錄"
+          actionLabel="新增模具"
+          onAction={() => setModalOpen(true)}
+        />
       ) : (
         <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((m) => (

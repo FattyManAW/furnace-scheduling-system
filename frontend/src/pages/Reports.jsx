@@ -7,6 +7,7 @@ import {
   FileSpreadsheet,
   Calendar as CalIcon,
 } from "lucide-react";
+import { PageSkeleton, EmptyState } from "../components/Skeleton";
 
 export default function Reports() {
   const [dashboard, setDashboard] = useState(null);
@@ -54,7 +55,7 @@ export default function Reports() {
         </button>
       </div>
     );
-  if (loading) return <div className="text-furnace-muted">載入中...</div>;
+  if (loading) return <PageSkeleton variant="cards" />;
   if (!dashboard)
     return <div className="text-furnace-muted">無法載入報表資料</div>;
 

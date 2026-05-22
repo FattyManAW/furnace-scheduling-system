@@ -9,43 +9,7 @@ import {
   Warehouse,
   TrendingUp,
 } from "lucide-react";
-
-/* ── Skeleton Placeholder ── */
-function Skeleton({ className = "" }) {
-  return <div className={`skeleton animate-pulse ${className}`} />;
-}
-
-function DashboardSkeleton() {
-  return (
-    <div
-      className="fade-slide-up d1 space-y-6"
-      role="status"
-      aria-label="載入中"
-    >
-      <div>
-        <Skeleton className="h-8 w-36 mb-2" />
-        <Skeleton className="h-4 w-56" />
-      </div>
-      <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="fade-slide-up d2 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5"
-          >
-            <Skeleton className="h-3 w-20 mb-3" />
-            <Skeleton className="h-7 w-16 mb-2" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-        ))}
-      </div>
-      <div className="fade-slide-up d2 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Skeleton className="h-48 rounded-xl" />
-        <Skeleton className="h-48 rounded-xl" />
-      </div>
-      <span className="sr-only">儀表板資料載入中...</span>
-    </div>
-  );
-}
+import { PageSkeleton } from "../components/Skeleton";
 
 /* ── KPI Card (ISA-101 grey + semantic accents) ── */
 function KpiCard({ icon: Icon, label, value, sub, accent }) {
@@ -167,7 +131,7 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <DashboardSkeleton />;
+  if (loading) return <PageSkeleton variant="dashboard" />;
   if (err)
     return (
       <div className="bg-furnace-red/10 border border-furnace-red/20 text-furnace-red rounded-xl p-5 text-sm">
