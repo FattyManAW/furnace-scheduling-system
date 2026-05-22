@@ -550,6 +550,23 @@ select:focus-visible {
   transform: scale(0.97);
 }
 
+/* ── Back-to-top ── */
+.back-to-top-enter {
+  animation: fadeSlideUp 0.3s var(--ease-out) backwards;
+  animation-direction: reverse;
+}
+
+/* ── Scroll Progress Bar ── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--c-teal);
+  z-index: 100;
+  transition: width 0.15s linear;
+}
+
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   *,

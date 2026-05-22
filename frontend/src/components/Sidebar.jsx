@@ -8,6 +8,7 @@ import {
   Settings,
   Flame,
   Cog,
+  X,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { clsx } from "clsx";
@@ -22,11 +23,21 @@ const nav = [
   { to: "/settings", icon: Cog, label: "系統設定" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }) {
   const { pathname } = useLocation();
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-[var(--c-sidebar-width)] bg-furnace-card border-r border-furnace-border flex flex-col z-50">
+      {/* Mobile close button */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          aria-label="關閉選單"
+          className="md:hidden absolute top-3 right-3 p-2 rounded-lg hover:bg-furnace-border/50 text-furnace-muted"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      )}
       {/* Logo */}
       <div className="p-5 border-b border-furnace-border">
         <div className="flex items-center gap-2.5">
