@@ -316,8 +316,8 @@ export default function Schedule() {
                     ⚠️ 排程警示 ({result.warnings.length})
                   </p>
                   <div className="fade-slide-up d1 space-y-1 max-h-40 overflow-y-auto">
-                    {result.warnings.map((w, i) => (
-                      <p key={i} className="text-xs text-furnace-muted">
+                    {result.warnings.map((w) => (
+                    <p key={w} className="text-xs text-furnace-muted">
                         {w}
                       </p>
                     ))}
@@ -401,9 +401,9 @@ export default function Schedule() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {k.orders.map((o, i) => (
+                                {k.orders.map((o) => (
                                   <tr
-                                    key={i}
+                                    key={o.plan_no || o.order_id}
                                     className="border-t border-furnace-border/30"
                                   >
                                     <td className="py-1.5 font-semibold">
@@ -436,9 +436,9 @@ export default function Schedule() {
                 最近排程記錄
               </h2>
               <div className="fade-slide-up d1 space-y-2">
-                {recentRuns.map((r, i) => (
+                {recentRuns.map((r) => (
                   <div
-                    key={i}
+                    key={r.time + r.strategy}
                     className="flex items-center justify-between text-xs py-1.5 border-b border-furnace-border/30 last:border-0"
                   >
                     <span className="text-furnace-muted">{r.time}</span>
