@@ -263,7 +263,7 @@ export default function Schedule() {
 
           {/* Result */}
           {result && (
-            <div className="fade-slide-up d1 space-y-4">
+            <div className="fade-slide-up d1 space-y-4 success-pulse rounded-xl">
               {/* Summary Cards */}
               <div className="fade-slide-up d2 grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[

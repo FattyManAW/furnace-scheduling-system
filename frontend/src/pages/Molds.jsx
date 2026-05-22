@@ -294,11 +294,11 @@ export default function Molds() {
       {/* Modal */}
       {modalOpen && (
         <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 modal-backdrop"
           onClick={() => setModalOpen(false)}
         >
           <div
-            className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-2xl p-6 w-full max-w-lg"
+            className="modal-panel bg-furnace-card hover-lift border border-furnace-border rounded-2xl p-6 w-full max-w-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-bold mb-5">

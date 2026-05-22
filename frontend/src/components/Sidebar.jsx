@@ -51,15 +51,20 @@ export default function Sidebar() {
             end={to === "/"}
             className={({ isActive }) =>
               clsx(
-                "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all",
+                "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group relative",
                 isActive
                   ? "bg-furnace-green/15 text-furnace-green font-semibold"
                   : "text-furnace-muted hover:bg-furnace-border/50 hover:text-furnace-text",
               )
             }
           >
-            <Icon className="w-[18px] h-[18px]" />
+            <Icon className="w-[18px] h-[18px] transition-transform duration-200 group-hover:scale-110" />
             {label}
+            {({ isActive }) =>
+              isActive ? (
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-furnace-green shadow-[0_0_6px_var(--c-teal)]" />
+              ) : null
+            }
           </NavLink>
         ))}
       </nav>
