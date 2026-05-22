@@ -22,7 +22,8 @@ initScrollReveal();
   const update = () => {
     const isDark =
       document.documentElement.getAttribute("data-theme") === "dark";
-    el.setAttribute("content", isDark ? "#181b23" : "#fafafa");
+    const bgColor = getComputedStyle(document.documentElement).getPropertyValue("--c-bg").trim();
+    el.setAttribute("content", bgColor);
   };
   update();
   new MutationObserver(update).observe(document.documentElement, {

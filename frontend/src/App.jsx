@@ -1,26 +1,36 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
-import Orders from "./pages/Orders";
-import Molds from "./pages/Molds";
-import Schedule from "./pages/Schedule";
-import Gantt from "./pages/Gantt";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Orders = lazy(() => import("./pages/Orders"));
+const Molds = lazy(() => import("./pages/Molds"));
+const Schedule = lazy(() => import("./pages/Schedule"));
+const Gantt = lazy(() => import("./pages/Gantt"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Settings = lazy(() => import("./pages/Settings"));
+
+function PageFallback() {
+  return <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="w-6 h-6 border-2 border-furnace-blue border-t-transparent rounded-full animate-spin" />
+  </div>;
+}
 
 export default function App() {
   return (
     <Layout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/molds" element={<Molds />} />
-        <Route path="/schedule" element={<Schedule />} />
-        <Route path="/gantt" element={<Gantt />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/molds" element={<Molds />} />
+          <Route path="/schedule" element={<Schedule />} />
+          <Route path="/gantt" element={<Gantt />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </Layout>
   );
 }
