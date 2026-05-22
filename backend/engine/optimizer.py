@@ -35,7 +35,7 @@ def _si(v):
 
 
 # ── 共享日期解析 (由 backend.date_utils 統一) ─
-from backend.date_utils import parse_delivery_date as _dkey
+from date_utils import parse_delivery_date as _dkey
 
 
 def _load_data(data_dir: str | None = None):
