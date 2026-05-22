@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import Callable
 
 DAILY_HOUR_CAP = 1098.0
@@ -34,30 +34,8 @@ def _si(v):
         return 0
 
 
-def _dkey(o):
-    """Parse delivery_date to date object with Excel serial date support."""
-    d = o.get("delivery_date", "")
-    if isinstance(d, (int, float)):
-        if d > 10000:
-            return (datetime(1899, 12, 30) + timedelta(days=int(d))).date()
-        return date.today() + timedelta(days=60)
-    s = str(d).strip()
-    if not s:
-        return date.today() + timedelta(days=60)
-    # Excel serial date string "46117.0"
-    try:
-        serial = float(s)
-        if serial > 10000:
-            return (datetime(1899, 12, 30) + timedelta(days=int(serial))).date()
-    except (ValueError, OverflowError):
-        pass
-    # Standard date formats
-    for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y%m%d"):
-        try:
-            return datetime.strptime(s[:10], fmt).date()
-        except Exception:
-            continue
-    return date.today() + timedelta(days=60)
+# ── 共享日期解析 (由 backend.date_utils 統一) ─
+from backend.date_utils import parse_delivery_date as _dkey
 
 
 def _load_data(data_dir: str | None = None):
@@ -163,7 +141,7 @@ def delivery_priority(order: dict, today: date | None = None) -> float:
     """
     if today is None:
         today = date.today()
-    due = _dkey(order)
+    due = _dkey(order.get("delivery_date", ""))
     if isinstance(due, datetime):
         due = due.date()
     diff = (due - today).days
@@ -236,7 +214,7 @@ def schedule_orders(
         o["_priority"] = delivery_priority(o, today)
 
     # Sort: highest priority first, then earliest delivery
-    orders_sorted = sorted(orders, key=lambda o: (-o["_priority"], _dkey(o)))
+    orders_sorted = sorted(orders, key=lambda o: (-o["_priority"], _dkey(o.get("delivery_date", ""))))
 
     # ── kiln state tracking ─────────────────────────────────────────
     # Per-kiln hours limit: only enforced when max_hours_per_kiln is set.
@@ -301,7 +279,7 @@ def schedule_orders(
 
         prod = prods[0]
         qty = _si(order.get("qty", 0))
-        delivery = str(_dkey(order))
+        delivery = str(_dkey(order.get("delivery_date", "")))
         contract = str(order.get("contract_no", ""))
 
         mold_od = _sf(prod.get("mold_od", 0))
