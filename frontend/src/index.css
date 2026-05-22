@@ -529,13 +529,13 @@ select:focus-visible {
 /* ── Success Pulse ── */
 @keyframes successPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(60, 201, 126, 0.5);
+    box-shadow: 0 0 0 0 rgba(var(--c-success-rgb), 0.5);
   }
   70% {
-    box-shadow: 0 0 0 12px rgba(60, 201, 126, 0);
+    box-shadow: 0 0 0 12px rgba(var(--c-success-rgb), 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(60, 201, 126, 0);
+    box-shadow: 0 0 0 0 rgba(var(--c-success-rgb), 0);
   }
 }
 .success-pulse {
