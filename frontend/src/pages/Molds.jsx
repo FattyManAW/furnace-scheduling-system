@@ -103,10 +103,10 @@ export default function Molds() {
     setError(null);
     try {
       const data = await api.getMolds({ low_stock: lowOnly });
-      setMolds(data);
+      setMolds(Array.isArray(data) ? data : (data.items || []));
       setCreated(false);
     } catch (e) {
-      console.error(e);
+      console.warn("Error loading data:", e.message);
       setError(e.message || "載入失敗");
     } finally {
       setLoading(false);

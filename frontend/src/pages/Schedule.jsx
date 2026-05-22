@@ -31,8 +31,8 @@ export default function Schedule() {
   useEffect(() => {
     Promise.all([api.getKilns(), api.getOrders({ limit: 500 })])
       .then(([ks, os]) => {
-        setKilns(ks);
-        setOrders(os);
+        setKilns(Array.isArray(ks) ? ks : (ks.items || []));
+        setOrders(Array.isArray(os) ? os : (os.items || []));
       })
       .catch((e) => setErr(e.message))
       .finally(() => setLoading(false));
@@ -77,7 +77,7 @@ export default function Schedule() {
       );
       // Refresh kilns to show schedule
       const ks = await api.getKilns();
-      setKilns(ks);
+      setKilns(Array.isArray(ks) ? ks : (ks.items || []));
     } catch (e) {
       setErr(e.message);
     } finally {

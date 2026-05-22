@@ -45,13 +45,14 @@ export default function Orders() {
         status: statusFilter === "all" ? undefined : statusFilter,
         search: search || undefined,
       });
-      setOrders(data);
+      const items = Array.isArray(data) ? data : (data.items || []);
+      setOrders(items);
       const cnt = await api.countOrders(
         statusFilter === "all" ? undefined : statusFilter,
       );
-      setTotal(cnt.count);
+      setTotal(cnt.count || 0);
     } catch (e) {
-      console.error(e);
+      console.warn("Error loading data:", e.message);
       setError(e.message || "載入失敗");
     } finally {
       setLoading(false);

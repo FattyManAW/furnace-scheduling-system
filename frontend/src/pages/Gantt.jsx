@@ -239,19 +239,19 @@ export default function Gantt() {
             ))}
           </div>
           {/* Nav buttons */}
-          <button onClick={() => setViewStart(addDays(minDate, -navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronLeft className="w-4 h-4" /></button>
+          <button onClick={() => setViewStart(addDays(minDate, -navDays))} aria-label="向前" className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronLeft className="w-4 h-4" /></button>
           <span className="text-sm text-furnace-text px-2 font-semibold min-w-[200px] text-center">
             {format(minDate, "yyyy/MM/dd")} — {format(addDays(minDate, days - 1), "yyyy/MM/dd")}
           </span>
-          <button onClick={() => setViewStart(addDays(minDate, navDays))} className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronRight className="w-4 h-4" /></button>
-          <button onClick={() => setViewStart(startOfDay(new Date()))} className="px-2 py-1 text-xs text-furnace-blue border border-furnace-blue/30 rounded hover:bg-furnace-blue/10">📅 今天</button>
+          <button onClick={() => setViewStart(addDays(minDate, navDays))} aria-label="向後" className="p-2 rounded-lg border border-furnace-border hover:bg-furnace-border/50"><ChevronRight className="w-4 h-4" /></button>
+          <button onClick={() => setViewStart(startOfDay(new Date()))} aria-label="回到今天" className="px-2 py-1 text-xs text-furnace-blue border border-furnace-blue/30 rounded hover:bg-furnace-blue/10">📅 今天</button>
           {/* Deps toggle */}
-          <button onClick={() => setDepsVisible(!depsVisible)} className={clsx("px-2 py-1 text-xs rounded border transition-all", depsVisible ? "bg-furnace-purple/10 text-furnace-purple border-furnace-purple/30" : "text-furnace-muted border-furnace-border")}>
+          <button onClick={() => setDepsVisible(!depsVisible)} aria-label={depsVisible ? "隱藏相依線" : "顯示相依線"} className={clsx("px-2 py-1 text-xs rounded border transition-all", depsVisible ? "bg-furnace-purple/10 text-furnace-purple border-furnace-purple/30" : "text-furnace-muted border-furnace-border")}>
             <GitBranch className="w-3 h-3 inline mr-1" />相依線
           </button>
           {/* Save button */}
           {hasChanges && (
-            <button onClick={saveChanges} className="px-3 py-1 text-xs font-semibold bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors">
+            <button onClick={saveChanges} aria-label="儲存拖曳變更" className="px-3 py-1 text-xs font-semibold bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors">
               儲存變更
             </button>
           )}
