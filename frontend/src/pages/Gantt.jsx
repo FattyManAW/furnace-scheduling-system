@@ -104,17 +104,24 @@ export default function Gantt() {
   }, []);
 
   // ── 拖曳處理 ─────────────────
+  // ── Unified drag clientX extraction (mouse + touch) ──
+  const getClientX = useCallback((e) => {
+    if (e.touches && e.touches[0]) return e.touches[0].clientX;
+    if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].clientX;
+    return e.clientX;
+  }, []);
+
   const handleDragStart = useCallback((e, entryIds) => {
     const data = localSchedule;
     if (!data) return;
-    setDragging({ ids: entryIds, startClientX: e.clientX, moved: false });
-  }, [localSchedule]);
+    setDragging({ ids: entryIds, startClientX: getClientX(e), moved: false });
+  }, [localSchedule, getClientX]);
 
   const handleDrag = useCallback((e) => {
     setDragging((prev) =>
-      prev ? { ...prev, currentClientX: e.clientX, moved: true } : null,
+      prev ? { ...prev, currentClientX: getClientX(e), moved: true } : null,
     );
-  }, []);
+  }, [getClientX]);
 
   const handleDragEnd = useCallback((e) => {
     if (!dragging || !localSchedule) { setDragging(null); return; }
@@ -122,7 +129,7 @@ export default function Gantt() {
     const cw = VIEW_MODES[viewMode].colW;
 
     if (dragging.moved && dragging.ids) {
-      const dayDelta = Math.round((e.clientX - (dragging.startClientX || e.clientX)) / cw);
+      const dayDelta = Math.round((getClientX(e) - (dragging.startClientX || getClientX(e))) / cw);
       if (dayDelta !== 0) {
         const updated = JSON.parse(JSON.stringify(localSchedule));
         dragging.ids.forEach((id) => {
@@ -138,7 +145,7 @@ export default function Gantt() {
       }
     }
     setDragging(null);
-  }, [dragging, localSchedule, viewMode]);
+  }, [dragging, localSchedule, viewMode, getClientX]);
 
   // ── 儲存拖曳變更 ─────────────────
   const saveChanges = useCallback(async () => {
@@ -264,6 +271,8 @@ export default function Gantt() {
         onMouseMove={handleDrag}
         onMouseUp={handleDragEnd}
         onMouseLeave={handleDragEnd}
+        onTouchMove={handleDrag}
+        onTouchEnd={handleDragEnd}
       >
         <div className="inline-block min-w-full relative">
           {/* Header */}
@@ -316,7 +325,7 @@ export default function Gantt() {
                             合約: {e.contract_no || "-"} | {e.qty}支 | {e.voltage_kv}kV | {e.est_hours}h<br />
                             交期: {e.delivery_date} | 狀態: {LIFECYCLE_LABELS[lc] || lc}
                             <br />
-                            <span className="text-[10px] opacity-60">🖱️ 拖曳可調整交期</span>
+                            <span className="text-[10px] opacity-60">🖱️👆 拖曳可調整交期</span>
                           </>
                         }
                       >
@@ -328,6 +337,7 @@ export default function Gantt() {
                           )}
                           style={{ left, width: blockW }}
                           onMouseDown={(ev) => handleDragStart(ev, [e.id || e.plan_no])}
+                          onTouchStart={(ev) => handleDragStart(ev, [e.id || e.plan_no])}
                         >
                           <GripVertical className="w-3 h-3 mr-1 opacity-60 flex-shrink-0" />
                           {e.plan_no}
