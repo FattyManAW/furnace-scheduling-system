@@ -11,8 +11,9 @@ const Reports = lazy(() => import("./pages/Reports"));
 const Settings = lazy(() => import("./pages/Settings"));
 
 function PageFallback() {
-  return <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="w-6 h-6 border-2 border-furnace-blue border-t-transparent rounded-full animate-spin" />
+  return <div className="flex items-center justify-center min-h-[60vh]" role="status" aria-label="頁面載入中">
+    <div className="w-6 h-6 border-2 border-furnace-blue border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+    <span className="sr-only">載入中...</span>
   </div>;
 }
 
