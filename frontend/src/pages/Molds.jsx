@@ -234,12 +234,14 @@ export default function Molds() {
       <div className="fade-slide-up d6 flex gap-3 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-furnace-muted" />
+          <label htmlFor="mold-search" className="sr-only">搜尋模具編號或位置</label>
           <input
+            id="mold-search"
             type="text"
             placeholder="搜尋模具編號或位置..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text"
+            className="w-full pl-9 pr-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text focus-visible:ring-2 focus-visible:ring-furnace-blue/40 focus-visible:outline-none"
           />
         </div>
         <button
@@ -314,24 +316,26 @@ export default function Molds() {
                 ["位置", "location", "text"],
               ].map(([l, k, t]) => (
                 <div key={k}>
-                  <label className="block text-xs text-furnace-muted mb-1">
+                  <label htmlFor={`mold-form-${k}`} className="block text-xs text-furnace-muted mb-1">
                     {l}
                   </label>
                   <input
+                    id={`mold-form-${k}`}
                     type={t}
                     value={form[k] || ""}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, [k]: e.target.value }))
                     }
-                    className="w-full px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text"
+                    className="w-full px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text focus-visible:ring-2 focus-visible:ring-furnace-blue/40 focus-visible:outline-none"
                   />
                 </div>
               ))}
               <div className="col-span-2">
-                <label className="block text-xs text-furnace-muted mb-1">
+                <label htmlFor="mold-form-notes" className="block text-xs text-furnace-muted mb-1">
                   備註
                 </label>
                 <textarea
+                  id="mold-form-notes"
                   value={form.notes || ""}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, notes: e.target.value }))

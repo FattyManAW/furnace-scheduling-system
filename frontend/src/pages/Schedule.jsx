@@ -185,7 +185,9 @@ export default function Schedule() {
                 <thead className="fade-slide-up d4 sticky top-0 bg-furnace-card hover-lift">
                   <tr className="border-b border-furnace-border">
                     <th className="px-3 py-2 w-10">
+                      <label htmlFor="schedule-select-all" className="sr-only">全選</label>
                       <input
+                        id="schedule-select-all"
                         type="checkbox"
                         checked={
                           selected.size === orders.length && orders.length > 0
@@ -210,7 +212,9 @@ export default function Schedule() {
                       className="border-b border-furnace-border/30 hover:bg-furnace-bg/30"
                     >
                       <td className="px-3 py-2">
+                        <label htmlFor={`schedule-select-${o.id}`} className="sr-only">選擇 {o.plan_no}</label>
                         <input
+                          id={`schedule-select-${o.id}`}
                           type="checkbox"
                           checked={selected.has(o.id)}
                           onChange={() => toggleSelect(o.id)}

@@ -256,20 +256,24 @@ export default function Orders() {
       <div className="fade-slide-up d4 flex gap-3 items-center bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-furnace-muted" />
+          <label htmlFor="order-search" className="sr-only">搜尋計劃單號 / 合約號</label>
           <input
+            id="order-search"
             type="text"
             placeholder="搜尋計劃單號 / 合約號..."
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text placeholder:text-furnace-muted"
+            className="w-full pl-9 pr-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text placeholder:text-furnace-muted focus-visible:ring-2 focus-visible:ring-furnace-blue/40 focus-visible:outline-none"
           />
         </div>
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-furnace-muted" />
+          <label htmlFor="order-status-filter" className="sr-only">篩選狀態</label>
           <select
+            id="order-status-filter"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-furnace-bg border border-furnace-border rounded-lg px-3 py-2 text-sm text-furnace-text"
+            className="bg-furnace-bg border border-furnace-border rounded-lg px-3 py-2 text-sm text-furnace-text focus-visible:ring-2 focus-visible:ring-furnace-blue/40 focus-visible:outline-none"
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -470,24 +474,26 @@ export default function Orders() {
                 ["交期", "delivery_date", "date"],
               ].map(([label, key, type]) => (
                 <div key={key}>
-                  <label className="block text-xs text-furnace-muted mb-1">
+                  <label htmlFor={`order-form-${key}`} className="block text-xs text-furnace-muted mb-1">
                     {label}
                   </label>
                   <input
+                    id={`order-form-${key}`}
                     type={type}
                     value={form[key] || ""}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, [key]: e.target.value }))
                     }
-                    className="w-full px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text"
+                    className="w-full px-3 py-2 bg-furnace-bg border border-furnace-border rounded-lg text-sm text-furnace-text focus-visible:ring-2 focus-visible:ring-furnace-blue/40 focus-visible:outline-none"
                   />
                 </div>
               ))}
               <div className="col-span-2">
-                <label className="block text-xs text-furnace-muted mb-1">
+                <label htmlFor="order-form-notes" className="block text-xs text-furnace-muted mb-1">
                   備註
                 </label>
                 <textarea
+                  id="order-form-notes"
                   value={form.notes || ""}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, notes: e.target.value }))
@@ -497,10 +503,11 @@ export default function Orders() {
               </div>
               {editing && (
                 <div className="col-span-2">
-                  <label className="block text-xs text-furnace-muted mb-1">
+                  <label htmlFor="order-form-status" className="block text-xs text-furnace-muted mb-1">
                     狀態
                   </label>
                   <select
+                    id="order-form-status"
                     value={form.status || "pending"}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, status: e.target.value }))
