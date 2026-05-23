@@ -4,10 +4,14 @@
 """
 import uvicorn
 from api import kilns, molds, orders, process_steps, reports, schedule
+from erp_sim import router as erp_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
+
+# 確保 erp_sim 資料表被註冊
+import erp_sim.models  # noqa: F401
 
 # ── 啟動時建立資料表 ────────────────────────────────────────────────────
 Base.metadata.create_all(bind=engine)
@@ -49,6 +53,7 @@ app.include_router(kilns.router)
 app.include_router(schedule.router)
 app.include_router(reports.router)
 app.include_router(process_steps.router)
+app.include_router(erp_router.router)
 
 
 # ── 健康檢查 / 首頁 ──────────────────────────────────────────────────────
