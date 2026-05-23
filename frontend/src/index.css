@@ -13,7 +13,15 @@
    prefers-color-scheme: auto-detect via ThemeToggle.jsx + initTheme()
    CSS fallback: @media (prefers-color-scheme: dark) with :not([data-theme])
    prevents FOUC (flash of unstyled content) before JS theme init runs.
+   
+   color-scheme: light dark — paints native UI (scrollbar, form controls)
+   in the correct theme for both light and dark modes.
    ═══════════════════════════════════════════════════════════════════ */
+
+:root,
+:root:not([data-theme]) {
+  color-scheme: light dark;
+}
 
 /* ── prefers-color-scheme CSS fallback ──
    Only applies when data-theme is NOT explicitly set (no user override).

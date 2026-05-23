@@ -397,7 +397,7 @@ export default function Gantt() {
             });
             if (!arrows.length) return null;
             return (
-              <svg className="absolute inset-0 pointer-events-none" style={{ width: days * colW, height: kilnIds.length * rowH, top: 0, left: 150 }}>
+              <svg className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{ width: days * colW, height: kilnIds.length * rowH, top: 0, left: 150 }}>
                 <defs>
                   <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
                     <polygon points="0 0, 8 3, 0 6" fill="var(--c-purple)" opacity="0.6" />

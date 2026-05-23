@@ -309,6 +309,7 @@ export default function Orders() {
                 ].map((h) => (
                   <th
                     key={h}
+                    scope="col"
                     className="text-left px-4 py-3 text-furnace-muted text-xs font-semibold uppercase"
                   >
                     {h}

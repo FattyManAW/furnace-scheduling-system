@@ -176,6 +176,7 @@ export default function Reports() {
                 {["合約號", "訂單數", "總數量"].map((h) => (
                   <th
                     key={h}
+                    scope="col"
                     className="text-left px-4 py-3 text-furnace-muted text-xs font-semibold uppercase"
                   >
                     {h}
