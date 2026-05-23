@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { clsx } from "clsx";
 import { PageSkeleton, EmptyState } from "../components/Skeleton";
+import { useToast } from "../components/Toast";
 import {
   Play,
   AlertTriangle,
@@ -18,6 +19,7 @@ const STRATEGIES = [
 ];
 
 export default function Schedule() {
+  const toast = useToast();
   const [kilns, setKilns] = useState([]);
   const [orders, setOrders] = useState([]);
   const [selected, setSelected] = useState(new Set());
@@ -64,6 +66,7 @@ export default function Schedule() {
       const ids = selected.size > 0 ? [...selected] : undefined;
       const data = await api.runSchedule(ids, strategy);
       setResult(data);
+      toast.success(`排程完成！已排入 ${data.summary.scheduled} 筆訂單`);
       setRecentRuns((prev) =>
         [
           {
@@ -81,6 +84,7 @@ export default function Schedule() {
       setKilns(Array.isArray(ks) ? ks : (ks.items || []));
     } catch (e) {
       setErr(e.message);
+      toast.error(`排程失敗：${e.message}`);
     } finally {
       setRunning(false);
     }

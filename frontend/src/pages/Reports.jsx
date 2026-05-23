@@ -8,9 +8,11 @@ import {
   Calendar as CalIcon,
 } from "lucide-react";
 import { PageSkeleton, EmptyState } from "../components/Skeleton";
+import { useToast } from "../components/Toast";
 import { observeReveal } from "../lib/anim";
 
 export default function Reports() {
+  const toast = useToast();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,13 +34,18 @@ export default function Reports() {
     }
   }, [dashboard]);
 
-  const downloadCsv = async (url, filename) => {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
+  const downloadCsv = async (url, filename, label) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      toast.success(`${label} 已下載`);
+    } catch (e) {
+      toast.error(`下載失敗：${e.message}`);
+    }
   };
 
   if (error)
@@ -107,7 +114,7 @@ export default function Reports() {
         <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-3 gap-3">
           <button
             onClick={() =>
-              downloadCsv("/api/v1/reports/orders/csv", "orders.csv")
+              downloadCsv("/api/v1/reports/orders/csv", "orders.csv", "訂單 CSV")
             }
             aria-label="匯出訂單 CSV"
             className="flex items-center gap-3 p-4 rounded-xl border border-furnace-border hover:border-furnace-green/30 hover:bg-furnace-green/5 transition-colors group"
@@ -126,7 +133,7 @@ export default function Reports() {
 
           <button
             onClick={() =>
-              downloadCsv("/api/v1/reports/schedule/csv", "schedule.csv")
+              downloadCsv("/api/v1/reports/schedule/csv", "schedule.csv", "排程 CSV")
             }
             aria-label="匯出排程 CSV"
             className="flex items-center gap-3 p-4 rounded-xl border border-furnace-border hover:border-furnace-blue/30 hover:bg-furnace-blue/5 transition-colors group"
@@ -145,7 +152,7 @@ export default function Reports() {
 
           <button
             onClick={() =>
-              downloadCsv("/api/v1/reports/orders/json", "orders.json")
+              downloadCsv("/api/v1/reports/orders/json", "orders.json", "訂單 JSON")
             }
             aria-label="匯出訂單 JSON"
             className="flex items-center gap-3 p-4 rounded-xl border border-furnace-border hover:border-furnace-purple/30 hover:bg-furnace-purple/5 transition-colors group"
