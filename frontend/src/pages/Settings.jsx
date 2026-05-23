@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { clsx } from "clsx";
 import { Database, HardDrive, Shield, Bell, Info, AlertTriangle } from "lucide-react";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -24,6 +24,20 @@ export default function Settings() {
     { id: "about", label: "關於" },
   ];
 
+  const handleTabKeyDown = useCallback((e) => {
+    const idx = tabs.findIndex((t) => t.id === activeTab);
+    let next;
+    if (e.key === "ArrowRight") next = (idx + 1) % 4;
+    else if (e.key === "ArrowLeft") next = (idx - 1 + 4) % 4;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = 3;
+    else return;
+    e.preventDefault();
+    const tab = tabs[next];
+    setActiveTab(tab.id);
+    document.getElementById(`settings-tab-${tab.id}`)?.focus();
+  }, [activeTab, tabs]);
+
   return (
     <div className="fade-slide-up d1 space-y-5">
       <div>
@@ -32,12 +46,15 @@ export default function Settings() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-furnace-border pb-3" role="tablist">
+      <div className="flex gap-2 border-b border-furnace-border pb-3" role="tablist" aria-label="設定分類" onKeyDown={handleTabKeyDown}>
         {tabs.map((t) => (
           <button
             key={t.id}
             role="tab"
+            id={`settings-tab-${t.id}`}
             aria-selected={activeTab === t.id}
+            aria-controls={`settings-panel-${t.id}`}
+            tabIndex={activeTab === t.id ? 0 : -1}
             onClick={() => setActiveTab(t.id)}
             className={clsx(
               "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
@@ -52,7 +69,7 @@ export default function Settings() {
       </div>
 
       {activeTab === "system" && (
-        <div className="fade-slide-up d1 space-y-4">
+        <div id="settings-panel-system" role="tabpanel" aria-labelledby="settings-tab-system" className="fade-slide-up d1 space-y-4">
           <div className="fade-slide-up d2 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
             <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-furnace-blue" /> 一般設定
@@ -137,8 +154,8 @@ export default function Settings() {
       )}
 
       {activeTab === "database" && (
-        <div className="fade-slide-up d1 space-y-4">
-          <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="tabpanel">
+        <div id="settings-panel-database" role="tabpanel" aria-labelledby="settings-tab-database" className="fade-slide-up d1 space-y-4">
+          <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="region" aria-label="資料庫操作">
             <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2">
               <Database className="w-4 h-4 text-furnace-blue" /> 資料庫操作
             </h2>
@@ -174,7 +191,7 @@ export default function Settings() {
             </div>
             {dbResult && <p className="mt-3 text-xs text-furnace-green">{dbResult}</p>}
           </div>
-          <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="tabpanel">
+          <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="region" aria-label="資料統計">
             <h2 className="text-sm font-semibold text-furnace-text mb-3">資料統計</h2>
             <div className="fade-slide-up d2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               {[{ label: "訂單表", name: "orders" }, { label: "模具表", name: "molds" }, { label: "干燥罐表", name: "kilns" }, { label: "排程表", name: "schedule_entries" }].map((t) => (
@@ -189,7 +206,7 @@ export default function Settings() {
       )}
 
       {activeTab === "notifications" && (
-        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="tabpanel">
+        <div id="settings-panel-notifications" role="tabpanel" aria-labelledby="settings-tab-notifications" className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2">
             <Bell className="w-4 h-4 text-furnace-amber" /> 通知設定
           </h2>
@@ -213,7 +230,7 @@ export default function Settings() {
       )}
 
       {activeTab === "about" && (
-        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="tabpanel">
+        <div id="settings-panel-about" role="tabpanel" aria-labelledby="settings-tab-about" className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2">
             <Info className="w-4 h-4 text-furnace-cyan" /> 關於本系統
           </h2>

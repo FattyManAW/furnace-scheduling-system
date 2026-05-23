@@ -109,6 +109,7 @@ export default function Reports() {
             onClick={() =>
               downloadCsv("/api/v1/reports/orders/csv", "orders.csv")
             }
+            aria-label="匯出訂單 CSV"
             className="flex items-center gap-3 p-4 rounded-xl border border-furnace-border hover:border-furnace-green/30 hover:bg-furnace-green/5 transition-colors group"
           >
             <div className="w-10 h-10 rounded-lg bg-furnace-green/10 flex items-center justify-center">
@@ -127,6 +128,7 @@ export default function Reports() {
             onClick={() =>
               downloadCsv("/api/v1/reports/schedule/csv", "schedule.csv")
             }
+            aria-label="匯出排程 CSV"
             className="flex items-center gap-3 p-4 rounded-xl border border-furnace-border hover:border-furnace-blue/30 hover:bg-furnace-blue/5 transition-colors group"
           >
             <div className="w-10 h-10 rounded-lg bg-furnace-blue/10 flex items-center justify-center">
@@ -145,6 +147,7 @@ export default function Reports() {
             onClick={() =>
               downloadCsv("/api/v1/reports/orders/json", "orders.json")
             }
+            aria-label="匯出訂單 JSON"
             className="flex items-center gap-3 p-4 rounded-xl border border-furnace-border hover:border-furnace-purple/30 hover:bg-furnace-purple/5 transition-colors group"
           >
             <div className="w-10 h-10 rounded-lg bg-furnace-purple/10 flex items-center justify-center">
