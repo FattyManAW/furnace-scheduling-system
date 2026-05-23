@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { clsx } from "clsx";
 import { PageSkeleton, EmptyState } from "../components/Skeleton";
+import { useToast } from "../components/Toast";
 import {
   Warehouse,
   AlertTriangle,
@@ -87,6 +88,7 @@ function MoldCard({ mold, onEdit, onAdjust }) {
 }
 
 export default function Molds() {
+  const toast = useToast();
   const [molds, setMolds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -122,8 +124,7 @@ export default function Molds() {
       await api.adjustStock(id, delta, "manual");
       load();
     } catch (e) {
-      setError(e.message);
-      setTimeout(() => setError(null), 4000);
+      toast.error(e.message);
     }
   };
 
@@ -172,10 +173,10 @@ export default function Molds() {
         await api.createMold(payload);
       }
       setModalOpen(false);
+      toast.success(editMold ? "模具已更新" : "模具已新增");
       load();
     } catch (e) {
-      setError(e.message);
-      setTimeout(() => setError(null), 4000);
+      toast.error(e.message);
     }
   };
 

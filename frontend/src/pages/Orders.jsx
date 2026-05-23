@@ -19,11 +19,13 @@ import {
   ChevronRight,
 } from "lucide-react";
 import ConfirmDialog from "../components/ConfirmDialog";
+import { useToast } from "../components/Toast";
 
 const PAGE_SIZE = 20;
 const STATUSES = ["all", "pending", "scheduled", "completed"];
 
 export default function Orders() {
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -109,13 +111,12 @@ export default function Orders() {
   };
 
   const handleSave = async () => {
-    // Validate required fields
-    if (!form.plan_no?.trim()) { setError("計劃單號為必填"); setTimeout(() => setError(null), 4000); return; }
+    if (!form.plan_no?.trim()) { toast.error("計劃單號為必填"); return; }
     const v = parseFloat(form.voltage_kv);
     const a = parseFloat(form.current_a);
     const q = parseInt(form.qty);
-    if (!v || v <= 0) { setError("電壓必須大於 0"); setTimeout(() => setError(null), 4000); return; }
-    if (isNaN(q) || q <= 0) { setError("數量必須至少為 1"); setTimeout(() => setError(null), 4000); return; }
+    if (!v || v <= 0) { toast.error("電壓必須大於 0"); return; }
+    if (isNaN(q) || q <= 0) { toast.error("數量必須至少為 1"); return; }
 
     const payload = {
       plan_no: form.plan_no.trim(),
@@ -134,10 +135,10 @@ export default function Orders() {
         await api.createOrder(payload);
       }
       setModalOpen(false);
+      toast.success(editing ? "訂單已更新" : "訂單已新增");
       load();
     } catch (e) {
-      setError(e.message);
-      setTimeout(() => setError(null), 4000);
+      toast.error(e.message);
     }
   };
 
@@ -147,10 +148,10 @@ export default function Orders() {
     setDeleteTarget(null);
     try {
       await api.deleteOrder(id);
+      toast.success("訂單已刪除");
       load();
     } catch (e) {
-      setError(e.message);
-      setTimeout(() => setError(null), 4000);
+      toast.error(e.message);
     }
   };
 
