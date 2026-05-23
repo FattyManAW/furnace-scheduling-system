@@ -27,7 +27,7 @@ export default function Sidebar({ onClose }) {
   const { pathname } = useLocation();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[var(--c-sidebar-width)] bg-furnace-card border-r border-furnace-border flex flex-col z-50">
+    <aside aria-label="主導覽欄" className="fixed left-0 top-0 h-screen w-[var(--c-sidebar-width)] bg-furnace-card border-r border-furnace-border flex flex-col z-50">
       {/* Mobile close button */}
       {onClose && (
         <button
@@ -54,12 +54,13 @@ export default function Sidebar({ onClose }) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      <nav aria-label="頁面導航" className="flex-1 p-3 space-y-1 overflow-y-auto">
         {nav.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === "/"}
+            aria-current={({ isActive }) => (isActive ? "page" : undefined)}
             className={({ isActive }) =>
               clsx(
                 "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group relative",
