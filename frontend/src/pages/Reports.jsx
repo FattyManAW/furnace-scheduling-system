@@ -185,7 +185,14 @@ export default function Reports() {
               </tr>
             </thead>
             <tbody>
-              {o.pending_by_contract?.map((c) => (
+              {(!o.pending_by_contract || o.pending_by_contract.length === 0) ? (
+                <tr>
+                  <td colSpan={3} className="px-4 py-6 text-center text-furnace-muted text-sm">
+                    尚無待排訂單
+                  </td>
+                </tr>
+              ) : (
+                o.pending_by_contract.map((c) => (
                 <tr
                   key={c.contract}
                   className="border-b border-furnace-border/30"
@@ -194,7 +201,8 @@ export default function Reports() {
                   <td className="px-4 py-3 text-furnace-muted">{c.count} 筆</td>
                   <td className="px-4 py-3 text-furnace-text">{c.qty} 支</td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>
