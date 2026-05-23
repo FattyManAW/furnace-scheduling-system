@@ -171,7 +171,7 @@ def check_mold_availability(mold_od: float, mold_inner_dia: float | None,
     molds = get_molds_fn()
     for m in molds:
         mod = getattr(m, "outer_dia", 0)
-        getattr(m, "inner_dia", 0)
+        mid = getattr(m, "inner_dia", 0)
         mlen = getattr(m, "length", 0)
         stock = getattr(m, "stock_qty", 0)
         status = getattr(m, "status", "available")
@@ -244,7 +244,6 @@ def schedule_orders(
             "schemes": list(kiln.get("schemes", {}).keys()),
         }
 
-    sum(s["total_slots"] for s in furnace_state.values())
     global_hour_cap = DAILY_HOUR_CAP * 28  # 28 kilns × daily cap
 
     total_hours_used = 0.0

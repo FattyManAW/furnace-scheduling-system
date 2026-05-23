@@ -91,8 +91,6 @@ def test_reroute_before_after():
         expected = result["summary"]["scheduled"]
         assert total_orders == expected, f"Order count mismatch: {total_orders} vs {expected}"
 
-        return rerouted
-
     finally:
         db.close()
 

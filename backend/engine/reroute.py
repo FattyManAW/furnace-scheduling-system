@@ -11,7 +11,7 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import date, datetime
 
-from engine.optimizer import DAILY_HOUR_CAP, fit_score, hours_for
+from engine.optimizer import DAILY_HOUR_CAP
 
 
 def detect_congestion(
