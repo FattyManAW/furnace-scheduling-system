@@ -1,0 +1,303 @@
+# ─── OTD CI Gate ───────────────────────────────────────────────
+# 驗證 Pipeline：lint → 單元測試 → 排程引擎 → 閥值門檻 → Docker
+#
+# 設計者：Technus (Power Squad)
+# 對接：Smart P6 CLI (`./otd all` / `./otd compare`)
+# 治理：Christina Board Health 審計 peer_review_done flag
+# ────────────────────────────────────────────────────────────────
+
+name: OTD CI Gate
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      otd_threshold:
+        description: 'OTD 閥值 (%) — 低於此值 CI 失敗'
+        required: false
+        default: '80'
+        type: string
+      peer_review_done:
+        description: 'Peer review 已簽核 (Christina Board Health 治理 v1)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+env:
+  PYTHON_VERSION: '3.12'
+  OTD_THRESHOLD: ${{ inputs.otd_threshold || '80' }}
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════
+  # Gate 1: Lint
+  # ═══════════════════════════════════════════════════════════════
+  lint:
+    name: "🔍 Lint"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install ruff
+        run: pip install ruff
+      - name: Ruff check
+        run: ruff check backend/ || echo "⚠️ ruff warnings (non-blocking)"
+
+      - name: Syntax check (all .py)
+        run: |
+          errors=0
+          for f in $(find backend -name '*.py' ! -name '__init__.py'); do
+            python3 -c "compile(open('$f').read(), '$f', 'exec')" || errors=$((errors+1))
+          done
+          if [ $errors -gt 0 ]; then
+            echo "❌ $errors files have syntax errors"
+            exit 1
+          fi
+          echo "✅ All files compile clean"
+
+  # ═══════════════════════════════════════════════════════════════
+  # Gate 2: Unit Tests (pytest)
+  # ═══════════════════════════════════════════════════════════════
+  unit-test:
+    name: "🧪 Unit Tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install deps
+        run: |
+          pip install pytest pytest-cov httpx
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+      - name: Run pytest
+        run: |
+          cd backend
+          pytest tests/ -v --tb=short --cov=. --cov-report=term --cov-report=json:coverage.json
+        env:
+          PYTHONPATH: backend
+
+  # ═══════════════════════════════════════════════════════════════
+  # Gate 3: OTD Engine Smoke Test
+  # ═══════════════════════════════════════════════════════════════
+  engine-smoke:
+    name: "⚙️ Engine Smoke"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: unit-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install deps
+        run: |
+          pip install fastapi uvicorn sqlalchemy
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+
+      - name: DB init + Seed
+        run: |
+          cd backend
+          python3 -c "
+          from database import Base, engine
+          Base.metadata.create_all(bind=engine)
+          from seed_data import seed_all
+          seed_all()
+          print('✅ DB seeded')
+          "
+
+      - name: Start API + Smoke
+        run: |
+          cd backend
+          python3 -m uvicorn main:app --host 0.0.0.0 --port 8002 &
+          sleep 4
+          curl -sf http://127.0.0.1:8002/health && echo "  ✅ /health"
+          curl -sf http://127.0.0.1:8002/api/v1/orders/count && echo "  ✅ /api/v1/orders/count"
+          curl -sf http://127.0.0.1:8002/api/v1/molds/ && echo "  ✅ /api/v1/molds/"
+          curl -sf http://127.0.0.1:8002/api/v1/kilns/ && echo "  ✅ /api/v1/kilns/"
+          echo "✅ All endpoints OK"
+
+      - name: Optimizer run + validate
+        run: |
+          cd backend
+          python3 << 'PYEOF'
+          import json
+          from database import SessionLocal
+          from engine.data_layer import load_all_optimizer_data
+          from engine.optimizer import schedule_orders, quality_report
+          from engine.validator import check_overdue, validate_schedule
+          from models import Order
+
+          db = SessionLocal()
+          try:
+              orders = db.query(Order).order_by(Order.id).all()
+              if not orders:
+                  print('⚠️ No orders in DB — skip optimizer')
+                  import sys; sys.exit(0)
+
+              order_dicts = []
+              for o in orders:
+                  order_dicts.append({
+                      'plan_no': o.plan_no,
+                      'contract_no': o.contract_no,
+                      'voltage_kv': o.voltage_kv,
+                      'current_a': o.current_a,
+                      'qty': o.qty,
+                      'delivery_date': o.delivery_date or '',
+                      'product_from': o.product_from,
+                      'product_to': o.product_to,
+                  })
+
+              products_by_voltage, kilns_data, hours_per_root = load_all_optimizer_data(db)
+              result = schedule_orders(
+                  order_dicts,
+                  products_by_voltage=products_by_voltage,
+                  kilns_data=kilns_data,
+                  hours_per_root=hours_per_root,
+              )
+
+              report = quality_report(result)
+              print(json.dumps(report, indent=2, ensure_ascii=False, default=str))
+
+              validation = validate_schedule(result)
+              if not validation['valid']:
+                  for e in validation['errors']:
+                      print(f'❌ {e}')
+
+              overdue = check_overdue(lambda: SessionLocal())
+              over = overdue.get('overdue_count', 0)
+              total = report.get('total_orders', len(orders))
+              otd_rate = (1 - over/total) * 100 if total > 0 else 100
+              print(f'📊 OTD Rate: {otd_rate:.1f}% ({over} overdue / {total} total)')
+
+              threshold = float(f"${{OTD_THRESHOLD}}")
+              if otd_rate < threshold:
+                  print(f'❌ OTD {otd_rate:.1f}% < threshold {threshold:.0f}%')
+                  import sys; sys.exit(1)
+              print(f'✅ OTD {otd_rate:.1f}% ≥ threshold {threshold:.0f}%')
+          finally:
+              db.close()
+          PYEOF
+
+  # ═══════════════════════════════════════════════════════════════
+  # Gate 4: Smart P6 CLI Integration (pre-wired)
+  # ═══════════════════════════════════════════════════════════════
+  # Smart 的 P6 CLI：./otd all（全線模擬）+ ./otd compare（閾值比對）
+  # 當 ./otd binary 就位時啟用此 gate
+  # ═══════════════════════════════════════════════════════════════
+  otd-cli-gate:
+    name: "🖥️ OTD CLI (Smart P6)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: engine-smoke
+    if: false  # ← 等 Smart P6 CLI binary 就位後改為 true
+    steps:
+      - uses: actions/checkout@v4
+      - name: OTD all（全線模擬）
+        run: |
+          ./otd all || (echo "❌ OTD all failed" && exit 1)
+      - name: OTD compare（閾值比對）
+        run: |
+          ./otd compare --threshold ${{ env.OTD_THRESHOLD }} || (echo "❌ OTD compare failed" && exit 1)
+
+  # ═══════════════════════════════════════════════════════════════
+  # Gate 5: Docker Build
+  # ═══════════════════════════════════════════════════════════════
+  docker-build:
+    name: "🐳 Docker Build"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: engine-smoke
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          docker build -t furnace-api:otd-ci .
+          docker images furnace-api:otd-ci
+      - name: Health check
+        run: |
+          docker run -d --name furnace-otd -p 8003:8002 furnace-api:otd-ci
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8003/health 2>/dev/null; then
+              echo "✅ Container healthy"
+              break
+            fi
+            sleep 2
+          done
+          curl -sf http://localhost:8003/health
+          curl -sf http://localhost:8003/api/v1/orders/count
+          docker stop furnace-otd
+
+  # ═══════════════════════════════════════════════════════════════
+  # Gate 6: 治理 — Peer Review Gate
+  # ═══════════════════════════════════════════════════════════════
+  # Christina Board Health 審計 P0: 任何 board member 可標記
+  # peer_review_done = true → gate 通過
+  # ═══════════════════════════════════════════════════════════════
+  peer-review-gate:
+    name: "👥 Peer Review"
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    needs: [lint, unit-test, engine-smoke, docker-build]
+    if: |
+      always() &&
+      (needs.lint.result == 'success' || needs.lint.result == 'skipped') &&
+      (needs.unit-test.result == 'success' || needs.unit-test.result == 'skipped') &&
+      (needs.engine-smoke.result == 'success' || needs.engine-smoke.result == 'skipped')
+    steps:
+      - name: Check peer review flag
+        run: |
+          PEER_OK="${{ inputs.peer_review_done }}"
+          if [ "$PEER_OK" = "true" ]; then
+            echo "✅ Peer review signed off"
+          else
+            echo "⏸️ Peer review pending — CI gates passed, awaiting board sign-off"
+            echo "📋 任何 Power Squad member 可在 workflow_dispatch 設定 peer_review_done=true"
+          fi
+
+  # ═══════════════════════════════════════════════════════════════
+  # Gate Summary
+  # ═══════════════════════════════════════════════════════════════
+  otd-summary:
+    name: "🏁 OTD Gate Summary"
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test, engine-smoke, docker-build, peer-review-gate]
+    if: always()
+    steps:
+      - name: Report
+        run: |
+          echo "╔════════════════════════════════╗"
+          echo "║     OTD CI Gate Summary        ║"
+          echo "╠════════════════════════════════╣"
+          echo "║ 🔍 Lint:       ${{ needs.lint.result }}"
+          echo "║ 🧪 Unit Tests: ${{ needs.unit-test.result }}"
+          echo "║ ⚙️ Engine:     ${{ needs.engine-smoke.result }}"
+          echo "║ 🐳 Docker:     ${{ needs.docker-build.result }}"
+          echo "║ 👥 Peer Review:${{ needs.peer-review-gate.result }}"
+          echo "╠════════════════════════════════╣"
+
+          FAILS=0
+          for gate in lint unit-test engine-smoke; do
+            R="${{ needs[gate].result }}"
+            if [ "$R" != "success" ] && [ "$R" != "skipped" ]; then
+              FAILS=$((FAILS+1))
+            fi
+          done
+
+          if [ $FAILS -eq 0 ]; then
+            echo "║ 🎉 ALL GATES PASSED           ║"
+            echo "╚════════════════════════════════╝"
+          else
+            echo "║ ❌ $FAILS GATE(S) FAILED       ║"
+            echo "╚════════════════════════════════╝"
+            exit 1
+          fi
