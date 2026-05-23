@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from "react";
-import { Search, Command, X, Keyboard } from "lucide-react";
+import { Search, Command, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 /** ⌘K / ⌘/ / Esc — global keyboard shortcuts overlay */
