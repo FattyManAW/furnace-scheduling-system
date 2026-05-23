@@ -576,6 +576,24 @@ select:focus-visible {
   @page { margin: 1.5cm; }
 }
 
+/* ── Toast animation ── */
+.toast-enter {
+  animation: toast-in 0.35s var(--ease-spring) both;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Page transition ── */
+.page-transition-enter {
+  animation: page-in 0.25s var(--ease-out) both;
+}
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   *,

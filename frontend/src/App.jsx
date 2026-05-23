@@ -1,6 +1,9 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Layout from "./components/Layout";
+import PageTransition from "./components/PageTransition";
+import KeyboardShortcuts from "./components/KeyboardShortcuts";
+import { ToastProvider } from "./components/Toast";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Orders = lazy(() => import("./pages/Orders"));
@@ -19,20 +22,25 @@ function PageFallback() {
 
 export default function App() {
   return (
-    <Layout>
-      <Suspense fallback={<PageFallback />}>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/molds" element={<Molds />} />
-          <Route path="/schedule" element={<Schedule />} />
-          <Route path="/gantt" element={<Gantt />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-    </Layout>
+    <ToastProvider>
+      <Layout>
+        <KeyboardShortcuts />
+        <Suspense fallback={<PageFallback />}>
+          <PageTransition>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/molds" element={<Molds />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/gantt" element={<Gantt />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </PageTransition>
+        </Suspense>
+      </Layout>
+    </ToastProvider>
   );
 }
 
