@@ -175,10 +175,19 @@ def check_mold_availability(mold_od: float, mold_inner_dia: float | None,
         mlen = getattr(m, "length", 0)
         stock = getattr(m, "stock_qty", 0)
         status = getattr(m, "status", "available")
-        if (mod >= mold_od and mlen >= mold_len and stock > 0
+        # outer_dia + length + stock + status must all pass
+        if not (mod >= mold_od and mlen >= mold_len and stock > 0
                 and status == "available"):
-            return True, f"可用模具: {getattr(m, 'mold_no', '?')}"
-    return False, f"無可用模具 (外徑≥{mold_od}, 長度≥{mold_len})"
+            continue
+        # mold_inner_dia matching: mold inner_dia must be >= required
+        if mold_inner_dia and mold_inner_dia > 0 and mid < mold_inner_dia:
+            continue
+        return True, f"可用模具: {getattr(m, 'mold_no', '?')}"
+    # build descriptive error message
+    dia_msg = ""
+    if mold_inner_dia and mold_inner_dia > 0:
+        dia_msg = f", 內徑≥{mold_inner_dia}"
+    return False, f"無可用模具 (外徑≥{mold_od}, 長度≥{mold_len}{dia_msg})"
 
 
 # ── main scheduler (REWRITTEN) ───────────────────────────────────────────
