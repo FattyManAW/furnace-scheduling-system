@@ -198,15 +198,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: engine-smoke
-    if: false  # ← 等 Smart P6 CLI binary 就位後改為 true
+    if: true  # ← Smart P6 CLI --threshold flag 就位 (2026-05-23)
     steps:
       - uses: actions/checkout@v4
       - name: OTD all（全線模擬）
         run: |
           ./otd all || (echo "❌ OTD all failed" && exit 1)
-      - name: OTD compare（閾值比對）
+      - name: OTD compare（閾值比對 — CI smoke 輕量版）
         run: |
-          ./otd compare --threshold ${{ env.OTD_THRESHOLD }} || (echo "❌ OTD compare failed" && exit 1)
+          ./otd compare --days 7 --orders 5 --threshold ${{ env.OTD_THRESHOLD }} || (echo "❌ OTD compare failed" && exit 1)
 
   # ═══════════════════════════════════════════════════════════════
   # Gate 5: Docker Build
