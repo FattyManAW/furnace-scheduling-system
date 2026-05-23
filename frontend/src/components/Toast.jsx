@@ -72,7 +72,7 @@ export function ToastProvider({ children }) {
               role="alert"
               className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl border-l-4 bg-furnace-card border border-furnace-border ${borderMap[t.type]} shadow-lg toast-enter`}
             >
-              <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: `var(--c-${t.type === 'info' ? 'teal' : t.type === 'error' ? 'error' : t.type === 'warning' ? 'warning' : 'success'})` }} />
+              <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 toast-icon-${t.type}`} />
               <p className="text-sm text-furnace-text flex-1">{t.message}</p>
               <button
                 onClick={() => remove(t.id)}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { api } from "../lib/api";
 import {
   AlertTriangle,
@@ -13,7 +13,7 @@ import { PageSkeleton } from "../components/Skeleton";
 import { observeReveal } from "../lib/anim";
 
 /* ── KPI Card (ISA-101 grey + semantic accents) ── */
-function KpiCard({ icon: Icon, label, value, sub, accent }) {
+const KpiCard = memo(function KpiCard({ icon: Icon, label, value, sub, accent }) {
   const accentBg = {
     blue: "bg-furnace-blue/10",
     green: "bg-furnace-green/10",
@@ -55,7 +55,7 @@ function KpiCard({ icon: Icon, label, value, sub, accent }) {
       </div>
     </div>
   );
-}
+});
 
 /* ── Progress bar ── */
 function ProgressBar({ pct, label, used, cap }) {

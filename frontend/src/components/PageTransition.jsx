@@ -1,5 +1,5 @@
-import { useLocation, useOutlet } from "react-router-dom";
-import { cloneElement, useRef, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Wraps each route's outlet in a fade-slide page transition.
@@ -32,11 +32,8 @@ export default function PageTransition({ children }) {
       className={
         transitionStage === "enter"
           ? "page-transition-enter"
-          : "opacity-0 translate-y-2"
+          : "page-transition-exit"
       }
-      style={{
-        transition: "opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out)",
-      }}
     >
       {displayChildren}
     </div>

@@ -93,10 +93,7 @@ export default function Layout({ children }) {
 
         {/* Mobile sidebar drawer */}
         <div
-          className={`fixed top-0 left-0 h-full w-[var(--c-sidebar-width)] z-50 transform md:hidden ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-          style={{ transition: "transform 0.3s var(--ease-out)" }}
+          className={`fixed top-0 left-0 h-full w-[var(--c-sidebar-width)] z-50 transform md:hidden sidebar-slide ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
           <Sidebar onClose={() => setSidebarOpen(false)} />
         </div>
