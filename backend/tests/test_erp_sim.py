@@ -187,3 +187,190 @@ def test_order_not_found_404(client):
     """查詢不存在的訂單應回傳 404"""
     resp = client.get("/erp/orders/99999")
     assert resp.status_code == 404
+
+
+# ── Repository unit tests (direct, not via HTTP) ────────────────────────
+
+def test_list_orders_with_status_filter(db_session):
+    """list_orders with status filter 應正確過濾"""
+    from erp_sim.repository import create_order, list_orders
+
+    create_order(db_session, "PO-SF-001", "spec A", 10, "normal")
+    create_order(db_session, "PO-SF-002", "spec B", 20, "high")
+    # 手動改狀態
+    create_order(db_session, "PO-SF-003", "spec C", 30, "normal")
+    from erp_sim.repository import update_order_status
+    update_order_status(db_session, 1, "scheduled")
+
+    pending = list_orders(db_session, status="pending")
+    assert len(pending) == 2
+    assert all(o.status == "pending" for o in pending)
+
+    scheduled = list_orders(db_session, status="scheduled")
+    assert len(scheduled) == 1
+    assert scheduled[0].status == "scheduled"
+
+
+def test_get_deliveries_by_order(db_session):
+    """get_deliveries_by_order 應回傳指定訂單的全部交期"""
+    from erp_sim.repository import create_delivery, create_order, get_deliveries_by_order
+
+    create_order(db_session, "PO-GDBO-001", "spec A", 10)
+    create_order(db_session, "PO-GDBO-002", "spec B", 20)
+    create_delivery(db_session, order_id=1, order_no="PO-GDBO-001", furnace_id="k1")
+    create_delivery(db_session, order_id=1, order_no="PO-GDBO-001", furnace_id="k2")
+    create_delivery(db_session, order_id=2, order_no="PO-GDBO-002", furnace_id="k3")
+
+    results = get_deliveries_by_order(db_session, 1)
+    assert len(results) == 2
+    assert all(d.order_id == 1 for d in results)
+
+    results2 = get_deliveries_by_order(db_session, 2)
+    assert len(results2) == 1
+    assert results2[0].order_id == 2
+
+    results3 = get_deliveries_by_order(db_session, 99999)
+    assert results3 == []
+
+
+def test_list_deliveries_no_filter(db_session):
+    """list_deliveries without any filter 應回傳全部"""
+    from erp_sim.repository import create_delivery, create_order, list_deliveries
+
+    create_order(db_session, "PO-LD-000", "spec A", 10)
+    create_delivery(db_session, order_id=1, order_no="PO-LD-000", furnace_id="k1")
+    create_delivery(db_session, order_id=1, order_no="PO-LD-000", furnace_id="k2")
+
+    results = list_deliveries(db_session)
+    assert len(results) == 2
+
+
+def test_list_deliveries_with_order_id_filter(db_session):
+    """list_deliveries with order_id filter 應正確過濾"""
+    from erp_sim.repository import create_delivery, create_order, list_deliveries
+
+    create_order(db_session, "PO-LD-001", "spec A", 10)
+    create_order(db_session, "PO-LD-002", "spec B", 20)
+    create_delivery(db_session, order_id=1, order_no="PO-LD-001", furnace_id="k1")
+    create_delivery(db_session, order_id=2, order_no="PO-LD-002", furnace_id="k2")
+
+    results = list_deliveries(db_session, order_id=1)
+    assert len(results) == 1
+    assert results[0].order_id == 1
+    assert results[0].order_no == "PO-LD-001"
+
+
+def test_list_deliveries_with_status_filter(db_session):
+    """list_deliveries with status filter 應正確過濾"""
+    from erp_sim.repository import create_delivery, create_order, list_deliveries
+    from erp_sim.repository import update_delivery_status
+
+    create_order(db_session, "PO-LDS-001", "spec A", 10)
+    create_delivery(db_session, order_id=1, order_no="PO-LDS-001", status="scheduled")
+    create_delivery(db_session, order_id=1, order_no="PO-LDS-001", status="delivered")
+
+    scheduled = list_deliveries(db_session, status="scheduled")
+    assert len(scheduled) == 1
+    assert scheduled[0].status == "scheduled"
+
+    delivered = list_deliveries(db_session, status="delivered")
+    assert len(delivered) == 1
+    assert delivered[0].status == "delivered"
+
+
+def test_update_delivery_status_happy_path(db_session):
+    """update_delivery_status 應正確更新交期狀態"""
+    from erp_sim.repository import create_delivery, create_order, update_delivery_status
+
+    create_order(db_session, "PO-UDS-001", "spec A", 10)
+    create_delivery(db_session, order_id=1, order_no="PO-UDS-001", status="scheduled")
+
+    updated = update_delivery_status(db_session, delivery_id=1, status="in_progress")
+    assert updated is not None
+    assert updated.status == "in_progress"
+
+    # 確認持久化
+    from erp_sim.repository import list_deliveries
+    results = list_deliveries(db_session)
+    assert results[0].status == "in_progress"
+
+
+# ── Sync unit tests ─────────────────────────────────────────────────────
+
+def test_parse_date_invalid_fallback():
+    """_compute_delivery_date with invalid date string → fallback to today"""
+    from erp_sim.sync import _compute_delivery_date
+    from datetime import date
+
+    result = _compute_delivery_date("not-a-date", 8.0)
+    today = date.today().strftime("%Y-%m-%d")
+    # 應該回傳未來日期（非 today），因為 est_hours > 0 會加工作日
+    assert "2099" not in result
+    assert result >= today
+
+
+def test_parse_date_zero_est_hours():
+    """_compute_delivery_date with est_hours=0 → return base date unchanged"""
+    from erp_sim.sync import _compute_delivery_date
+
+    result = _compute_delivery_date("2026-06-01", 0.0)
+    assert result == "2026-06-01"
+
+    result2 = _compute_delivery_date("2026-06-01", -5.0)
+    assert result2 == "2026-06-01"
+
+
+def test_sync_schedule_skipped_no_plan_no(db_session):
+    """sync with entry missing plan_no → skipped += 1"""
+    from erp_sim.sync import sync_schedule_to_erp
+
+    schedule_result = {
+        "order_schedule": [
+            {"plan_no": "", "delivery_date": "2026-06-01", "est_hours": 8.0},
+        ]
+    }
+    result = sync_schedule_to_erp(db_session, schedule_result)
+    assert result["skipped"] == 1
+    assert result["synced"] == 0
+    assert result["errors"] == 0
+
+
+def test_sync_schedule_skipped_no_matching_order(db_session):
+    """sync with plan_no that has no matching ERP order → skipped += 1"""
+    from erp_sim.sync import sync_schedule_to_erp
+
+    schedule_result = {
+        "order_schedule": [
+            {"plan_no": "NONEXISTENT", "delivery_date": "2026-06-01", "est_hours": 8.0},
+        ]
+    }
+    result = sync_schedule_to_erp(db_session, schedule_result)
+    assert result["skipped"] == 1
+    assert result["synced"] == 0
+    assert result["errors"] == 0
+
+
+def test_sync_schedule_exception_error(db_session, monkeypatch):
+    """sync with create_delivery raising exception → errors += 1"""
+    from erp_sim.repository import create_order
+    from erp_sim.sync import sync_schedule_to_erp
+
+    create_order(db_session, "PO-ERR-001", "spec A", 10)
+
+    # Mock create_delivery to raise
+    import erp_sim.sync as sync_mod
+
+    def mock_create_delivery(**kwargs):
+        raise RuntimeError("simulated db error")
+
+    monkeypatch.setattr(sync_mod, "create_delivery", mock_create_delivery)
+
+    schedule_result = {
+        "order_schedule": [
+            {"plan_no": "PO-ERR-001", "delivery_date": "2026-06-01", "est_hours": 8.0},
+        ]
+    }
+    result = sync_schedule_to_erp(db_session, schedule_result)
+    assert result["errors"] == 1
+    assert result["synced"] == 0
+    assert result["skipped"] == 0
