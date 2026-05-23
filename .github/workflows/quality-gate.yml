@@ -9,7 +9,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.12'
-  COVERAGE_THRESHOLD: 60
+  COVERAGE_THRESHOLD: 80
 
 jobs:
   dev-gate:
