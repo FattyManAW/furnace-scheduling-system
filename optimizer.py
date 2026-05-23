@@ -2,9 +2,15 @@
 oven_scheduler/optimizer.py  v2
 Best-fit furnace scheduler — improved multi-pass filling.
 """
+import sys
 from collections import defaultdict
+from datetime import datetime, timedelta
 
 from data_loader import load_all
+
+# shared date utils (same module as backend/date_utils, imported at runtime)
+_DPATH = __import__('backend.date_utils', fromlist=['excel_to_date'])
+excel_to_date = _DPATH.excel_to_date
 
 
 def _load():
@@ -81,6 +87,19 @@ def schedule(orders=None, selected_furnaces=None):
 
     orders = sorted(orders, key=lambda o: (o.get("delivery_date", ""), -o.get("qty", 0)))
 
+    # ── anchor date: earliest real delivery date, used for calendar day output ──
+    anchor = datetime.now()
+    for o in orders:
+        raw = o.get("delivery_date", "")
+        try:
+            d = excel_to_date(raw)
+            parsed = datetime.strptime(d, "%Y-%m-%d")
+            if parsed < anchor:
+                anchor = parsed
+        except Exception:
+            continue
+    anchor = anchor.replace(hour=0, minute=0, second=0, microsecond=0)
+
     # Group by mold spec
     order_groups = defaultdict(list)
     for o in orders:
@@ -156,8 +175,8 @@ def schedule(orders=None, selected_furnaces=None):
                 "total_molds": batch_qty,
                 "start_day": start_day,
                 "end_day": end_day,
-                "start_date": f"Day {start_day}",
-                "end_date": f"Day {end_day}",
+                "start_date": (anchor + timedelta(days=start_day)).strftime("%Y-%m-%d"),
+                "end_date": (anchor + timedelta(days=end_day)).strftime("%Y-%m-%d"),
             })
             furnace_day[fname] = end_day + 1
 
