@@ -96,6 +96,34 @@ class TestOrderAPI:
         assert results[0]["plan_no"] == "SRCH-ZZZ"
 
 
+    def test_update_nonexistent_order(self, client):
+        """PUT /orders/99999 → 404"""
+        resp = client.put("/api/v1/orders/99999", json={"status": "scheduled"})
+        assert resp.status_code == 404
+        assert "不存在" in resp.json()["detail"]
+
+    def test_delete_nonexistent_order(self, client):
+        """DELETE /orders/99999 → 404"""
+        resp = client.delete("/api/v1/orders/99999")
+        assert resp.status_code == 404
+        assert "不存在" in resp.json()["detail"]
+
+    def test_bulk_import_orders(self, client):
+        """POST /orders/bulk-import → 200 + imported count"""
+        resp = client.post("/api/v1/orders/bulk-import", json=[
+            {"plan_no": "BULK-001", "contract_no": "C-BULK-001", "voltage_kv": 220.0,
+             "current_a": 150.0, "qty": 10, "delivery_date": "2026-08-01",
+             "product_from": "raw", "product_to": "finished"},
+            {"plan_no": "BULK-002", "contract_no": "C-BULK-002", "voltage_kv": 110.0,
+             "current_a": 100.0, "qty": 5, "delivery_date": "2026-09-15",
+             "product_from": "raw", "product_to": "finished"},
+        ])
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["imported"] >= 1
+        assert "skipped" in data
+
+
 class TestMoldAPI:
     def test_list_molds_empty(self, client):
         resp = client.get("/api/v1/molds/")

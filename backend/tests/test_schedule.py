@@ -451,5 +451,152 @@ class TestScheduleValidation:
         assert data["summary"]["scheduled"] >= 1
 
 
+class TestScheduleEdgeCases:
+    """Cover remaining uncovered branches in api/schedule.py (lines 32, 84, 95-107, 125-128, 140-142)"""
+
+    def test_kiln_name_null_id(self):
+        """_kiln_name returns '' for falsy kiln_id (line 32)."""
+        from api.schedule import _kiln_name
+        from database import SessionLocal
+        db = SessionLocal()
+        try:
+            assert _kiln_name(db, 0) == ""
+            assert _kiln_name(db, None) == ""
+        finally:
+            db.close()
+
+    def test_validation_error_adds_warnings(self, client, db_session, monkeypatch):
+        """schedule/optimize adds [驗證錯誤] to warnings on validation failure (line 84)."""
+        import api.schedule as smod
+        monkeypatch.setattr(
+            smod, "validate_schedule",
+            lambda result: {"valid": False, "errors": ["ERR-TEST-1", "ERR-TEST-2"]},
+        )
+        _seed_baseline(client, db_session)
+        resp = client.post("/api/v1/schedule/optimize", json={"strategy": "deadline"})
+        assert resp.status_code == 200
+        data = resp.json()
+        found = [w for w in data["warnings"] if "[驗證錯誤]" in w]
+        assert len(found) >= 2
+
+    def test_reroute_with_moves(self, client, db_session, monkeypatch):
+        """schedule/optimize: congestion → reroute moves orders → reroutes_applied=True (lines 95-107)."""
+        import api.schedule as smod
+
+        # Make schedule_orders return a result with a congested kiln
+        def fake_schedule_orders(orders, **kw):
+            return {
+                "order_schedule": [{
+                    "plan_no": "SCHED-TEST-001", "kiln_id": "1", "kiln_name": "K1",
+                    "voltage_kv": 220.0, "current_a": 150.0, "qty": 5,
+                    "delivery_date": "2026-06-30", "contract_no": "C-SCHED-001",
+                    "mold_od": 0, "mold_len": 0, "est_hours": 10, "status": "scheduled",
+                }],
+                "kiln_schedule": {
+                    "1": {"usage_pct": 95, "hours_used": 1000, "slots_used": 1,
+                           "total_slots": 10, "order_count": 1,
+                           "orders": [{"plan_no": "SCHED-TEST-001", "hours": 10}],
+                           "kiln_name": "K1"},
+                },
+                "summary": {"scheduled": 1, "total_orders": 1, "total_hours": 10, "daily_cap": 1098},
+                "warnings": [],
+            }
+
+        monkeypatch.setattr(smod, "schedule_orders", fake_schedule_orders)
+
+        # Make reroute_on_congestion report moved > 0
+        def fake_reroute_moved(result, **kw):
+            result["reroute"] = {
+                "iterations": 1, "moved": 3,
+                "before": {"congested_kilns": 1, "max_usage_pct": 95, "avg_usage_pct": 60, "usage_spread": 40},
+                "after": {"congested_kilns": 0, "max_usage_pct": 70, "avg_usage_pct": 60, "usage_spread": 15},
+            }
+            return result
+
+        monkeypatch.setattr(smod, "reroute_on_congestion", fake_reroute_moved)
+        monkeypatch.setattr(smod, "sync_schedule_to_erp", lambda db, result: {})
+
+        _seed_baseline(client, db_session)
+        resp = client.post("/api/v1/schedule/optimize", json={"strategy": "deadline"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["reroutes_applied"] is True
+        assert data["reroute_info"]["moved"] == 3
+        assert data["reroute_info"]["iterations"] == 1
+
+    def test_reroute_congestion_but_no_moves(self, client, db_session, monkeypatch):
+        """schedule/optimize: congestion detected but reroute moved=0 → reroutes_applied=False."""
+        import api.schedule as smod
+
+        def fake_schedule_orders(orders, **kw):
+            return {
+                "order_schedule": [{
+                    "plan_no": "SCHED-TEST-001", "kiln_id": "1", "kiln_name": "K1",
+                    "voltage_kv": 220.0, "current_a": 150.0, "qty": 5,
+                    "delivery_date": "2026-06-30", "contract_no": "C-SCHED-001",
+                    "mold_od": 0, "mold_len": 0, "est_hours": 10, "status": "scheduled",
+                }],
+                "kiln_schedule": {
+                    "1": {"usage_pct": 95, "hours_used": 1000, "slots_used": 1,
+                           "total_slots": 10, "order_count": 1,
+                           "orders": [{"plan_no": "SCHED-TEST-001", "hours": 10}],
+                           "kiln_name": "K1"},
+                },
+                "summary": {"scheduled": 1, "total_orders": 1, "total_hours": 10, "daily_cap": 1098},
+                "warnings": [],
+            }
+
+        monkeypatch.setattr(smod, "schedule_orders", fake_schedule_orders)
+
+        def fake_reroute_noop(result, **kw):
+            result["reroute"] = {"iterations": 0, "moved": 0, "before": {}, "after": {}}
+            return result
+
+        monkeypatch.setattr(smod, "reroute_on_congestion", fake_reroute_noop)
+        monkeypatch.setattr(smod, "sync_schedule_to_erp", lambda db, result: {})
+
+        _seed_baseline(client, db_session)
+        resp = client.post("/api/v1/schedule/optimize", json={"strategy": "deadline"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["reroutes_applied"] is False
+
+    def test_delivery_date_slash_format(self, client, db_session, monkeypatch):
+        """schedule/optimize: delivery_date in YYYY/MM/DD format → fallback path (lines 140-142)."""
+        import api.schedule as smod
+
+        def fake_schedule_orders(orders, **kw):
+            return {
+                "order_schedule": [{
+                    "plan_no": "SCHED-TEST-001", "kiln_id": "1", "kiln_name": "K1",
+                    "voltage_kv": 220.0, "current_a": 150.0, "qty": 5,
+                    # Use slash format — should trigger the fallback on line 141
+                    "delivery_date": "2026/06/30", "contract_no": "C-SCHED-001",
+                    "mold_od": 0, "mold_len": 0, "est_hours": 10, "status": "scheduled",
+                }],
+                "kiln_schedule": {
+                    "1": {"usage_pct": 50, "hours_used": 10, "slots_used": 1,
+                           "total_slots": 10, "order_count": 1,
+                           "orders": [{"plan_no": "SCHED-TEST-001", "hours": 10}],
+                           "kiln_name": "K1"},
+                },
+                "summary": {"scheduled": 1, "total_orders": 1, "total_hours": 10, "daily_cap": 1098},
+                "warnings": [],
+            }
+
+        monkeypatch.setattr(smod, "schedule_orders", fake_schedule_orders)
+        monkeypatch.setattr(smod, "reroute_on_congestion", lambda result, **kw: result)
+        monkeypatch.setattr(smod, "sync_schedule_to_erp", lambda db, result: {})
+
+        _seed_baseline(client, db_session)
+        resp = client.post("/api/v1/schedule/optimize", json={"strategy": "deadline"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["summary"]["scheduled"] >= 1
+        # delivery_date was in slash format — fallback normalization runs without error
+        # (normalization applies to DB write, response shows original from result dict)
+        assert len(data["schedule"]) >= 1
+
+
 # ── Alias for the seed helper used in tests ─────────────────────────────
 _seed_baseline = _seed_schedule_baseline
