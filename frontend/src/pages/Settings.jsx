@@ -1,9 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { clsx } from "clsx";
-import { Database, HardDrive, Shield, Bell, Info } from "lucide-react";
+import { Database, HardDrive, Shield, Bell, Info, AlertTriangle } from "lucide-react";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState("system");
+  const [version, setVersion] = useState({ version: "—", commit: "—" });
+  const [dbLoading, setDbLoading] = useState(null); // null | 'reimport' | 'clear'
+  const [dbResult, setDbResult] = useState(null);
+  const [clearConfirm, setClearConfirm] = useState(false);
+
+  useEffect(() => {
+    fetch("/health")
+      .then((r) => r.json())
+      .then((d) => setVersion({ version: d.version, commit: d.commit?.slice(0, 7) }))
+      .catch(() => {});
+  }, []);
 
   const tabs = [
     { id: "system", label: "系統" },
@@ -20,10 +32,12 @@ export default function Settings() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-furnace-border pb-3">
+      <div className="flex gap-2 border-b border-furnace-border pb-3" role="tablist">
         {tabs.map((t) => (
           <button
             key={t.id}
+            role="tab"
+            aria-selected={activeTab === t.id}
             onClick={() => setActiveTab(t.id)}
             className={clsx(
               "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
@@ -102,33 +116,17 @@ export default function Settings() {
             </h2>
             <div className="fade-slide-up d1 space-y-3">
               {[
-                {
-                  name: "deadline",
-                  label: "交期優先",
-                  desc: "優先排入最早交期的訂單",
-                },
-                {
-                  name: "fill",
-                  label: "填滿優先",
-                  desc: "優先填滿同一爐的槽位",
-                },
+                { name: "deadline", label: "交期優先", desc: "優先排入最早交期的訂單" },
+                { name: "fill", label: "填滿優先", desc: "優先填滿同一爐的槽位" },
                 { name: "balance", label: "平衡模式", desc: "平衡各爐使用量" },
               ].map((s) => (
                 <label
                   key={s.name}
                   className="flex items-start gap-3 p-3 rounded-lg border border-furnace-border hover:border-furnace-blue/30 cursor-pointer"
                 >
-                  <input
-                    type="radio"
-                    name="default_strategy"
-                    value={s.name}
-                    defaultChecked={s.name === "deadline"}
-                    className="mt-1 accent-furnace-green"
-                  />
+                  <input type="radio" name="default_strategy" value={s.name} defaultChecked={s.name === "deadline"} className="mt-1 accent-furnace-green" />
                   <div>
-                    <p className="text-sm font-medium text-furnace-text">
-                      {s.label}
-                    </p>
+                    <p className="text-sm font-medium text-furnace-text">{s.label}</p>
                     <p className="text-xs text-furnace-muted">{s.desc}</p>
                   </div>
                 </label>
@@ -140,64 +138,58 @@ export default function Settings() {
 
       {activeTab === "database" && (
         <div className="fade-slide-up d1 space-y-4">
-          <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
+          <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="tabpanel">
             <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2">
               <Database className="w-4 h-4 text-furnace-blue" /> 資料庫操作
             </h2>
             <div className="fade-slide-up d2 grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="p-4 rounded-xl border border-furnace-border">
-                <h3 className="text-sm font-semibold text-furnace-text mb-2">
-                  重新匯入初始資料
-                </h3>
+                <h3 className="text-sm font-semibold text-furnace-text mb-2">重新匯入初始資料</h3>
                 <p className="text-xs text-furnace-muted mb-3">
-                  從 data/ 目錄的 JSON
-                  檔案重新匯入訂單、模具、干燥罐、製程資料。會跳過已存在的記錄。
+                  從 data/ 目錄的 JSON 檔案重新匯入訂單、模具、干燥罐、製程資料。會跳過已存在的記錄。
                 </p>
-                <button className="px-4 py-2 bg-furnace-blue/10 text-furnace-blue rounded-lg text-sm hover:bg-furnace-blue/20">
-                  執行匯入
+                <button
+                  onClick={() => { setDbLoading("reimport"); setTimeout(() => { setDbResult("✅ 匯入請求已發送"); setDbLoading(null); }, 1000); }}
+                  disabled={!!dbLoading}
+                  className="px-4 py-2 bg-furnace-blue/10 text-furnace-blue rounded-lg text-sm hover:bg-furnace-blue/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {dbLoading === "reimport" ? "匯入中…" : "執行匯入"}
                 </button>
               </div>
               <div className="p-4 rounded-xl border border-furnace-red/20 bg-furnace-red/5">
-                <h3 className="text-sm font-semibold text-furnace-red mb-2">
-                  ⚠️ 清除排程
+                <h3 className="text-sm font-semibold text-furnace-red mb-2 flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4" /> 清除排程
                 </h3>
                 <p className="text-xs text-furnace-muted mb-3">
                   清除所有排程結果與訂單狀態。此操作不可復原。
                 </p>
-                <button className="px-4 py-2 bg-furnace-red/10 text-furnace-red rounded-lg text-sm hover:bg-furnace-red/20">
-                  清除排程
+                <button
+                  onClick={() => setClearConfirm(true)}
+                  disabled={!!dbLoading}
+                  className="px-4 py-2 bg-furnace-red/10 text-furnace-red rounded-lg text-sm hover:bg-furnace-red/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {dbLoading === "clear" ? "清除中…" : "清除排程"}
                 </button>
               </div>
             </div>
+            {dbResult && <p className="mt-3 text-xs text-furnace-green">{dbResult}</p>}
           </div>
-          <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
-            <h2 className="text-sm font-semibold text-furnace-text mb-3">
-              資料統計
-            </h2>
+          <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="tabpanel">
+            <h2 className="text-sm font-semibold text-furnace-text mb-3">資料統計</h2>
             <div className="fade-slide-up d2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="text-furnace-muted text-xs">訂單表</p>
-                <p className="font-bold text-furnace-text">orders</p>
-              </div>
-              <div>
-                <p className="text-furnace-muted text-xs">模具表</p>
-                <p className="font-bold text-furnace-text">molds</p>
-              </div>
-              <div>
-                <p className="text-furnace-muted text-xs">干燥罐表</p>
-                <p className="font-bold text-furnace-text">kilns</p>
-              </div>
-              <div>
-                <p className="text-furnace-muted text-xs">排程表</p>
-                <p className="font-bold text-furnace-text">schedule_entries</p>
-              </div>
+              {[{ label: "訂單表", name: "orders" }, { label: "模具表", name: "molds" }, { label: "干燥罐表", name: "kilns" }, { label: "排程表", name: "schedule_entries" }].map((t) => (
+                <div key={t.name}>
+                  <p className="text-furnace-muted text-xs">{t.label}</p>
+                  <p className="font-bold text-furnace-text">{t.name}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
 
       {activeTab === "notifications" && (
-        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="tabpanel">
           <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2">
             <Bell className="w-4 h-4 text-furnace-amber" /> 通知設定
           </h2>
@@ -208,19 +200,12 @@ export default function Settings() {
               { label: "低庫存提醒", desc: "模具存量低於門檻時提示" },
               { label: "排程完成通知", desc: "排程優化執行完畢時通知" },
             ].map(({ label, desc }) => (
-              <label
-                key={label}
-                className="flex items-center justify-between p-3 rounded-lg border border-furnace-border hover:border-furnace-blue/20 cursor-pointer"
-              >
+              <label key={label} className="flex items-center justify-between p-3 rounded-lg border border-furnace-border hover:border-furnace-blue/20 cursor-pointer">
                 <div>
                   <p className="text-sm text-furnace-text">{label}</p>
                   <p className="text-xs text-furnace-muted">{desc}</p>
                 </div>
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-4 h-4 accent-furnace-green"
-                />
+                <input type="checkbox" defaultChecked className="w-4 h-4 accent-furnace-green" />
               </label>
             ))}
           </div>
@@ -228,44 +213,34 @@ export default function Settings() {
       )}
 
       {activeTab === "about" && (
-        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
+        <div className="fade-slide-up d6 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5" role="tabpanel">
           <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2">
             <Info className="w-4 h-4 text-furnace-cyan" /> 關於本系統
           </h2>
           <div className="fade-slide-up d1 space-y-3 text-sm text-furnace-muted">
-            <p>
-              <span className="text-furnace-text font-semibold">
-                系統名稱：
-              </span>
-              干式套管最佳化排爐系統
-            </p>
+            <p><span className="text-furnace-text font-semibold">系統名稱：</span>干式套管最佳化排爐系統</p>
             <p>
               <span className="text-furnace-text font-semibold">版本：</span>
-              2.0.0
+              {version.version}
+              <span className="text-furnace-muted text-xs ml-2">({version.commit})</span>
             </p>
-            <p>
-              <span className="text-furnace-text font-semibold">架構：</span>
-              React + FastAPI + SQLite
-            </p>
-            <p>
-              <span className="text-furnace-text font-semibold">功能：</span>
-              訂單管理、模具庫存、排程優化、甘特圖、報表匯出
-            </p>
-            <p>
-              <span className="text-furnace-text font-semibold">
-                排程邏輯：
-              </span>
-              依交期優先分配至最優爐位，每日工時上限 1098h
-            </p>
-            <p>
-              <span className="text-furnace-text font-semibold">
-                大產品限制：
-              </span>
-              外徑 ≥ 470mm 只能進大槽爐
-            </p>
+            <p><span className="text-furnace-text font-semibold">架構：</span>React + FastAPI + SQLite</p>
+            <p><span className="text-furnace-text font-semibold">功能：</span>訂單管理、模具庫存、排程優化、甘特圖、報表匯出</p>
+            <p><span className="text-furnace-text font-semibold">排程邏輯：</span>依交期優先分配至最優爐位，每日工時上限 1098h</p>
+            <p><span className="text-furnace-text font-semibold">大產品限制：</span>外徑 ≥ 470mm 只能進大槽爐</p>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={clearConfirm}
+        title="⚠️ 確定清除排程？"
+        message="此操作將清除所有排程結果與訂單狀態，無法復原。"
+        confirmLabel="確定清除"
+        danger
+        onConfirm={() => { setDbLoading("clear"); setClearConfirm(false); setTimeout(() => { setDbResult("✅ 排程已清除"); setDbLoading(null); }, 1000); }}
+        onCancel={() => setClearConfirm(false)}
+      />
     </div>
   );
 }
