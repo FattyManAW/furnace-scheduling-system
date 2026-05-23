@@ -90,7 +90,7 @@ def find_alternate_kilns(
             kiln,
             mold_od=order.get("mold_od", 0),
             mold_len=order.get("mold_len", 0),
-            mold_inner_dia=order.get("mold_inner_dia", 0),
+            mold_inner_dia=order.get("mold_inner_dia", order.get("mold_id_dia", 0)),
             needs_big_slot=(order.get("mold_od", 0) >= 470),
         )
 

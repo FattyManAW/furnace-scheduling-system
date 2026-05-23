@@ -236,6 +236,8 @@ class ScheduleResult(BaseModel):
     schedule: list[ScheduleEntryOut]
     items: list[ScheduleEntryOut] = []  # alias for consistency with PaginatedResponse
     warnings: list[str] = []
+    reroutes_applied: bool = False
+    reroute_info: Optional[dict[str, Any]] = None
 
     def model_post_init(self, __context):
         """Backward-compat: populate items from schedule if not set."""

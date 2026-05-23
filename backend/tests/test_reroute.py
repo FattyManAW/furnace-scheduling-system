@@ -21,8 +21,9 @@ from engine.reroute import reroute_on_congestion, reroute_report
 
 Base.metadata.create_all(bind=engine)
 
-def test_reroute_before_after():
-    """Full integration: seed → schedule → detect → reroute → report"""
+
+def _run_reroute_integration():
+    """Helper: seed → schedule → detect → reroute → report. Returns full result dict."""
     db = SessionLocal()
     try:
         seed_all()
@@ -86,17 +87,86 @@ def test_reroute_before_after():
         print(f"\n✅ Test complete: {rr.get('moved', 0)} orders rerouted in {rr.get('iterations', 0)} iterations")
 
         # Verify no data corruption
-        moved = rr.get("moved", 0)
         total_orders = sum(k.get("order_count", 0) for k in rerouted["kiln_schedule"].values())
         expected = result["summary"]["scheduled"]
         assert total_orders == expected, f"Order count mismatch: {total_orders} vs {expected}"
+
+        return rerouted
 
     finally:
         db.close()
 
 
+def test_reroute_before_after():
+    """Full integration: seed → schedule → detect → reroute → report"""
+    rerouted = _run_reroute_integration()
+    rr = rerouted.get("reroute", {})
+
+    # Assert reroute structure is valid
+    assert "before" in rr, "Missing before stats"
+    assert "after" in rr, "Missing after stats"
+    assert "moved" in rr, "Missing moved count"
+    assert isinstance(rr["moved"], int), "moved should be int"
+
+    # Assert order count integrity
+    total_orders = sum(k.get("order_count", 0) for k in rerouted["kiln_schedule"].values())
+    assert total_orders == rerouted["summary"]["scheduled"], \
+        f"Order count mismatch: {total_orders} vs {rerouted['summary']['scheduled']}"
+
+    # Assert before/after improvement or no-op
+    before = rr["before"]
+    after = rr["after"]
+    # Moving orders can trade congested kiln count for better spread — both are valid outcomes
+    if rr["moved"] > 0:
+        # When orders moved, at least one of these should improve:
+        # spread narrows, max usage drops, or congested count drops
+        spread_improved = after.get("usage_spread", 999) <= before.get("usage_spread", 999)
+        max_improved = after.get("max_usage_pct", 999) <= before.get("max_usage_pct", 999)
+        congested_improved = after.get("congested_kilns", 999) <= before.get("congested_kilns", 999)
+        assert spread_improved or max_improved or congested_improved, \
+            f"Reroute should improve at least one metric. Before: {before}, After: {after}"
+
+
+def test_reroute_field_mapping():
+    """Verify reroute handles optimizer field names correctly (mold_id_dia)."""
+    db = SessionLocal()
+    try:
+        seed_all()
+        products_by_voltage, kilns_data, hours_per_root = load_all_optimizer_data(db)
+
+        from models import Order
+        orders = db.query(Order).order_by(Order.id).all()
+        order_dicts = [{
+            "plan_no": o.plan_no, "contract_no": o.contract_no,
+            "voltage_kv": o.voltage_kv, "current_a": o.current_a,
+            "qty": o.qty, "delivery_date": o.delivery_date or "",
+            "product_from": o.product_from, "product_to": o.product_to,
+        } for o in orders]
+
+        result = schedule_orders(
+            order_dicts, products_by_voltage=products_by_voltage,
+            kilns_data=kilns_data, hours_per_root=hours_per_root,
+        )
+
+        # All scheduled orders should have mold_id_dia key
+        for entry in result.get("order_schedule", []):
+            assert "mold_id_dia" in entry, f"{entry['plan_no']} missing mold_id_dia"
+            assert isinstance(entry["mold_id_dia"], (int, float)), \
+                f"{entry['plan_no']} mold_id_dia is not numeric: {entry['mold_id_dia']}"
+
+        # reroute should work without errors even with only mold_id_dia
+        rerouted = reroute_on_congestion(
+            result, kilns_data=kilns_data,
+            products_by_voltage=products_by_voltage,
+            hours_per_root=hours_per_root,
+        )
+        assert "reroute" in rerouted
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
-    result = test_reroute_before_after()
+    result = _run_reroute_integration()
     rr = result.get("reroute", {})
     before = rr.get("before", {})
     after = rr.get("after", {})

@@ -13,7 +13,9 @@ from crud import (
 )
 from engine.data_layer import load_all_optimizer_data
 from engine.optimizer import DAILY_HOUR_CAP, schedule_orders
+from engine.reroute import reroute_on_congestion
 from engine.validator import validate_schedule
+from erp_sim.sync import sync_schedule_to_erp
 from fastapi import APIRouter, Depends, HTTPException, Query
 from models import Kiln, Order, ScheduleEntry
 from schemas import PaginatedResponse, ScheduleEntryOut, ScheduleRequest, ScheduleResult
@@ -80,6 +82,37 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
     validation = validate_schedule(result)
     if not validation["valid"]:
         result["warnings"].extend([f"[驗證錯誤] {e}" for e in validation["errors"]])
+
+    # ── Reroute: detect congestion and redirect overloaded orders ──
+    reroutes_applied = False
+    reroute_info = None
+    # Check if any kiln exceeds congestion threshold (85%)
+    ks_check = result.get("kiln_schedule", {})
+    congested_before = sum(
+        1 for k in ks_check.values() if k.get("usage_pct", 0) >= 85.0
+    )
+    if congested_before > 0:
+        rerouted_result = reroute_on_congestion(
+            result,
+            kilns_data=kilns_data,
+            products_by_voltage=products_by_voltage,
+            hours_per_root=hours_per_root,
+            congestion_threshold=85.0,
+        )
+        rr = rerouted_result.get("reroute", {})
+        moved = rr.get("moved", 0)
+        if moved > 0:
+            result = rerouted_result
+            reroutes_applied = True
+            reroute_info = {
+                "moved": moved,
+                "iterations": rr.get("iterations", 0),
+                "before": rr.get("before", {}),
+                "after": rr.get("after", {}),
+            }
+
+    # ── Sync to ERP ──
+    erp_sync_result = sync_schedule_to_erp(db, result)
 
     clear_schedule(db)
     kiln_map = {str(k.kiln_no): k for k in get_kilns(db)}
@@ -160,6 +193,8 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
         kiln_summary=list(result["kiln_schedule"].values()),
         schedule=schedule_out,
         warnings=result["warnings"],
+        reroutes_applied=reroutes_applied,
+        reroute_info=reroute_info,
     )
 
 
