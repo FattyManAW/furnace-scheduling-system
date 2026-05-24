@@ -2,11 +2,7 @@ import { useEffect, useState, memo } from "react";
 import { api } from "../lib/api";
 import {
   AlertTriangle,
-  ClipboardList,
-  Clock,
-  Factory,
   CheckCircle,
-  Warehouse,
   TrendingUp,
 } from "lucide-react";
 import { PageSkeleton } from "../components/Skeleton";

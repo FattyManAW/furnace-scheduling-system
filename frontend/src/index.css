@@ -582,7 +582,7 @@ select:focus-visible {
 
 /* ── Print (Reports/Gantt) ── */
 @media print {
-  aside, .sidebar, .md\:block, button, .fixed { display: none !important; }
+  nav, aside, [role="navigation"], button, .fixed { display: none !important; }
   main { margin-left: 0 !important; padding: 0 !important; }
   .bg-furnace-card { border: 1px solid #ccc !important; box-shadow: none !important; }
   body { background: white !important; color: black !important; }

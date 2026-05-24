@@ -95,6 +95,7 @@ export default function KeyboardShortcuts() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="搜尋頁面..."
+            aria-label="搜尋頁面"
             className="flex-1 bg-transparent text-furnace-text text-sm outline-none placeholder:text-furnace-muted"
           />
           <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-furnace-elevated text-furnace-muted font-mono">
