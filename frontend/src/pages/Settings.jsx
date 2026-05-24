@@ -131,7 +131,7 @@ export default function Settings() {
             <h2 className="text-sm font-semibold text-furnace-text mb-4 flex items-center gap-2">
               <Shield className="w-4 h-4 text-furnace-purple" /> 排程策略
             </h2>
-            <div className="fade-slide-up d1 space-y-3">
+            <div className="fade-slide-up d1 space-y-3" role="radiogroup" aria-label="預設排程策略">
               {[
                 { name: "deadline", label: "交期優先", desc: "優先排入最早交期的訂單" },
                 { name: "fill", label: "填滿優先", desc: "優先填滿同一爐的槽位" },
