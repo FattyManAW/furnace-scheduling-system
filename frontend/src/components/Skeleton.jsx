@@ -5,13 +5,6 @@
  *   <Skeleton className="h-8 w-36" />  // inline block
  *   <PageSkeleton variant="dashboard" />  // per-page presets
  */
-import {
-  ClipboardList,
-  Factory,
-  Clock,
-  Warehouse,
-  TrendingUp,
-} from "lucide-react";
 
 export function Skeleton({ className = "" }) {
   return <div className={`skeleton animate-pulse ${className}`} />;
