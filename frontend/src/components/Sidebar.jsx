@@ -47,9 +47,9 @@ export default function Sidebar({ onClose }) {
             <Flame className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-furnace-text leading-tight">
+            <div className="text-sm font-bold text-furnace-text leading-tight">
               排爐系統
-            </h1>
+            </div>
             <p className="text-[10px] text-furnace-muted">Dry Bushing v2</p>
           </div>
         </div>

@@ -314,7 +314,7 @@ export default function Kanban() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-furnace-text">Kanban 看板</h2>
+          <h1 className="text-lg font-bold text-furnace-text">Kanban 看板</h1>
           <p className="text-xs text-furnace-muted mt-0.5">
             拖曳卡片變更訂單狀態 · 共 {items.length} 筆訂單
           </p>

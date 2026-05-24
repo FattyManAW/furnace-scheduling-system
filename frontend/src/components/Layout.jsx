@@ -109,7 +109,7 @@ export default function Layout({ children }) {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-lg font-bold">排爐系統</h1>
+            <div className="text-lg font-bold">排爐系統</div>
           </div>
 
           <ErrorBoundary>{children}</ErrorBoundary>
