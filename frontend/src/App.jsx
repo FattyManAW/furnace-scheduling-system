@@ -10,6 +10,7 @@ const Orders = lazy(() => import("./pages/Orders"));
 const Molds = lazy(() => import("./pages/Molds"));
 const Schedule = lazy(() => import("./pages/Schedule"));
 const Gantt = lazy(() => import("./pages/Gantt"));
+const Kanban = lazy(() => import("./pages/Kanban"));
 const Reports = lazy(() => import("./pages/Reports"));
 const Settings = lazy(() => import("./pages/Settings"));
 
@@ -33,6 +34,7 @@ export default function App() {
               <Route path="/molds" element={<Molds />} />
               <Route path="/schedule" element={<Schedule />} />
               <Route path="/gantt" element={<Gantt />} />
+              <Route path="/kanban" element={<Kanban />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />

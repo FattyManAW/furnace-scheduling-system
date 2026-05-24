@@ -83,4 +83,12 @@ export const api = {
   },
   exportScheduleCsv: () => fetch(`${API_BASE}/api/v1/reports/schedule/csv`),
   exportOrdersJson: () => req("/api/v1/reports/orders/json"),
+
+  // ── Kanban ──
+  getKanban: () => req("/api/v1/kanban"),
+  updateKanbanItem: (id, status) =>
+    req(`/api/v1/kanban/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
 };

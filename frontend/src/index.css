@@ -516,6 +516,11 @@ button:active,
   background: var(--c-t3);
 }
 
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-elevated) transparent;
+}
+
 /* ── Glassmorphism ── */
 .glass {
   background: color-mix(in srgb, var(--c-surface) 70%, transparent);

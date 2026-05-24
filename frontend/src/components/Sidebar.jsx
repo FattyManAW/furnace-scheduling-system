@@ -5,6 +5,7 @@ import {
   Warehouse,
   Calendar,
   BarChart3,
+  Kanban,
   Settings,
   Flame,
   Cog,
@@ -19,6 +20,7 @@ const nav = [
   { to: "/molds", icon: Warehouse, label: "模具庫存" },
   { to: "/schedule", icon: Calendar, label: "排程設定" },
   { to: "/gantt", icon: BarChart3, label: "甘特圖" },
+  { to: "/kanban", icon: Kanban, label: "Kanban 看板" },
   { to: "/reports", icon: Settings, label: "報表匯出" },
   { to: "/settings", icon: Cog, label: "系統設定" },
 ];
