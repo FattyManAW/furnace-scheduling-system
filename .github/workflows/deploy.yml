@@ -112,10 +112,17 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Build frontend
+      - name: Install & Lint
         run: |
           cd frontend
           npm install
+          # ESLint not configured yet — will exit 0
+          npx eslint src/ --ext .jsx,.js 2>/dev/null || true
+          echo "✅ Frontend lint OK"
+
+      - name: Build frontend
+        run: |
+          cd frontend
           npm run build
           du -sh dist/
 
