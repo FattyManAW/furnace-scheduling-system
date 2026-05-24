@@ -42,10 +42,14 @@ def pytest_sessionfinish(session):
 @pytest.fixture(scope="function", autouse=True)
 def _clean_db(db_session):
     """Clear all tables before each test."""
+    from sqlalchemy import text
+    # Turn off FK enforcement for SQLite to allow clean deletes
+    db_session.execute(text("PRAGMA foreign_keys = OFF"))
     for table in reversed(_db.Base.metadata.sorted_tables):
         with contextlib.suppress(Exception):
             db_session.execute(table.delete())
     db_session.commit()
+    db_session.execute(text("PRAGMA foreign_keys = ON"))
 
 
 @pytest.fixture(scope="function")

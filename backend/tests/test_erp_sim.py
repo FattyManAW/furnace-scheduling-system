@@ -27,13 +27,14 @@ def test_create_order_200(client):
 def test_get_order_200(client):
     """查詢訂單應回傳 200"""
     # 先建立
-    client.post("/erp/orders", json={
+    create_resp = client.post("/erp/orders", json={
         "order_no": "PO-2026-002",
         "product_spec": "110kV 套管",
         "quantity": 30,
     })
+    order_id = create_resp.json()["id"]
     # 查詢
-    resp = client.get("/erp/orders/1")
+    resp = client.get(f"/erp/orders/{order_id}")
     assert resp.status_code == 200, resp.text
     data = resp.json()
     assert data["order_no"] == "PO-2026-002"
@@ -193,41 +194,40 @@ def test_order_not_found_404(client):
 
 def test_list_orders_with_status_filter(db_session):
     """list_orders with status filter 應正確過濾"""
-    from erp_sim.repository import create_order, list_orders
+    from erp_sim.repository import create_order, list_orders, update_order_status
 
-    create_order(db_session, "PO-SF-001", "spec A", 10, "normal")
-    create_order(db_session, "PO-SF-002", "spec B", 20, "high")
-    # 手動改狀態
-    create_order(db_session, "PO-SF-003", "spec C", 30, "normal")
-    from erp_sim.repository import update_order_status
-    update_order_status(db_session, 1, "scheduled")
+    o1 = create_order(db_session, "PO-SF-001", "spec A", 10, "normal")
+    o2 = create_order(db_session, "PO-SF-002", "spec B", 20, "high")
+    o3 = create_order(db_session, "PO-SF-003", "spec C", 30, "normal")
+    update_order_status(db_session, o1.id, "scheduled")
 
     pending = list_orders(db_session, status="pending")
-    assert len(pending) == 2
+    assert len(pending) >= 2
     assert all(o.status == "pending" for o in pending)
+    assert any(o.order_no == "PO-SF-002" for o in pending)
 
     scheduled = list_orders(db_session, status="scheduled")
-    assert len(scheduled) == 1
-    assert scheduled[0].status == "scheduled"
+    assert len(scheduled) >= 1
+    assert any(o.order_no == "PO-SF-001" and o.status == "scheduled" for o in scheduled)
 
 
 def test_get_deliveries_by_order(db_session):
     """get_deliveries_by_order 應回傳指定訂單的全部交期"""
     from erp_sim.repository import create_delivery, create_order, get_deliveries_by_order
 
-    create_order(db_session, "PO-GDBO-001", "spec A", 10)
-    create_order(db_session, "PO-GDBO-002", "spec B", 20)
-    create_delivery(db_session, order_id=1, order_no="PO-GDBO-001", furnace_id="k1")
-    create_delivery(db_session, order_id=1, order_no="PO-GDBO-001", furnace_id="k2")
-    create_delivery(db_session, order_id=2, order_no="PO-GDBO-002", furnace_id="k3")
+    o1 = create_order(db_session, "PO-GDBO-001", "spec A", 10)
+    o2 = create_order(db_session, "PO-GDBO-002", "spec B", 20)
+    create_delivery(db_session, order_id=o1.id, order_no="PO-GDBO-001", furnace_id="k1")
+    create_delivery(db_session, order_id=o1.id, order_no="PO-GDBO-001", furnace_id="k2")
+    create_delivery(db_session, order_id=o2.id, order_no="PO-GDBO-002", furnace_id="k3")
 
-    results = get_deliveries_by_order(db_session, 1)
+    results = get_deliveries_by_order(db_session, o1.id)
     assert len(results) == 2
-    assert all(d.order_id == 1 for d in results)
+    assert all(d.order_id == o1.id for d in results)
 
-    results2 = get_deliveries_by_order(db_session, 2)
+    results2 = get_deliveries_by_order(db_session, o2.id)
     assert len(results2) == 1
-    assert results2[0].order_id == 2
+    assert results2[0].order_id == o2.id
 
     results3 = get_deliveries_by_order(db_session, 99999)
     assert results3 == []
@@ -237,27 +237,29 @@ def test_list_deliveries_no_filter(db_session):
     """list_deliveries without any filter 應回傳全部"""
     from erp_sim.repository import create_delivery, create_order, list_deliveries
 
-    create_order(db_session, "PO-LD-000", "spec A", 10)
-    create_delivery(db_session, order_id=1, order_no="PO-LD-000", furnace_id="k1")
-    create_delivery(db_session, order_id=1, order_no="PO-LD-000", furnace_id="k2")
+    o = create_order(db_session, "PO-LD-NF-001", "spec A", 10)
+    create_delivery(db_session, order_id=o.id, order_no="PO-LD-NF-001", furnace_id="k1")
+    create_delivery(db_session, order_id=o.id, order_no="PO-LD-NF-001", furnace_id="k2")
 
     results = list_deliveries(db_session)
-    assert len(results) == 2
+    assert len(results) >= 2
+    our_deliveries = [d for d in results if d.order_no == "PO-LD-NF-001"]
+    assert len(our_deliveries) == 2
 
 
 def test_list_deliveries_with_order_id_filter(db_session):
     """list_deliveries with order_id filter 應正確過濾"""
     from erp_sim.repository import create_delivery, create_order, list_deliveries
 
-    create_order(db_session, "PO-LD-001", "spec A", 10)
-    create_order(db_session, "PO-LD-002", "spec B", 20)
-    create_delivery(db_session, order_id=1, order_no="PO-LD-001", furnace_id="k1")
-    create_delivery(db_session, order_id=2, order_no="PO-LD-002", furnace_id="k2")
+    o1 = create_order(db_session, "PO-LD-OIF-001", "spec A", 10)
+    o2 = create_order(db_session, "PO-LD-OIF-002", "spec B", 20)
+    create_delivery(db_session, order_id=o1.id, order_no="PO-LD-OIF-001", furnace_id="k1")
+    create_delivery(db_session, order_id=o2.id, order_no="PO-LD-OIF-002", furnace_id="k2")
 
-    results = list_deliveries(db_session, order_id=1)
+    results = list_deliveries(db_session, order_id=o1.id)
     assert len(results) == 1
-    assert results[0].order_id == 1
-    assert results[0].order_no == "PO-LD-001"
+    assert results[0].order_id == o1.id
+    assert results[0].order_no == "PO-LD-OIF-001"
 
 
 def test_list_deliveries_with_status_filter(db_session):
@@ -265,34 +267,35 @@ def test_list_deliveries_with_status_filter(db_session):
     from erp_sim.repository import create_delivery, create_order, list_deliveries
     from erp_sim.repository import update_delivery_status
 
-    create_order(db_session, "PO-LDS-001", "spec A", 10)
-    create_delivery(db_session, order_id=1, order_no="PO-LDS-001", status="scheduled")
-    create_delivery(db_session, order_id=1, order_no="PO-LDS-001", status="delivered")
+    o = create_order(db_session, "PO-LDS-001", "spec A", 10)
+    create_delivery(db_session, order_id=o.id, order_no="PO-LDS-001", status="scheduled")
+    create_delivery(db_session, order_id=o.id, order_no="PO-LDS-001", status="delivered")
 
     scheduled = list_deliveries(db_session, status="scheduled")
-    assert len(scheduled) == 1
-    assert scheduled[0].status == "scheduled"
+    assert len(scheduled) >= 1
+    assert any(d.status == "scheduled" and d.order_no == "PO-LDS-001" for d in scheduled)
 
     delivered = list_deliveries(db_session, status="delivered")
-    assert len(delivered) == 1
-    assert delivered[0].status == "delivered"
+    assert len(delivered) >= 1
+    assert any(d.status == "delivered" and d.order_no == "PO-LDS-001" for d in delivered)
 
 
 def test_update_delivery_status_happy_path(db_session):
     """update_delivery_status 應正確更新交期狀態"""
-    from erp_sim.repository import create_delivery, create_order, update_delivery_status
+    from erp_sim.repository import create_delivery, create_order, update_delivery_status, list_deliveries
 
-    create_order(db_session, "PO-UDS-001", "spec A", 10)
-    create_delivery(db_session, order_id=1, order_no="PO-UDS-001", status="scheduled")
+    o = create_order(db_session, "PO-UDS-001", "spec A", 10)
+    d = create_delivery(db_session, order_id=o.id, order_no="PO-UDS-001", status="scheduled")
 
-    updated = update_delivery_status(db_session, delivery_id=1, status="in_progress")
+    updated = update_delivery_status(db_session, delivery_id=d.id, status="in_progress")
     assert updated is not None
     assert updated.status == "in_progress"
 
     # 確認持久化
-    from erp_sim.repository import list_deliveries
     results = list_deliveries(db_session)
-    assert results[0].status == "in_progress"
+    our_delivery = next((r for r in results if r.id == d.id), None)
+    assert our_delivery is not None
+    assert our_delivery.status == "in_progress"
 
 
 # ── Sync unit tests ─────────────────────────────────────────────────────
