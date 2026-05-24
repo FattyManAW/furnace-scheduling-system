@@ -178,6 +178,7 @@ export default function Reports() {
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
+            <caption className="sr-only">報表匯出資料</caption>
             <thead>
               <tr className="border-b border-furnace-border">
                 {["合約號", "訂單數", "總數量"].map((h) => (

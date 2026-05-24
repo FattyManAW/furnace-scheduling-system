@@ -295,6 +295,7 @@ export default function Orders() {
       <div className="fade-slide-up d5 bg-furnace-card hover-lift border border-furnace-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
+            <caption className="sr-only">訂單列表</caption>
             <thead>
               <tr className="border-b border-furnace-border">
                 {[

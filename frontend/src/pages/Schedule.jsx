@@ -186,6 +186,7 @@ export default function Schedule() {
             {/* Order list (scrollable) */}
             <div className="max-h-[300px] overflow-y-auto border border-furnace-border rounded-lg">
               <table className="w-full text-xs">
+                <caption className="sr-only">待排程訂單列表</caption>
                 <thead className="fade-slide-up d4 sticky top-0 bg-furnace-card hover-lift">
                   <tr className="border-b border-furnace-border">
                     <th className="px-3 py-2 w-10">
@@ -402,6 +403,7 @@ export default function Schedule() {
                         {isExpanded && (
                           <div className="px-4 pb-3 border-t border-furnace-border/50">
                             <table className="w-full text-xs mt-2">
+                              <caption className="sr-only">排程結果詳情</caption>
                               <thead>
                                 <tr className="text-furnace-muted">
                                   <th scope="col" className="text-left py-1.5">計劃單號</th>
