@@ -626,3 +626,28 @@ select:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── High Contrast / Forced Colors (Windows Ease of Access) ── */
+@media (forced-colors: active), (prefers-contrast: more) {
+  * {
+    border-color: ButtonText !important;
+  }
+  .fade-slide-up,
+  .fade-slide-down,
+  .fade-slide-left,
+  .fade-slide-right,
+  .scale-in {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  button,
+  a,
+  [role="button"] {
+    outline: 2px solid ButtonText !important;
+  }
+  /* Respect system colors for semantic UI */
+  .bg-furnace-green,
+  .bg-furnace-green\/60 {
+    background-color: ButtonText !important;
+  }
+}

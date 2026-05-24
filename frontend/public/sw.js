@@ -47,12 +47,17 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Page navigations: network-first, fallback to index
+  // Page navigations: network-first, fallback to cached "/" or offline page
   if (e.request.mode === "navigate") {
     e.respondWith(
-      fetch(e.request).catch(() =>
-        caches.match("/").then((r) => r || Response.redirect("/", 302)),
-      ),
+      fetch(e.request).catch(async () => {
+        const cachedRoot = await caches.match("/");
+        if (cachedRoot) return cachedRoot;
+        return new Response(
+          "<!DOCTYPE html><html lang=\"zh-TW\"><head><meta charset=\"UTF-8\"><title>离线模式</title></head><body style=\"display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui;background:#181b23;color:#e2e8f0;text-align:center\"><div><h1>📡</h1><p>目前为离线模式</p><p style=\"font-size:14px;opacity:.6\">请检查网络连线后重整页面</p></div></body></html>",
+          { status: 503, headers: { "Content-Type": "text/html" } },
+        );
+      }),
     );
     return;
   }
