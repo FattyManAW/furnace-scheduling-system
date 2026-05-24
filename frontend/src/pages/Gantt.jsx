@@ -47,7 +47,7 @@ function timeToLeft(dateStr, minDate, colW) {
   return diff * colW;
 }
 
-// ── Hover Tooltip
+// ── Hover Tooltip (mouse + keyboard accessible)
 function Tooltip({ children, content }) {
   const [show, setShow] = useState(false);
   return (
@@ -55,6 +55,8 @@ function Tooltip({ children, content }) {
       className="relative inline-block"
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
+      onFocus={() => setShow(true)}
+      onBlur={() => setShow(false)}
     >
       {children}
       {show && (

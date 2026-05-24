@@ -81,6 +81,7 @@ function ProgressBar({ pct, label, used, cap }) {
           className={`h-full rounded-full transition-all duration-700 ease-out ${barColor}`}
           style={{ width: `${pct}%` }}
           role="progressbar"
+          aria-label={`窯爐使用率 ${pct}%`}
           aria-valuenow={pct}
           aria-valuemin={0}
           aria-valuemax={100}

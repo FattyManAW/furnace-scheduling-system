@@ -98,8 +98,16 @@ export default function Layout({ children }) {
           <Sidebar onClose={() => setSidebarOpen(false)} />
         </div>
 
+        {/* Skip-to-content link (WCAG 2.1 2.4.1) */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-furnace-blue focus:text-white focus:rounded-lg focus:text-sm focus:outline-none focus:ring-2 focus:ring-furnace-blue/50"
+        >
+          跳至主要內容
+        </a>
+
         {/* Main content */}
-        <main className="flex-1 p-4 md:p-6 md:ml-[var(--c-sidebar-width)] min-h-screen">
+        <main id="main-content" className="flex-1 p-4 md:p-6 md:ml-[var(--c-sidebar-width)] min-h-screen">
           {/* Mobile header bar */}
           <div className="flex items-center gap-3 mb-4 md:hidden">
             <button
