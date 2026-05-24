@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
+import usePageTitle from "../lib/usePageTitle";
 import { clsx } from "clsx";
 import {
   Download,
@@ -12,6 +13,7 @@ import { useToast } from "../components/Toast";
 import { observeReveal } from "../lib/anim";
 
 export default function Reports() {
+  usePageTitle("報表匯出");
   const toast = useToast();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);

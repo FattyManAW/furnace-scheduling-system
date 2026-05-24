@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
+import usePageTitle from "../lib/usePageTitle";
 import { clsx } from "clsx";
 import { PageSkeleton, EmptyState } from "../components/Skeleton";
 import { useToast } from "../components/Toast";
@@ -88,6 +89,7 @@ function MoldCard({ mold, onEdit, onAdjust }) {
 }
 
 export default function Molds() {
+  usePageTitle("模具庫存");
   const toast = useToast();
   const [molds, setMolds] = useState([]);
   const [loading, setLoading] = useState(true);

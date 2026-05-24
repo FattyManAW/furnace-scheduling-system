@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { clsx } from "clsx";
+import usePageTitle from "../lib/usePageTitle";
 import { Database, HardDrive, Shield, Bell, Info, AlertTriangle } from "lucide-react";
 import ConfirmDialog from "../components/ConfirmDialog";
 
 export default function Settings() {
+  usePageTitle("系統設定");
   const [activeTab, setActiveTab] = useState("system");
   const [version, setVersion] = useState({ version: "—", commit: "—" });
   const [dbLoading, setDbLoading] = useState(null); // null | 'reimport' | 'clear'

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { api } from "../lib/api";
+import usePageTitle from "../lib/usePageTitle";
 import {
   format,
   addDays,
@@ -73,6 +74,7 @@ function Tooltip({ children, content }) {
 }
 
 export default function Gantt() {
+  usePageTitle("甘特圖");
   const [schedule, setSchedule] = useState(null);
   const [loading, setLoading] = useState(true);
   const [viewStart, setViewStart] = useState(null);
@@ -299,7 +301,8 @@ export default function Gantt() {
             return (
               <div key={kid} className="flex border-b border-furnace-border/30 hover:bg-furnace-bg/10">
                 <div className="w-[150px] min-w-[150px] px-3 py-4 text-xs font-semibold text-furnace-text border-r border-furnace-border flex items-center gap-2">
-                  <div className={clsx("w-2 h-2 rounded-full", usage >= 90 ? "bg-furnace-red" : usage >= 70 ? "bg-furnace-amber" : usage >= 40 ? "bg-furnace-purple" : "bg-furnace-blue")} />
+                  <div className={clsx("w-2 h-2 rounded-full", usage >= 90 ? "bg-furnace-red" : usage >= 70 ? "bg-furnace-amber" : usage >= 40 ? "bg-furnace-purple" : "bg-furnace-blue")} aria-hidden="true" />
+                  <span className="sr-only">使用率 {usage}%</span>
                   {kn.name}
                 </div>
                 <div className="relative flex-shrink-0" style={{ width: days * colW, height: rowH }}>

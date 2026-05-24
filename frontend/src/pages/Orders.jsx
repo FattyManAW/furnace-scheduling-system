@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { api } from "../lib/api";
+import usePageTitle from "../lib/usePageTitle";
 import { format } from "date-fns";
 import { clsx } from "clsx";
 import { PageSkeleton, EmptyState } from "../components/Skeleton";
@@ -25,6 +26,7 @@ const PAGE_SIZE = 20;
 const STATUSES = ["all", "pending", "scheduled", "completed"];
 
 export default function Orders() {
+  usePageTitle("訂單管理");
   const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);

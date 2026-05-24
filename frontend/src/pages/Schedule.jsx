@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
+import usePageTitle from "../lib/usePageTitle";
 import { clsx } from "clsx";
 import { PageSkeleton, EmptyState } from "../components/Skeleton";
 import { useToast } from "../components/Toast";
@@ -19,6 +20,7 @@ const STRATEGIES = [
 ];
 
 export default function Schedule() {
+  usePageTitle("排程設定");
   const toast = useToast();
   const [kilns, setKilns] = useState([]);
   const [orders, setOrders] = useState([]);

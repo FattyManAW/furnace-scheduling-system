@@ -1,5 +1,6 @@
 import { useEffect, useState, memo } from "react";
 import { api } from "../lib/api";
+import usePageTitle from "../lib/usePageTitle";
 import {
   AlertTriangle,
   CheckCircle,
@@ -117,6 +118,7 @@ function StatusRow({ label, count, color, total }) {
 
 /* ─── Main Dashboard ─── */
 export default function Dashboard() {
+  usePageTitle("儀表板");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);

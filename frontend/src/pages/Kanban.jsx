@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { api } from "../lib/api";
+import usePageTitle from "../lib/usePageTitle";
 import { clsx } from "clsx";
 import {
   DndContext,
@@ -188,6 +189,7 @@ function DragCard({ item }) {
 
 // ── Main Kanban Page ───────────────────────────
 export default function Kanban() {
+  usePageTitle("Kanban 看板");
   const [items, setItems] = useState([]);
   const [activeItem, setActiveItem] = useState(null);
   const [loading, setLoading] = useState(true);
