@@ -6,6 +6,14 @@
 const state = {
   summary: null,
   products: {},
+
+// ── Theme-aware CSS variable reader ──
+function cssVar(name) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name);
+  return (v || '').trim();
+}
+let _gridColor = null;
+function gridColor() { return _gridColor || (_gridColor = `rgba(${cssVar('--border-rgb')}, .3)`); }
   orders: [],
   dryers: [],
   molds: [],
@@ -108,7 +116,7 @@ function renderDashboard() {
       backgroundColor: colors,
       borderWidth: 0,
     }],
-  }, { plugins: { legend: { position: "right", labels: { color: "#e2e4ed", font: { size: 11 } } } } });
+  }, { plugins: { legend: { position: "right", labels: { color: cssVar('--text'), font: { size: 11 } } } } });
 
   // Delivery date bar chart (top 20 dates)
   const dateCount = {};
@@ -120,13 +128,13 @@ function renderDashboard() {
     datasets: [{
       label: "訂單數量",
       data: sortedDates.map(([,cnt]) => cnt),
-      backgroundColor: "rgba(108,124,255,.6)",
+      backgroundColor: `rgba(${cssVar('--accent-rgb')}, .6)`,
       borderRadius: 4,
     }],
   }, { plugins: { legend: { display: false } }, scales: {
-    x: { ticks: { color: "#8b8fa8", font: { size: 10 }, maxRotation: 45 },
-        grid: { color: "rgba(46,49,80,.3)" } },
-    y: { ticks: { color: "#8b8fa8" }, grid: { color: "rgba(46,49,80,.3)" } },
+    x: { ticks: { color: cssVar('--text2'), font: { size: 10 }, maxRotation: 45 },
+        grid: { color: gridColor() } },
+    y: { ticks: { color: cssVar('--text2') }, grid: { color: gridColor() } },
   }});
 
   // Mold stock table
@@ -312,14 +320,14 @@ function renderScheduleResult(r) {
     datasets: [{
       label: "入罐模具總數",
       data: Object.values(fUtil),
-      backgroundColor: "rgba(0,210,160,.5)",
-      borderColor: "rgba(0,210,160,.8)",
+      backgroundColor: `rgba(${cssVar('--accent2-rgb')}, .5)`,
+      borderColor: `rgba(${cssVar('--accent2-rgb')}, .8)`,
       borderWidth: 1,
       borderRadius: 4,
     }],
   }, { plugins: { legend: { display: false } }, scales: {
-    x: { ticks: { color: "#8b8fa8", font: { size: 10 }, maxRotation: 45 }, grid: { color: "rgba(46,49,80,.3)" } },
-    y: { ticks: { color: "#8b8fa8" }, grid: { color: "rgba(46,49,80,.3)" }, title: { display: true, text: "模具數量", color: "#8b8fa8" } },
+    x: { ticks: { color: cssVar('--text2'), font: { size: 10 }, maxRotation: 45 }, grid: { color: gridColor() } },
+    y: { ticks: { color: cssVar('--text2') }, grid: { color: gridColor() }, title: { display: true, text: "模具數量", color: cssVar('--text2') } },
   }});
 
   // Batch sizes
@@ -331,12 +339,12 @@ function renderScheduleResult(r) {
     datasets: [{
       label: "批次數",
       data: Object.keys(sizeDist).sort((a,b) => a-b).map(k => sizeDist[k]),
-      backgroundColor: "rgba(108,124,255,.6)",
+      backgroundColor: `rgba(${cssVar('--accent-rgb')}, .6)`,
       borderRadius: 4,
     }],
   }, { plugins: { legend: { display: false } }, scales: {
-    x: { ticks: { color: "#8b8fa8" }, grid: { color: "rgba(46,49,80,.3)" } },
-    y: { ticks: { color: "#8b8fa8", stepSize: 1 }, grid: { color: "rgba(46,49,80,.3)" } },
+    x: { ticks: { color: cssVar('--text2') }, grid: { color: gridColor() } },
+    y: { ticks: { color: cssVar('--text2'), stepSize: 1 }, grid: { color: gridColor() } },
   }});
 
   // Gantt
@@ -389,7 +397,7 @@ function renderGantt(r) {
       const left = b.start_day * dayWidth + 200;
       const width = Math.max(1, b.total_molds) * dayWidth + 40;
       const colorIdx = b.total_molds % 5;
-      const colors = ["#6c7cff","#00d2a0","#ffb347","#47b3ff","#ff5c7c","#c084fc","#fb923c","#34d399"];
+      const colors = [cssVar('--accent'),cssVar('--accent2'),cssVar('--warn'),cssVar('--info'),cssVar('--danger'),'hsl(270,70%,75%)','hsl(28,95%,61%)','hsl(150,60%,52%)'];
       const bg = colors[colorIdx % colors.length];
       html += `<tr>
         <td class="furnace-name">${idx === 0 ? `<strong>${fname}</strong><br><span style="font-size:0.7rem;color:var(--text2)">${b.furnace_spec}</span>` : ""}</td>
@@ -426,7 +434,7 @@ function renderGantt(r) {
       const ms = b.mold_spec || {};
       const pct = (b.start_day / maxDay) * 100;
       const durPct = Math.max(8, (1 / maxDay) * 100 * Math.max(1, b.total_molds * 0.3));
-      const colors = ["#6c7cff","#00d2a0","#ffb347","#47b3ff","#ff5c7c","#c084fc","#fb923c","#34d399"];
+      const colors = [cssVar('--accent'),cssVar('--accent2'),cssVar('--warn'),cssVar('--info'),cssVar('--danger'),'hsl(270,70%,75%)','hsl(28,95%,61%)','hsl(150,60%,52%)'];
       const bg = colors[b.batch_id.charCodeAt(2) % colors.length];
       html += `<div class="gantt-block" style="position:absolute;left:${pct}%;width:${durPct}%;height:28px;background:${bg};border-radius:6px;top:10px;
         font-size:0.68rem;color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap;font-weight:600;padding:0 4px"
@@ -486,12 +494,12 @@ function renderMoldsPage() {
     datasets: [{
       label: "庫存數量",
       data: values,
-      backgroundColor: values.map(v => v < 30 ? "rgba(255,179,71,.6)" : "rgba(0,210,160,.5)"),
+      backgroundColor: values.map(v => v < 30 ? `rgba(${cssVar('--warn-rgb')}, .6)` : `rgba(${cssVar('--accent2-rgb')}, .5)`),
       borderRadius: 3,
     }],
   }, { indexAxis: "y", plugins: { legend: { display: false } }, scales: {
-    x: { ticks: { color: "#8b8fa8" }, grid: { color: "rgba(46,49,80,.3)" } },
-    y: { ticks: { color: "#8b8fa8", font: { size: 10 } }, grid: { color: "rgba(46,49,80,.3)" } },
+    x: { ticks: { color: cssVar('--text2') }, grid: { color: gridColor() } },
+    y: { ticks: { color: cssVar('--text2'), font: { size: 10 } }, grid: { color: gridColor() } },
   }});
 }
 
@@ -519,7 +527,7 @@ function renderChart(id, type, data, opts = {}) {
   const defaultOpts = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { tooltip: { backgroundColor: "#212436", titleColor: "#e2e4ed", bodyColor: "#e2e4ed", borderColor: "#2e3150", borderWidth: 1 } },
+    plugins: { tooltip: { backgroundColor: cssVar('--surface2'), titleColor: cssVar('--text'), bodyColor: cssVar('--text'), borderColor: cssVar('--border'), borderWidth: 1 } },
   };
   state.charts[id] = new Chart(ctx, { type, data, options: { ...defaultOpts, ...opts } });
 }
@@ -531,7 +539,7 @@ function destroyChart(id) {
 // ─── Toast ───────────────────────────────────────────────
 function toast(msg, type = "info") {
   const el = document.getElementById("toast");
-  const colors = { info: "#47b3ff", success: "#00d2a0", warn: "#ffb347", error: "#ff5c7c" };
+  const colors = { info: cssVar('--info'), success: cssVar('--success'), warn: cssVar('--warn'), error: cssVar('--danger') };
   el.style.borderLeft = `4px solid ${colors[type] || colors.info}`;
   el.textContent = msg;
   el.classList.add("show");
