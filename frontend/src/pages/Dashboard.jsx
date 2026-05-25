@@ -72,7 +72,7 @@ function ProgressBar({ pct, label, used, cap }) {
   return (
     <div className="fade-slide-up d4 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-furnace-heading">{label}</h2>
+        <div className="text-sm font-semibold text-furnace-heading">{label}</div>
         <span className={`text-sm font-bold ${textColor}`}>
           {pct.toFixed(1)}%
         </span>

@@ -141,7 +141,7 @@ function KanbanColumn({ columnId, items, activeItem }) {
       <div className="flex items-center gap-2 mb-3 px-1">
         <div className={clsx("w-2.5 h-2.5 rounded-full", meta.color)} />
         <Icon className="w-4 h-4 text-furnace-muted" />
-        <h3 className="text-sm font-semibold text-furnace-text">{meta.label}</h3>
+        <div className="text-sm font-semibold text-furnace-text">{meta.label}</div>
         <span className="ml-auto text-xs text-furnace-muted bg-furnace-border/30 px-1.5 py-0.5 rounded-full">
           {items.length}
         </span>

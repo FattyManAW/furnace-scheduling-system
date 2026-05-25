@@ -230,7 +230,7 @@ export default function Orders() {
       {bulkOpen && (
         <div className="fade-slide-up d3 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">批量匯入（每行一個 JSON）</h3>
+            <h2 className="text-sm font-semibold">批量匯入（每行一個 JSON）</h2>
             <button onClick={() => setBulkOpen(false)}>
               <X className="w-4 h-4 text-furnace-muted" />
             </button>

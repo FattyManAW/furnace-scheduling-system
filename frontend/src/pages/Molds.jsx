@@ -24,7 +24,7 @@ function MoldCard({ mold, onEdit, onAdjust }) {
     <div className="fade-slide-up d2 bg-furnace-card hover-lift border border-furnace-border rounded-xl p-4 hover:border-furnace-blue/30 transition-colors">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <h3 className="font-semibold text-furnace-text">#{mold.mold_no}</h3>
+          <div className="font-semibold text-furnace-text">#{mold.mold_no}</div>
           <p className="text-xs text-furnace-muted mt-0.5">
             OD {mold.outer_dia} × ID {mold.inner_dia} × L {mold.length}
           </p>
