@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-APS 排程如何切入智能制造深水区 — 用友科技</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+  <style>
+    :root {
+      --bg: #fdfae7;
+      --primary: #1e2bfa;
+      --text: #111111;
+      --text-muted: #6b6b6b;
+      --text-light: #9a9a9a;
+      --accent-light: rgba(30, 43, 250, 0.08);
+      --accent-medium: rgba(30, 43, 250, 0.15);
+      --border: rgba(30, 43, 250, 0.2);
+      --card-bg: rgba(30, 43, 250, 0.04);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Slide container */
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /* Asymmetric padding: extra bottom space to clear the fixed
+         slide-counter (left) and nav-controls (right). Without this,
+         cards/grids that fill slide-content overlap the nav chrome. */
+      padding: 3.5vw 4vw 8.5vh 4vw;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(40px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0);
+      z-index: 10;
+    }
+
+    .slide.prev {
+      transform: translateX(-40px);
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      margin-bottom: 1.5rem;
+    }
+
+    h3 {
+      font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    h4 {
+      font-size: clamp(0.85rem, 1.2vw, 1rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+    }
+
+    p, li {
+      font-size: clamp(0.85rem, 1.1vw, 1.05rem);
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* Slide header bar */
+    .slide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2.5vh;
+      flex-shrink: 0;
+    }
+
+    .slide-header h4 {
+      margin: 0;
+    }
+
+    .slide-header .tag {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--primary);
+      background: var(--accent-light);
+      padding: 0.35rem 0.9rem;
+      border-radius: 100px;
+    }
+
+    /* Slide content area */
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* Navigation */
+    .nav-controls {
+      position: fixed;
+      bottom: 2.5vh;
+      right: 3vw;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-size: 1.1rem;
+    }
+
+    .nav-btn:hover {
+      background: var(--primary);
+      color: var(--bg);
+      border-color: var(--primary);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .slide-counter {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      position: fixed;
+      bottom: 2.5vh;
+      left: 3vw;
+      z-index: 100;
+    }
+
+    .progress-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: var(--primary);
+      transition: width 0.4s ease;
+      z-index: 100;
+    }
+
+    /* Decorative elements */
+    .accent-line {
+      width: 60px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+    }
+
+    .accent-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* ============================================================
+       LAYOUT 1: Cover / Title Slide
+       ============================================================ */
+    .layout-cover {
+      justify-content: center;
+      align-items: flex-start;
+      padding-left: 8vw;
+    }
+
+    .layout-cover h1 {
+      max-width: 55vw;
+      margin-bottom: 1.5rem;
+      line-height: 1.05;
+    }
+
+    .layout-cover .subtitle {
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 40vw;
+      margin-bottom: 3rem;
+      font-weight: 400;
+    }
+
+    .layout-cover .meta {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      letter-spacing: 0.05em;
+    }
+
+    .layout-cover .cover-decoration {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 35vw;
+      height: 100vh;
+      background: var(--accent-light);
+      clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+    }
+
+    .layout-cover .cover-dots {
+      position: absolute;
+      bottom: 12vh;
+      right: 8vw;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      opacity: 0.25;
+    }
+
+    .layout-cover .cover-dots .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+
+    /* ============================================================
+       LAYOUT 2: Agenda / Table of Contents
+       ============================================================ */
+    .layout-agenda .agenda-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 1rem 3rem;
+      margin-top: 1rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .agenda-item {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      transition: background 0.2s ease;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .agenda-item:hover {
+      background: var(--card-bg);
+    }
+
+    .agenda-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+      min-width: 36px;
+    }
+
+    .agenda-item h3 {
+      margin-bottom: 0.3rem;
+      font-size: clamp(1rem, 1.4vw, 1.2rem);
+    }
+
+    .agenda-item p {
+      font-size: clamp(0.8rem, 1vw, 0.95rem);
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       LAYOUT 3: Key Metrics (3 large callouts)
+       Cards size to their content; the row centers vertically
+       inside the remaining slide-content area.
+       ============================================================ */
+    .layout-metrics .slide-content {
+      justify-content: flex-start;
+    }
+
+    .layout-metrics .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+      align-items: stretch;
+    }
+
+    .metric-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding: 1.5rem 1.6rem;
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      background: var(--card-bg);
+    }
+
+    .metric-card .metric-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.2rem, 3.4vw, 3rem);
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .metric-card .metric-label {
+      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .metric-card .metric-desc {
+      font-size: clamp(0.78rem, 0.95vw, 0.9rem);
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .metric-card .metric-supports {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin: 0.2rem 0 0;
+      padding: 0.7rem 0 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .metric-card .metric-supports li {
+      font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+      color: var(--text-muted);
+      padding-left: 1rem;
+      position: relative;
+      line-height: 1.45;
+    }
+
+    .metric-card .metric-supports li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--text-light);
+    }
+
+    .metric-card .metric-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-top: 0.3rem;
+    }
+
+    .metric-change.positive { color: #059669; }
+    .metric-change.negative { color: #dc2626; }
+
+    /* ============================================================
+       LAYOUT 4: Data Dashboard (6 stat grid)
+       Cells have natural height with stat at top + name + small
+       context line. Grid is auto-sized; the row stays in the upper
+       portion of slide-content with the bottom-padding reserved
+       for nav chrome.
+       ============================================================ */
+    .layout-dashboard .slide-content {
+      justify-content: flex-start;
+    }
+
+    .layout-dashboard .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-top: 0.5rem;
+    }
+
+    .stat-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1.4rem 1.5rem;
+      border-radius: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+
+    .stat-cell .stat-top {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .stat-cell .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .stat-cell .stat-unit {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .stat-cell .stat-name {
+      font-size: clamp(0.85rem, 1vw, 0.95rem);
+      color: var(--text);
+      line-height: 1.35;
+      font-weight: 500;
+    }
+
+    .stat-cell .stat-context {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      line-height: 1.4;
+      padding-top: 0.4rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       LAYOUT 5: Two Column Split
+       Left = numbered insight list, Right = pull-quote + supporting
+       stats. Both columns size to their content with natural rhythm
+       (gap-based spacing, no forced height-distribution).
+       ============================================================ */
+    .layout-split .slide-content {
+      justify-content: flex-start;
+    }
+
+    .layout-split .split-body {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 3.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .split-left, .split-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .split-right {
+      padding-left: 2.5rem;
+      border-left: 2px solid var(--border);
+    }
+
+    .insight-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      margin: 0;
+      counter-reset: insight;
+    }
+
+    .insight-list li {
+      position: relative;
+      padding-left: 2.6rem;
+      font-size: clamp(0.88rem, 1.05vw, 1rem);
+      color: var(--text);
+      line-height: 1.55;
+      counter-increment: insight;
+    }
+
+    .insight-list li::before {
+      content: counter(insight, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+      line-height: 1.7;
+    }
+
+    .split-highlight {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.15rem, 1.55vw, 1.5rem);
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+      padding: 1.3rem 1.5rem;
+      background: var(--accent-light);
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .split-highlight cite {
+      display: block;
+      margin-top: 0.7rem;
+      font-style: normal;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .mini-stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      padding-top: 0.4rem;
+    }
+
+    .mini-stat {
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+
+    .mini-stat .mini-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .mini-stat .mini-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      line-height: 1.35;
+    }
+
+    /* ============================================================
+       LAYOUT 6: Horizontal Bar Ranking
+       ============================================================ */
+    .layout-bars .bars-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    .bar-item {
+      display: grid;
+      grid-template-columns: minmax(180px, 30%) 1fr auto;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.6rem 0;
+    }
+
+    .bar-label {
+      font-size: clamp(0.8rem, 1.1vw, 1rem);
+      color: var(--text);
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .bar-track {
+      height: 28px;
+      background: var(--accent-light);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 6px;
+      transition: width 0.8s ease;
+    }
+
+    .bar-pct {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary);
+      min-width: 45px;
+      text-align: right;
+    }
+
+    .bar-note {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 0.2rem;
+    }
+
+    /* ============================================================
+       LAYOUT 7: Quote / Highlight
+       ============================================================ */
+    .layout-quote {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .layout-quote .quote-mark {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 8rem;
+      font-weight: 700;
+      color: var(--primary);
+      opacity: 0.15;
+      line-height: 0.5;
+      margin-bottom: 1rem;
+    }
+
+    .layout-quote blockquote {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--text);
+      max-width: 65vw;
+      margin-bottom: 2rem;
+    }
+
+    .layout-quote .quote-source {
+      font-size: clamp(0.85rem, 1.1vw, 1rem);
+      color: var(--text-muted);
+    }
+
+    .layout-quote .quote-source strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .layout-quote .quote-decoration {
+      position: absolute;
+      top: 10vh;
+      left: 5vw;
+      width: 80px;
+      height: 80px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+    }
+
+    .layout-quote .quote-decoration-2 {
+      position: absolute;
+      bottom: 12vh;
+      right: 6vw;
+      width: 60px;
+      height: 60px;
+      background: var(--accent-light);
+      border-radius: 50%;
+    }
+
+    /* ============================================================
+       LAYOUT 8: Timeline / Process Flow
+       ============================================================ */
+    .layout-timeline .timeline-track {
+      display: flex;
+      gap: 1.5rem;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .timeline-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .timeline-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 28px;
+      right: -0.75rem;
+      width: 1.5rem;
+      height: 2px;
+      background: var(--border);
+    }
+
+    .step-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .timeline-step:nth-child(2) .step-circle { opacity: 0.85; }
+    .timeline-step:nth-child(3) .step-circle { opacity: 0.7; }
+    .timeline-step:nth-child(4) .step-circle { opacity: 0.55; }
+
+    .step-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    .step-desc {
+      font-size: clamp(0.75rem, 1vw, 0.9rem);
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 220px;
+    }
+
+    /* ============================================================
+       LAYOUT 9: Detailed Analysis (bullets with sub-items)
+       ============================================================ */
+    .layout-detail .detail-body {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem 3rem;
+      flex: 1;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .detail-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .detail-block {
+      padding: 1rem 1.2rem;
+      border-radius: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+
+    .detail-block h3 {
+      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      margin-bottom: 0.6rem;
+      color: var(--text);
+    }
+
+    .detail-block ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .detail-block ul li {
+      position: relative;
+      padding-left: 1.1rem;
+      padding-bottom: 0.4rem;
+      font-size: clamp(0.78rem, 1vw, 0.9rem);
+      line-height: 1.5;
+    }
+
+    .detail-block ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.55rem;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .detail-block ul li:last-child {
+      padding-bottom: 0;
+    }
+
+    /* ============================================================
+       LAYOUT 10: Closing / CTA
+       ============================================================ */
+    .layout-closing {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .layout-closing h1 {
+      margin-bottom: 1rem;
+    }
+
+    .layout-closing .closing-sub {
+      font-size: clamp(1rem, 1.5vw, 1.3rem);
+      color: var(--text-muted);
+      max-width: 45vw;
+      margin-bottom: 2.5rem;
+    }
+
+    .layout-closing .cta-btn {
+      display: inline-block;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--bg);
+      background: var(--primary);
+      padding: 0.9rem 2.2rem;
+      border-radius: 100px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .layout-closing .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(30, 43, 250, 0.25);
+    }
+
+    .layout-closing .closing-contact {
+      margin-top: 3rem;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .layout-closing .closing-decoration {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 500px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .layout-closing .closing-decoration-2 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 360px;
+      height: 360px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* Keyboard hint */
+    .keyboard-hint {
+      position: fixed;
+      bottom: 2.5vh;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--text-light);
+      z-index: 100;
+      opacity: 0.6;
+    }
+
+    /* Responsive adjustments for very small heights */
+    @media (max-height: 700px) {
+      .slide { padding: 2.5vh 3vw; }
+      .layout-agenda .agenda-grid { gap: 0.8rem 2rem; }
+      .agenda-item { padding: 0.8rem; }
+      .metric-card { padding: 1rem; }
+      .layout-bars .bars-container { gap: 0.5rem; }
+      .bar-item { padding: 0.4rem 0; }
+      .detail-block { padding: 0.8rem 1rem; }
+    }
+  </style>
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap');
+
+/* Chinese fonts */
+body, .layout-cover .subtitle, .layout-agenda .agenda-item p, .detail-block p, .detail-block li,
+.layout-split .split-highlight, .mini-stat .mini-label, .mini-stat .mini-val {
+  font-family: 'Noto Serif SC', 'Inter', sans-serif;
+}
+h1, h2, h3, h4, .metric-card .metric-value, .stat-cell .stat-num, .agenda-num,
+.step-circle, .bar-pct, .mini-stat .mini-val, .tag, .counter, .meta, .stat-top,
+.split-highlight, .closing-contact, .blockquote, .step-title, .bar-label,
+.insight-list li::before, .accent-line {
+  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+}
+
+/* Yonyou logo */
+.yonyou-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1e2bfa;
+  text-decoration: none;
+}
+.yonyou-logo .logo-icon {
+  width: 22px;
+  height: 22px;
+  background: #1e2bfa;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fdfae7;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.slide-footer {
+  position: absolute;
+  bottom: 1.8vh;
+  left: 4vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: calc(100% - 8vw);
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+  </style>
+</head>
+<body>
+  <div class="deck">
+
+<div class="slide layout-cover active">
+  <div class="cover-decoration"></div>
+  <div class="cover-dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="accent-line"></div>
+  <h1>AI-APS 排程如何切入<br>智能制造深水区</h1>
+  <p class="subtitle">多工厂协同排程 · 利润最优 · 智能决策</p>
+  <p class="meta">2026年5月 &nbsp;&middot;&nbsp; 用友科技 ISV 赋能专场</p>
+  <svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg>
+</div>
+
+<div class="slide layout-agenda">
+  <div class="slide-header">
+  <h4>议程总览</h4>
+  <span class="tag">概览</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <div class="agenda-grid">
+      <div class="agenda-item"><span class="agenda-num">01</span><div><h3>APS 大单：索通集团</h3><p>多工厂协同方案剖析</p></div></div>
+      <div class="agenda-item"><span class="agenda-num">02</span><div><h3>售前快速响应</h3><p>APS 项目客户需求实战技巧</p></div></div>
+      <div class="agenda-item"><span class="agenda-num">03</span><div><h3>ESG 双碳管理产品</h3><p>如何帮助企业双碳合规</p></div></div>
+      <div class="agenda-item"><span class="agenda-num">04</span><div><h3>用友 APS 产品架构</h3><p>集团层 + 工厂层两层计划体系</p></div></div>
+      <div class="agenda-item"><span class="agenda-num">05</span><div><h3>核心价值与效益</h3><p>决策可视化 · 协同透明 · 风险预警</p></div></div>
+      <div class="agenda-item"><span class="agenda-num">06</span><div><h3>IMPACTs 双碳解决方案</h3><p>数据采集 · 智能核算 · 碳资产管理</p></div></div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-cover" style="justify-content:center;align-items:flex-start;padding-left:8vw;">
+  <div class="cover-decoration"></div>
+  <div class="accent-line" style="margin-top:10vh;"></div>
+  <h1 style="font-size:clamp(3.2rem,6vw,5rem);margin-bottom:1rem;">1</h1>
+  <h2 style="margin-bottom:0.5rem;">APS 大单：索通集团</h2>
+  <p style="color:var(--text-muted);font-size:clamp(1rem,1.5vw,1.25rem);max-width:35vw;">多工厂协同方案剖析</p>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>业务现状 · 公司概况</h4>
+  <span class="tag">索通集团</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <h2 style="margin-bottom:0.5rem;">索通发展股份有限公司</h2>
+    <div class="detail-body">
+      <div class="detail-col">
+        <div class="detail-block">
+          <h3>🏢 集团架构</h3>
+          <ul>
+            <li>索通发展股份有限公司（总部）</li>
+            <li>索通齐力炭材料有限公司</li>
+            <li>云南索通云铝炭材料有限公司</li>
+            <li>湖北索通炭材料有限公司</li>
+            <li>陇西索通炭材料有限公司</li>
+            <li>山东创新炭材料有限公司</li>
+            <li>嘉峪关索通炭材料有限公司</li>
+            <li>重庆锦旗碳素有限公司</li>
+          </ul>
+        </div>
+        <div class="detail-block">
+          <h3>主要产品</h3>
+          <ul>
+            <li>铝电解预焙阳极（核心产品）</li>
+            <li>产品规格：10kV ~ 750kV 全覆盖</li>
+            <li>产品类型：29 种不同型号</li>
+            <li>生产工艺：24 道工序流程</li>
+          </ul>
+        </div>
+      </div>
+      <div class="detail-col">
+        <div class="detail-block">
+          <h3>🎯 业务模式</h3>
+          <ul>
+            <li>集中接单、集中采购</li>
+            <li>原料分厂供应、产品分散发货</li>
+            <li>多工厂产销协同排产</li>
+            <li>利润成本一体化核算</li>
+          </ul>
+        </div>
+        <div class="detail-block">
+          <h3>📌 转型目标</h3>
+          <ul>
+            <li>保交付 + 利润最优</li>
+            <li>打破人工经验排产局限</li>
+            <li>全局优化替代局部优化</li>
+            <li>计划-执行-反馈闭环</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-metrics">
+  <div class="slide-header">
+  <h4>业务现状 · 生产工艺</h4>
+  <span class="tag">配比目标</span>
+</div>
+  <div class="slide-content">
+    <h2>原料混配 · 三大目标</h2>
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-value">30%</div>
+        <div class="metric-label">质量稳定</div>
+        <div class="metric-desc">通过标准化配比算法，确保产品质量一致性和批次稳定性，减少质量波动导致的客户投诉。</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">40%</div>
+        <div class="metric-label">用料均衡</div>
+        <div class="metric-desc">多供应商原料智能配比，在质量达标前提下优化各原料占比，降低单一原料依赖风险。</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">30%</div>
+        <div class="metric-label">低成本</div>
+        <div class="metric-desc">统筹 121 家供应商价格、运费、质量数据，通过全局优化算法找出成本最优配比方案。</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>业务现状 · 集团主排产</h4>
+  <span class="tag">协同流程</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <h2 style="margin-bottom:1rem;">集团主排产五部曲</h2>
+    <div class="detail-body" style="grid-template-columns:repeat(5,1fr);">
+      <div class="detail-block" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:700;color:var(--primary);font-family:Space Grotesk,sans-serif;margin-bottom:0.5rem;">①</div>
+        <h3 style="text-align:center;">销售部</h3>
+        <ul style="text-align:center;">
+          <li>接收销售订单</li>
+          <li>客户交期要求</li>
+          <li>产品规格确认</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:700;color:var(--primary);font-family:Space Grotesk,sans-serif;margin-bottom:0.5rem;">②</div>
+        <h3 style="text-align:center;">运营中心</h3>
+        <ul style="text-align:center;">
+          <li>多工厂产销协同</li>
+          <li>利润最优分配</li>
+          <li>并行排产计划</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:700;color:var(--primary);font-family:Space Grotesk,sans-serif;margin-bottom:0.5rem;">③</div>
+        <h3 style="text-align:center;">采购部</h3>
+        <ul style="text-align:center;">
+          <li>原料供应清单</li>
+          <li>协同采购优化</li>
+          <li>供应商比价</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:700;color:var(--primary);font-family:Space Grotesk,sans-serif;margin-bottom:0.5rem;">④</div>
+        <h3 style="text-align:center;">财务部</h3>
+        <ul style="text-align:center;">
+          <li>利润成本核算</li>
+          <li>制造费用管理</li>
+          <li>运输费用优化</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:700;color:var(--primary);font-family:Space Grotesk,sans-serif;margin-bottom:0.5rem;">⑤</div>
+        <h3 style="text-align:center;">生产基地</h3>
+        <ul style="text-align:center;">
+          <li>工厂产能上报</li>
+          <li>工艺路线确认</li>
+          <li>基地排产执行</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-metrics">
+  <div class="slide-header">
+  <h4>客户需求 · 总览</h4>
+  <span class="tag">多维度约束</span>
+</div>
+  <div class="slide-content">
+    <h2>排程优化的六大约束维度</h2>
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-value">利润最优</div>
+        <div class="metric-label">成本综合核算</div>
+        <div class="metric-desc">原料价 + 运费 + 制造成本 + 煅后焦预算</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">产能约束</div>
+        <div class="metric-label">多厂负荷平衡</div>
+        <div class="metric-desc">各厂产能上限 + 检修计划 + 大小块产能分配</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">工艺约束</div>
+        <div class="metric-label">配方与路线</div>
+        <div class="metric-desc">工艺路线 · 工艺流程 · 配比转换系数 · 合格率</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">交期约束</div>
+        <div class="metric-label">持续发货时间窗</div>
+        <div class="metric-desc">发货开始/结束日期约束 + 期间持续发货节奏</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">并行排产</div>
+        <div class="metric-label">弹性产能调度</div>
+        <div class="metric-desc">多订单并行 + 大小块比例弹性调整</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">定向约束</div>
+        <div class="metric-label">客户工厂匹配</div>
+        <div class="metric-desc">云铝/魏桥定向分配 + 人工调整 + 变更处理</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-split">
+  <div class="slide-header">
+  <h4>项目背景与目标</h4>
+  <span class="tag">索通集团</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <div class="split-body">
+      <div class="split-left">
+        <h3 style="margin-bottom:1rem;color:var(--text);">项目背景</h3>
+        <ul class="insight-list">
+          <li>索通发展为集团型企业，下属多家分厂（嘉峪关、云南、湖北、陇西、山东、重庆等）</li>
+          <li>主要产品为铝电解预焙阳极</li>
+          <li>业务模式：集中接单、集中采购、分散生产、分散发货</li>
+          <li>现有排产依赖人工经验，难以同时兼顾利润、产能、交期等多重约束</li>
+        </ul>
+        <h3 style="margin-bottom:1rem;margin-top:1.5rem;color:var(--text);">转型目标</h3>
+        <ul class="insight-list">
+          <li>建立多工厂协同排产体系，实现订单自动分配、利润最优</li>
+          <li>满足客户持续发货时间窗要求，支持多订单并行排产</li>
+          <li>与 BIP、MES 系统集成，形成计划-执行-反馈闭环</li>
+        </ul>
+      </div>
+      <div class="split-right">
+        <div class="split-highlight">
+          核心价值：从"各厂单独优化，局部最优" → "全局优化算法，综合考虑利润与交期"
+          <cite>— 保交付 &amp; 利润最优</cite>
+        </div>
+        <div class="mini-stat-row">
+          <div class="mini-stat">
+            <div class="mini-val">8</div>
+            <div class="mini-label">家分厂</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-val">121</div>
+            <div class="mini-label">家供应商</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-val">29</div>
+            <div class="mini-label">产品型号</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-val">24</div>
+            <div class="mini-label">道工序</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-val">28</div>
+            <div class="mini-label">座炉窑</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-val">251</div>
+            <div class="mini-label">张销售订单</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>用友 APS 产品架构</h4>
+  <span class="tag">两层计划体系</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <h2 style="margin-bottom:0.5rem;">三层 AI Agent 驱动的 APS 架构</h2>
+    <div class="detail-body" style="grid-template-columns:1fr 1fr;gap:2rem;">
+      <div class="detail-block" style="border-left:4px solid var(--primary);">
+        <h3>第一层：AI Agent 前置算料</h3>
+        <ul>
+          <li>中长期协作采购</li>
+          <li>APS 产能物料同步规划</li>
+          <li>智能预测 + 原料需求预判</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left:4px solid var(--primary);">
+        <h3>第二层：产线级别排程</h3>
+        <ul>
+          <li>APS 产线级计划</li>
+          <li>基于约束规划（周/日计划）</li>
+          <li>工序级作业指令下发</li>
+        </ul>
+      </div>
+    </div>
+    <div class="detail-body" style="margin-top:1.5rem;">
+      <div class="detail-block">
+        <h3>集团层中期计划（季/月）</h3>
+        <ul>
+          <li>目标：做什么 · 做多少 · 在哪个厂做</li>
+          <li>方法：全域优化算法 + 利润最优为目标</li>
+          <li>约束：订单交期 + 各厂产能 + 原料成本 + 运输成本</li>
+          <li>输出：各工厂生产任务建议 + 原料采购建议</li>
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h3>工厂层短期计划（周/日）</h3>
+        <ul>
+          <li>承接集团层生产任务 → 工序级指令</li>
+          <li>考虑：设备状态 + 炉室利用最大化 + 工作时间 + 连批生产</li>
+          <li>工厂层排程包含集团层 70% 的逻辑</li>
+          <li>输出：可执行的工序级工单 + 派工指令</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-timeline">
+  <div class="slide-header">
+  <h4>实施方案</h4>
+  <span class="tag">分步 vs 同步</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <h2 style="margin-bottom:1rem;">同步实施 — 时间最优 · 成本最低</h2>
+    <div class="timeline-track" style="gap:2.5rem;">
+      <div class="timeline-step">
+        <div class="step-circle" style="opacity:1.0;">①</div>
+        <div class="step-title">集团层调研</div>
+        <div class="step-desc">一次调研，覆盖全局<br>4 个月</div>
+      </div>
+      <div class="timeline-step">
+        <div class="step-circle" style="opacity:0.85;">②</div>
+        <div class="step-title">工厂详细调研</div>
+        <div class="step-desc">同步进行各分厂<br>详细调研</div>
+      </div>
+      <div class="timeline-step">
+        <div class="step-circle" style="opacity:0.7;">③</div>
+        <div class="step-title">集团层实施</div>
+        <div class="step-desc">中期计划 + 优化算法<br>4 个月</div>
+      </div>
+      <div class="timeline-step">
+        <div class="step-circle" style="opacity:0.55;">④</div>
+        <div class="step-title">工厂层实施</div>
+        <div class="step-desc">短期排程 + 工序指令<br>4 个月</div>
+      </div>
+    </div>
+    <div style="margin-top:2.5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
+      <div class="detail-block" style="text-align:center;">
+        <div style="font-size:2rem;font-weight:700;color:var(--primary);">30%</div>
+        <p style="margin-top:0.5rem;text-align:center;">整体进度加快<br><small>减少 2.5 个月重复工作</small></p>
+      </div>
+      <div class="detail-block" style="text-align:center;">
+        <div style="font-size:2rem;font-weight:700;color:var(--primary);">5.5月</div>
+        <p style="margin-top:0.5rem;text-align:center;">同步实施周期<br><small>vs 分步 8 个月</small></p>
+      </div>
+      <div class="detail-block" style="text-align:center;">
+        <div style="font-size:2rem;font-weight:700;color:var(--primary);">一次</div>
+        <p style="margin-top:0.5rem;text-align:center;">数据一致性保障<br><small>全局调研 · 无缝衔接</small></p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>系统集成方案</h4>
+  <span class="tag">BIP · MES</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <div class="detail-body" style="grid-template-columns:1fr 1fr;">
+      <div class="detail-block" style="border-left:4px solid var(--primary);">
+        <h3>与 BIP 一体化平台集成</h3>
+        <ul>
+          <li><strong>读取数据：</strong>销售订单 · 客户主数据 · 物料主数据 · BOM · 工艺路线 · 供货商主数据</li>
+          <li><strong>输出数据：</strong>生产订单 · 采购建议 · 发货计划</li>
+          <li>标准 API 对接，实时或批处理灵活选择</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left:4px solid var(--primary);">
+        <h3>与 MES 系统集成</h3>
+        <ul>
+          <li><strong>下发指令：</strong>工序级工单 · 派工指令</li>
+          <li><strong>接收回馈：</strong>报工数据 · 设备状态 · 在制品信息</li>
+          <li>实时更新计划进度，形成计划-执行-反馈闭环</li>
+          <li>根据业务需求灵活选择实时/批处理模式</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-cover" style="justify-content:center;align-items:flex-start;padding-left:8vw;">
+  <div class="cover-decoration"></div>
+  <div class="accent-line" style="margin-top:10vh;"></div>
+  <div style="font-size:5rem;font-weight:700;color:var(--primary);font-family:Space Grotesk,sans-serif;margin-bottom:1rem;">10天</div>
+  <h1 style="margin-bottom:1rem;">開發 Demo 系統</h1>
+  <p style="color:var(--text-muted);font-size:clamp(1rem,1.5vw,1.25rem);max-width:35vw;margin-bottom:1rem;">快速驗證方案可行性，10 天內完成可運行 Demo 系統</p>
+  <p style="color:var(--text-muted);font-size:0.9rem;">Day 1-3 · 數據建模 · Day 4-6 · 算法原型 · Day 7-10 · Demo 整合</p>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>索通解决方案核心价值</h4>
+  <span class="tag">五大价值</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <div class="detail-body" style="grid-template-columns:repeat(2,1fr);gap:1.5rem;">
+      <div class="detail-block" style="border-left:4px solid var(--primary);">
+        <h3>📊 决策可视化</h3>
+        <ul>
+          <li>管理层实时查看利润、交期、产能多维数据</li>
+          <li>决策有据可依，告别经验排产</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left:4px solid var(--primary);">
+        <h3>🔗 协同透明化</h3>
+        <ul>
+          <li>多工厂之间物料、产能一目了然</li>
+          <li>内部调拨高效透明</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left:4px solid var(--primary);">
+        <h3>📋 执行可追溯</h3>
+        <ul>
+          <li>每张销售订单可穿透至生产工序</li>
+          <li>进度全程可跟踪</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left:4px solid var(--primary);">
+        <h3>⚠️ 风险预警</h3>
+        <ul>
+          <li>交期风险、产能超载自动预警</li>
+          <li>变"救火"为"预防"</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left:4px solid var(--primary);">
+        <h3>🏭 组织经验沉淀</h3>
+        <ul>
+          <li>老师傅经验 → 算法规则</li>
+          <li>降低对人的依赖</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-metrics">
+  <div class="slide-header">
+  <h4>索通解决方案核心价值</h4>
+  <span class="tag">效益量化</span>
+</div>
+  <div class="slide-content">
+    <h2>预期效益指标</h2>
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-value">+1.5%~2.5%</div>
+        <div class="metric-label">集团整体利润提升</div>
+        <div class="metric-desc">通过降本与优配，全局优化替代局部优化</div>
+        <ul class="metric-supports">
+          <li>改善前：各厂单独优化，局部最优</li>
+          <li>改善后：全局优化算法，综合利润与交期</li>
+        </ul>
+        <div class="metric-change positive"><span>↑</span> 利润提升</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">-10%~15%</div>
+        <div class="metric-label">在制品库存降低</div>
+        <div class="metric-desc">工序级排程，减少等待与积压</div>
+        <ul class="metric-supports">
+          <li>改善前：工序间积压严重</li>
+          <li>改善后：工序级精准排程</li>
+        </ul>
+        <div class="metric-change positive"><span>↓</span> 库存下降</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">-15%~20%</div>
+        <div class="metric-label">原料库存周转天数</div>
+        <div class="metric-desc">协同采购 + 精准排产，从 45~60 天缩短至 35~40 天</div>
+        <ul class="metric-supports">
+          <li>改善前：45~60 天（安全库存偏高）</li>
+          <li>改善后：35~40 天</li>
+        </ul>
+        <div class="metric-change positive"><span>↓</span> 周转优化</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-cover" style="justify-content:center;align-items:flex-start;padding-left:8vw;">
+  <div class="cover-decoration"></div>
+  <div class="accent-line" style="margin-top:10vh;"></div>
+  <h1 style="font-size:clamp(3.2rem,6vw,5rem);margin-bottom:1rem;">2</h1>
+  <h2 style="margin-bottom:0.5rem;">售前快速响应 APS 项目</h2>
+  <p style="color:var(--text-muted);font-size:clamp(1rem,1.5vw,1.25rem);max-width:35vw;">客户需求实战技巧</p>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>YS 标准版 POC</h4>
+  <span class="tag">以客戶資料建立模型</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <h2 style="margin-bottom:1rem;">快速建立 POC 模型，验证方案可行性</h2>
+    <div class="detail-body" style="grid-template-columns:repeat(2,1fr);gap:2rem;">
+      <div class="detail-block">
+        <h3>📌 客户数据建模</h3>
+        <ul>
+          <li>基于客户实际业务数据建立标准版 POC</li>
+          <li>无需定制化开发，快速验证算法效果</li>
+          <li>支持不同行业数据格式自动适配</li>
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h3>🎯 售前演示支持</h3>
+        <ul>
+          <li>用客户真实数据做现场演示</li>
+          <li>可视化展示优化前后对比效果</li>
+          <li>快速生成方案演示报告</li>
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h3>⚡ 快速响应机制</h3>
+        <ul>
+          <li>标准版模型 + 行业模板</li>
+          <li>减少重复调研工作 2.5 个月</li>
+          <li>项目周期缩短 30%</li>
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h3>🔧 定制化扩展</h3>
+        <ul>
+          <li>标准版验证通过后 → 定制开发</li>
+          <li>逐步扩展到集团层 + 工厂层</li>
+          <li>渐进式部署降低实施风险</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-cover" style="justify-content:center;align-items:flex-start;padding-left:8vw;">
+  <div class="cover-decoration"></div>
+  <div class="accent-line" style="margin-top:10vh;"></div>
+  <h1 style="font-size:clamp(3.2rem,6vw,5rem);margin-bottom:1rem;">3</h1>
+  <h2 style="margin-bottom:0.5rem;">ESG 双碳管理产品</h2>
+  <p style="color:var(--text-muted);font-size:clamp(1rem,1.5vw,1.25rem);max-width:35vw;">如何帮助企业双碳合规</p>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>政策与市场双重驱动</h4>
+  <span class="tag">碳管理挑战与机遇</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <div class="detail-body" style="grid-template-columns:1fr 1fr;gap:2rem;">
+      <div class="detail-block">
+        <h3>🌍 全球政策加速碳管理刚性化</h3>
+        <ul>
+          <li>欧盟 CBAM 碳关税 2027 年全面实施，首批覆盖钢铁/铝/电力</li>
+          <li>欧盟 CSRD &amp; ESRS：强制范围 1-3 碳排放披露</li>
+          <li>2027 年实施数字电池护照，国际碳壁垒形成</li>
+          <li>碳核查违规最高罚款 200 万 + 配额核减 50%-100%</li>
+          <li>2024 年查处 ESG 数据造假 87 起，单案罚款超 500 万</li>
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h3>🇨🇳 2030 碳达峰 · 2060 碳中和</h3>
+        <ul>
+          <li>碳市场扩容：覆盖建材、有色等八大行业，45 亿吨排放量</li>
+          <li>2025 年建立 50+ 重点产品碳足迹标准</li>
+          <li>常州对动力电池/光伏企业碳足迹认证最高补贴 5 万元</li>
+          <li>零碳工厂奖励 100 万元</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>ESG 投资与碳数据</h4>
+  <span class="tag">数字化与透明化</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <div class="detail-body" style="grid-template-columns:1fr 1fr;gap:2rem;">
+      <div class="detail-block">
+        <h3>💰 ESG 投资倒逼碳数据透明化</h3>
+        <ul>
+          <li>全球 ESG 资管规模超 <strong>40 万亿美元</strong></li>
+          <li>MSCI 碳指标权重达 <strong>15%</strong></li>
+          <li>香港联交所将范围 3 排放列入强制披露</li>
+          <li>64% 消费者将可持续性列为采购前三因素</li>
+          <li>仅 9% 企业能完整计算范围 3 排放，错误率 30-40%</li>
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h3>🏦 碳挂钩金融工具</h3>
+        <ul>
+          <li>碳足迹挂钩贷款利率直接关联企业减排绩效</li>
+          <li>碳数据透明企业融资成本平均降 <strong>1.2 个百分点</strong></li>
+          <li>绿色债券发行成功率提升 <strong>40%</strong></li>
+          <li>苹果/沃尔玛等要求供应商 2030 年碳中和</li>
+          <li>未达标订单削减比例达 <strong>40%</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-metrics">
+  <div class="slide-header">
+  <h4>企业做碳盘查的必要性</h4>
+  <span class="tag">四大价值</span>
+</div>
+  <div class="slide-content">
+    <h2>碳盘查 — 企业双碳管理的第一块基石</h2>
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-value">合规</div>
+        <div class="metric-label">合规经营保障</div>
+        <div class="metric-desc">精准掌握碳排放数据，满足碳市场交易、碳税缴纳等政策要求，规避数据不清导致的合规风险。</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">降本</div>
+        <div class="metric-label">降本增效利器</div>
+        <div class="metric-desc">发现高耗能高排放环节，通过技术改造、工艺优化，降低能源消耗和生产成本。</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">国际</div>
+        <div class="metric-label">国际通行证</div>
+        <div class="metric-desc">面对欧盟 CBAM 等绿色贸易壁垒，碳盘查数据是产品出口的必要凭证，确保企业符合国际碳足迹标准。</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>企业碳管理痛点分析</h4>
+  <span class="tag">挑战</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <div class="detail-body" style="grid-template-columns:repeat(2,1fr);gap:1.5rem;">
+      <div class="detail-block">
+        <h3>📊 数据分散</h3>
+        <ul>
+          <li>数据来源分散，手工收集效率低</li>
+          <li>Excel 计算易出错，单位换算混乱</li>
+          <li>缺乏统一数据平台，数据孤岛严重</li>
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h3>⏱️ 周期长</h3>
+        <ul>
+          <li>每年碳盘查需 1-3 个月</li>
+          <li>数据反复核对，耗时耗力</li>
+          <li>响应监管时效性差</li>
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h3>📐 标准复杂</h3>
+        <ul>
+          <li>ISO 14064 / GHG Protocol 等标准繁多</li>
+          <li>范围 1/2/3 分类核算要求高</li>
+          <li>缺乏专业人才和经验积累</li>
+        </ul>
+      </div>
+      <div class="detail-block">
+        <h3>💡 价值难显现</h3>
+        <ul>
+          <li>碳管理视为合规成本，难以体现商业价值</li>
+          <li>减排机会识别困难</li>
+          <li>缺少数据支撑碳资产变现</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-split">
+  <div class="slide-header">
+  <h4>IMPACTs 双碳管理解决方案</h4>
+  <span class="tag">3-3</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <div class="split-body">
+      <div class="split-left">
+        <h3 style="margin-bottom:1rem;color:var(--text);">方案总览</h3>
+        <ul class="insight-list">
+          <li>物联网实时监测 + AI 智能算法</li>
+          <li>覆盖数据采集 → 智能核算 → 清册报告 → 碳资产管理全流程</li>
+          <li>遵循 ISO 14064、GHG Protocol 等国际标准</li>
+          <li>全面覆盖范围 1-3 碳排放管理场景</li>
+          <li>深度对接用友 ERP / APS / MES / SCM 核心系统</li>
+          <li>碳排放数据自动化采集、智能化分析、全链路闭环管理</li>
+          <li>用友 ISV 生态认证产品</li>
+        </ul>
+      </div>
+      <div class="split-right">
+        <div class="split-highlight">
+          一站式碳管理平台，助力企业高效达成双碳目标
+          <cite>— IMPACTs 双碳智能管理系统</cite>
+        </div>
+        <div class="mini-stat-row" style="margin-top:1.5rem;">
+          <div class="mini-stat">
+            <div class="mini-val">ISO</div>
+            <div class="mini-label">14064 标准</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-val">1-3</div>
+            <div class="mini-label">范围全覆盖</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-val">ISV</div>
+            <div class="mini-label">用友生态认证</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-detail">
+  <div class="slide-header">
+  <h4>IMPACTs 双碳解决方案</h4>
+  <span class="tag">核心功能</span>
+</div>
+  <div class="slide-content">
+    <div class="accent-line"></div>
+    <div class="detail-body" style="grid-template-columns:repeat(2,1fr);gap:1.5rem;">
+      <div class="detail-block" style="border-left:4px solid #059669;">
+        <h3>📡 多源数据采集与整合</h3>
+        <ul>
+          <li>支持来自不同来源的数据收集和分析</li>
+          <li>能源消耗、工业过程排放和废弃物处理等</li>
+          <li>对接 ERP/MES/SCM 等业务系统</li>
+          <li>物联网 PLC/Sensor/SMB 实时采集</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left:4px solid #059669;">
+        <h3>🧮 精准碳排放核算</h3>
+        <ul>
+          <li>依据国际标准，对所有业务活动碳排放核算</li>
+          <li>ISO 14064 + GHG Protocol 双重认证</li>
+          <li>范围 1/2/3 全场景覆盖</li>
+          <li>自动化计算逻辑，减少人为误差</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left:4px solid #059669;">
+        <h3>📈 深度数据分析与洞察</h3>
+        <ul>
+          <li>帮助企业识别减排机会</li>
+          <li>制定具体的减排措施</li>
+          <li>AI 智能算法优化碳资产配置</li>
+          <li>减排路径模拟和预测分析</li>
+        </ul>
+      </div>
+      <div class="detail-block" style="border-left:4px solid #059669;">
+        <h3>📄 合规报告生成与管理</h3>
+        <ul>
+          <li>生成符合国际标准的碳排放报告</li>
+          <li>协助企业获得碳足迹认证</li>
+          <li>自动化报告生成，周期缩短至 1-2 周</li>
+          <li>支持 CBAM、CSRD 等国际标准格式</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-metrics">
+  <div class="slide-header">
+  <h4>IMPACTs 客户案例</h4>
+  <span class="tag">部分行业客户</span>
+</div>
+  <div class="slide-content">
+    <h2>多行业成功案例</h2>
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-value">金属制品</div>
+        <div class="metric-label">某金属制品有限公司</div>
+        <div class="metric-desc">沃尔沃绿色供应商认证 · 欧盟 CBAM 首年核查通过</div>
+        <div class="metric-change positive"><span>↑</span> 年减排 CO₂ 8986 吨</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">胶膜行业</div>
+        <div class="metric-label">某胶膜有限公司</div>
+        <div class="metric-desc">行业内首家碳足迹认证 · 国际客户绿色溢价 20%</div>
+        <div class="metric-change positive"><span>↑</span> 预计 2.5 年收回成本</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">适用行业</div>
+        <div class="metric-label">重工 · 电力 · 交通 · 建筑 · 电子 · 化工 · 园区</div>
+        <div class="metric-desc">覆盖 9 大行业，从重工业到园区公共机构</div>
+        <div class="metric-change positive"><span>→</span> 全行业覆盖</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><svg class="yonyou-logo" width="100" height="22" viewBox="0 0 100 22"><rect width="22" height="22" rx="4" fill="#1e2bfa"/><text x="11" y="16" text-anchor="middle" fill="#fdfae7" font-family="sans-serif" font-size="11" font-weight="700" font-style="italic">Y</text><text x="30" y="16" fill="#1e2bfa" font-family="sans-serif" font-size="13" font-weight="600" font-style="italic">onyou</text></svg><span style="color:var(--text-light);font-size:11px;font-family:Space Grotesk,Inter,sans-serif;">AI-APS 排程如何切入智能制造深水区</span></div>
+</div>
+
+<div class="slide layout-closing">
+  <div class="closing-decoration"></div>
+  <div class="closing-decoration-2"></div>
+  <div class="accent-line" style="margin:0 auto 1.5rem;"></div>
+  <h1>感谢聆听</h1>
+  <p class="closing-sub">AI-APS 排程如何切入智能制造深水区</p>
+  <a href="#" class="cta-btn" onclick="alert('感谢您的关注！');return false;">联系我们</a>
+  <p class="closing-contact">用友科技 · ISV 赋能专场 · 2026年5月</p>
+</div>
+  </div>
+  <div class="slide-counter"><span id="current">1</span> / <span id="total">25</span></div>
+  <div class="keyboard-hint">使用 ← → 方向键或左右滑动翻页</div>
+  <div class="progress-bar" id="progress"></div>
+  <div class="nav-controls">
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" aria-label="上一页">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)" aria-label="下一页">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+  </div>
+  <script>
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const currentEl = document.getElementById('current');
+    const totalEl = document.getElementById('total');
+    const progressEl = document.getElementById('progress');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    let current = 0;
+    const total = slides.length;
+    totalEl.textContent = total;
+
+    function updateSlide() {
+      slides.forEach((slide, i) => {
+        slide.classList.remove('active', 'prev');
+        if (i === current) {
+          slide.classList.add('active');
+        } else if (i < current) {
+          slide.classList.add('prev');
+        }
+      });
+      currentEl.textContent = current + 1;
+      progressEl.style.width = ((current + 1) / total * 100) + '%';
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === total - 1;
+    }
+
+    function changeSlide(dir) {
+      const next = current + dir;
+      if (next >= 0 && next < total) {
+        current = next;
+        updateSlide();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        changeSlide(-1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        current = 0;
+        updateSlide();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        current = total - 1;
+        updateSlide();
+      }
+    });
+
+    // Touch support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        changeSlide(diff > 0 ? 1 : -1);
+      }
+    }, { passive: true });
+
+    updateSlide();
+  </script>
+
+  </script>
+</body>
+</html>
