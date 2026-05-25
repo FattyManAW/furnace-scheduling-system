@@ -1,5 +1,5 @@
 """SQLAlchemy ORM models"""
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Float, Integer, String, Text
 
@@ -20,8 +20,8 @@ class Order(Base):
     product_to = Column(String(50))
     status = Column(String(20), default="pending")  # pending / scheduled / completed
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class Mold(Base):
@@ -36,8 +36,8 @@ class Mold(Base):
     location = Column(String(100))
     status = Column(String(20), default="available")  # available / in_use / maintenance
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class Kiln(Base):
@@ -49,8 +49,8 @@ class Kiln(Base):
     inner_dia = Column(Float, nullable=False)
     height = Column(Float, nullable=False)
     schemes_json = Column(Text)  # JSON blob of schemes
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class ScheduleEntry(Base):
@@ -70,7 +70,7 @@ class ScheduleEntry(Base):
     est_hours = Column(Float, default=0)
     status = Column(String(20), default="scheduled")
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class Product(Base):
@@ -85,7 +85,7 @@ class Product(Base):
     mold_id = Column(Float)
     mold_len = Column(Float, nullable=False)
     capacity = Column(Integer, default=1)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class ProcessStep(Base):

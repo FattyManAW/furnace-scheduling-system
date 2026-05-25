@@ -1,6 +1,6 @@
 """ERP Simulation 資料模型"""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Float, Integer, String, Text
 
@@ -17,7 +17,7 @@ class ErpOrder(Base):
     quantity = Column(Integer, nullable=False, default=0)
     priority = Column(String(20), default="normal")  # normal / high / urgent
     status = Column(String(20), default="pending")  # pending / scheduled / in_production / completed
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class ErpDelivery(Base):
@@ -35,4 +35,4 @@ class ErpDelivery(Base):
     est_hours = Column(Float, default=0.0)
     quantity = Column(Integer, default=0)
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

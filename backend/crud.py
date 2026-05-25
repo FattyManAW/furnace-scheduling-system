@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from models import Kiln, Mold, Order, ProcessStep, Product, ScheduleEntry
@@ -68,7 +68,7 @@ def update_order(db: Session, order_id: int, order_update: OrderUpdate) -> Optio
     update_data = order_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_order, key, value)
-    db_order.updated_at = datetime.utcnow()
+    db_order.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(db_order)
     return db_order
@@ -145,7 +145,7 @@ def update_mold(db: Session, mold_id: int, mold_update: MoldUpdate) -> Optional[
     update_data = mold_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_mold, key, value)
-    db_mold.updated_at = datetime.utcnow()
+    db_mold.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(db_mold)
     return db_mold
@@ -157,7 +157,7 @@ def adjust_mold_stock(db: Session, mold_id: int, delta: int, reason: str = "adju
         return None
     db_mold.stock_qty = max(0, db_mold.stock_qty + delta)
     db_mold.notes = (db_mold.notes or "") + f"\n[{reason}] {delta:+d}"
-    db_mold.updated_at = datetime.utcnow()
+    db_mold.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(db_mold)
     return db_mold
@@ -221,7 +221,7 @@ def update_kiln(db: Session, kiln_id: int, kiln_update: KilnUpdate) -> Optional[
         db_kiln.schemes_json = json.dumps(update_data.pop("schemes"), ensure_ascii=False)
     for key, value in update_data.items():
         setattr(db_kiln, key, value)
-    db_kiln.updated_at = datetime.utcnow()
+    db_kiln.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(db_kiln)
     return db_kiln

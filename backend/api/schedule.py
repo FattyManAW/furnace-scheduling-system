@@ -1,6 +1,6 @@
 """Schedule API — 排程執行與結果查詢 + 單筆管理"""
 import contextlib
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional as _Opt
 
 from crud import (
@@ -159,7 +159,7 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
 
         if db_order:
             db_order.status = "scheduled"
-            db_order.updated_at = datetime.utcnow()
+            db_order.updated_at = datetime.now(timezone.utc)
 
     db.commit()
 
