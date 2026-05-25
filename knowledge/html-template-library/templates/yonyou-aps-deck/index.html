@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>AI-APS 排程如何切入智能制造深水区</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<script src="../deck-stage.js"></script>
+<style>
+:root{--green:#1a3a5c;--green-deep:#0f2540;--green-lite:#2a5080;--pink:#d4a853;--pink-deep:#c4983f;--cream:#f5f0e8;--cream-2:#ebe5d8;--ink:#1a1a17;--serif:"Noto Serif TC","Source Serif 4",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;}
+html,body{margin:0;padding:0;background:#111}deck-stage{font-family:var(--serif);color:var(--ink)}
+section{box-sizing:border-box;width:1920px;height:1080px;padding:72px 100px;background:var(--cream);color:var(--ink);position:relative;overflow:hidden}
+.label{font-family:var(--mono);font-size:22px;letter-spacing:.15em;text-transform:uppercase;font-weight:500;color:var(--green)}
+.cover{background:var(--green);color:var(--pink);padding:80px 120px;display:flex;flex-direction:column;justify-content:space-between}
+.cover .topbar{display:flex;justify-content:space-between;align-items:center;color:var(--pink)}
+.cover h1{font-weight:600;font-size:68px;line-height:1.2;margin:48px 0 0 0;letter-spacing:.02em}
+.cover .subtitle{font-size:28px;margin-top:20px;opacity:.85;font-weight:400}
+.cover .footline{position:absolute;bottom:56px;left:120px;right:120px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:22px;color:var(--pink);letter-spacing:.1em;font-weight:500}
+.chapter{background:var(--green);color:var(--pink);display:flex;flex-direction:column;justify-content:center;padding:0 120px}
+.chapter .chapter-num{font-family:var(--mono);font-size:120px;font-weight:700;line-height:1;opacity:.3;letter-spacing:-.05em}
+.chapter h2{font-size:54px;font-weight:600;margin:0;line-height:1.3}
+.chapter .chapter-sub{font-size:22px;margin-top:16px;opacity:.75;font-weight:400}
+.content{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;gap:24px;height:100%}
+.content .slide-header{grid-column:1/-1;display:flex;align-items:baseline;gap:16px;border-bottom:3px solid var(--green);padding-bottom:16px}
+.content .slide-header h2{font-size:38px;font-weight:600;margin:0;color:var(--green)}
+.content .body-left,.content .body-right{padding:8px 0;overflow:hidden}
+.content h3{font-size:24px;font-weight:600;margin:0 0 14px 0;color:var(--green-deep)}
+.content p,.content li{font-size:19px;line-height:1.7;margin:0 0 10px 0}
+.content ul{margin:0;padding-left:24px}.content li{margin-bottom:6px}
+.full-content{display:flex;flex-direction:column;height:100%}
+.full-content .slide-header{display:flex;align-items:baseline;gap:16px;border-bottom:3px solid var(--green);padding-bottom:16px;margin-bottom:20px}
+.full-content .slide-header h2{font-size:38px;font-weight:600;margin:0;color:var(--green)}
+.full-content .body{flex:1;overflow:hidden}
+.full-content h3{font-size:24px;font-weight:600;margin:0 0 14px 0;color:var(--green-deep)}
+.full-content p,.full-content li{font-size:19px;line-height:1.7;margin:0 0 10px 0}
+.full-content ul{margin:0;padding-left:24px}
+table{width:100%;border-collapse:collapse;font-size:16px;margin-top:12px}
+th{background:var(--green);color:var(--cream);padding:10px 14px;text-align:left;font-weight:600;font-size:16px}
+td{padding:9px 14px;border-bottom:1px solid var(--cream-2);vertical-align:top;line-height:1.5}
+tr:nth-child(even) td{background:var(--cream-2)}
+.closing{background:var(--green);color:var(--pink);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.closing h2{font-size:80px;font-weight:600;margin:0;line-height:1.2}
+.agenda{display:flex;flex-direction:column;justify-content:center;padding:0 120px}
+.agenda h2{font-size:44px;font-weight:600;color:var(--green);margin:0 0 48px 0;border-bottom:3px solid var(--green);padding-bottom:16px}
+.agenda-item{display:flex;align-items:baseline;gap:20px;padding:18px 0;border-bottom:1px solid var(--cream-2);font-size:26px}
+.agenda-item .num{font-family:var(--mono);font-size:22px;color:var(--pink-deep);font-weight:700;min-width:40px}
+.agenda-item .title{font-weight:600;color:var(--ink)}
+.value-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:16px}
+.value-card{background:var(--cream-2);border-left:5px solid var(--green);padding:20px 24px;border-radius:4px}
+.value-card h4{font-size:22px;font-weight:600;margin:0 0 8px 0;color:var(--green-deep)}
+.value-card p{font-size:18px;line-height:1.6;margin:0;color:#444}
+.stats-row{display:flex;gap:32px;margin-top:20px}
+.stat-item{flex:1;text-align:center;background:var(--green);color:var(--pink);padding:32px 20px;border-radius:8px}
+.stat-item .num{font-size:56px;font-weight:700;line-height:1}
+.stat-item .label{font-size:17px;margin-top:8px;opacity:.85;font-family:var(--mono)}
+.metric-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.metric-box{background:var(--cream-2);padding:20px 24px;border-radius:6px}
+.metric-box h4{font-size:18px;font-weight:600;margin:0 0 12px 0;color:var(--green);font-family:var(--mono)}
+.metric-box .before{color:#999;font-size:17px;margin-bottom:4px}
+.metric-box .after{color:var(--green-deep);font-size:20px;font-weight:600}
+.steps{display:flex;flex-direction:column;gap:16px;margin-top:20px}
+.step{display:flex;align-items:flex-start;gap:16px;background:var(--cream-2);padding:18px 24px;border-radius:6px}
+.step .step-num{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--pink-deep);min-width:50px}
+.step h4{font-size:22px;font-weight:600;margin:0 0 6px 0;color:var(--green-deep)}
+.step p{font-size:18px;line-height:1.6;margin:0;color:#555}
+.partner-row{display:flex;gap:24px;align-items:center;justify-content:center;margin-top:32px;flex-wrap:wrap}
+.partner-logo{width:140px;height:70px;background:var(--cream-2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#888;font-family:var(--mono)}
+</style>
+</head>
+<deck-stage width="1920" height="1080">
+
+<!-- Slide 1 — Cover -->
+<section data-label="封面">
+  <div class="cover">
+    <div class="topbar">
+      <span class="label">用友網絡 · 製造領域ISV賦能專場</span>
+      <span class="label">2026年5月</span>
+    </div>
+    <h1>AI-APS 排程如何<br>切入智能制造深水区</h1>
+    <div class="subtitle">製造領域 ISV 賦能專場</div>
+    <div class="footline"><span>用友網絡</span><span>AI-APS 解決方案</span></div>
+  </div>
+</section>
+
+<section data-label="目錄">
+  <div class="agenda"><h2>目錄</h2><div class="agenda-item"><span class="num">1、APS</span><span class="title">多工厂协同方案剖析</span></div><div class="agenda-item"><span class="num">2、售前快</span><span class="title">客户需求实战技巧</span></div><div class="agenda-item"><span class="num">3、ESG</span><span class="title">如何帮助企业双碳合规</span></div></div>
+</section>
+
+<section data-label="章節">
+  <div class="chapter"><div class="chapter-num">1-1</div><h2>APS大单索通集团     多工厂协同方案剖析</h2></div>
+</section>
+
+<!-- Slide 4 -->
+<section data-label="業務現狀">
+  <div class="content">
+    <div class="slide-header"><span class="label">業務現狀</span><h2>公司概况</h2></div>
+    <div class="body-left"><p>公司概况</p></div>
+    <div class="body-right"><p style="color:#999">（見左側）</p></div>
+  </div>
+</section>
+
+<!-- Slide 5 -->
+<section data-label="業務現狀">
+  <div class="content">
+    <div class="slide-header"><span class="label">業務現狀</span><h2>生产工艺</h2></div>
+    <div class="body-left"><p>生产工艺</p></div>
+    <div class="body-right"><p style="color:#999">（見左側）</p></div>
+  </div>
+</section>
+
+<!-- Slide 6 -->
+<section data-label="業務現狀">
+  <div class="content">
+    <div class="slide-header"><span class="label">業務現狀</span><h2>原料混配</h2></div>
+    <div class="body-left"><p>配比</p>
+<p>C/S/Fe/Si/Na/Ca/Mg…</p>
+<p>30%</p></div>
+    <div class="body-right"><p>40%</p>
+<p>30%</p>
+<p>一、质量稳定；    二、用料均衡；    三、低成本</p>
+<p>目标</p></div>
+  </div>
+</section>
+
+<!-- Slide 7 -->
+<section data-label="業務現狀">
+  <div class="full-content">
+    <div class="slide-header"><span class="label">業務現狀</span><h2>业务现状</h2></div>
+    <div class="body"><p>集团主排产</p>
+<p>销售订单</p>
+<p>多工厂产销协同排产</p>
+<p>主计划订单</p>
+<p>基地排产</p>
+<p>利润成本核算</p>
+<p>制造费用</p>
+<p>(人工/设备/能耗)</p>
+<p>工厂产能</p>
+<p>产品偏好</p>
+<p>属地偏好</p>
+<p>预测配比</p>
+<p>原料供应清单</p>
+<p>协同采购</p>
+<p>外部采购</p>
+<table>
+<tr><th>主排产流程</th><th></th><th></th><th></th><th></th></tr>
+<tr><td>销售部</td><td>运营中心</td><td>采购部</td><td>财务部</td><td>生产基地</td></tr>
+<tr><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<!-- Slide 8 -->
+<section data-label="業務現狀">
+  <div class="content">
+    <div class="slide-header"><span class="label">業務現狀</span><h2>索通集团</h2></div>
+    <div class="body-left"><p>索通发展股份有限公司</p>
+<p>索通齐力炭材料有限公司</p>
+<p>云南索通云铝炭材料有限公司</p>
+<p>湖北索通炭材料有限公司</p>
+<p>陇西索通炭材料有限公司</p>
+<p>山东创新炭材料有限公司</p>
+<p>嘉峪关索通炭材料有限公司</p>
+<p>重庆锦旗碳素有限公司</p>
+<p>。。。</p>
+<p>嘉峪关索通预焙阳极有限公司</p>
+<p>分厂一</p></div>
+    <div class="body-right"><p>分厂二</p>
+<p>分厂一</p>
+<p>分厂二</p>
+<p>分厂一</p>
+<p>分厂二</p>
+<p>分厂三</p>
+<p>分厂一</p>
+<p>分厂二</p>
+<p>分厂三</p>
+<p>分厂一</p>
+<p>分厂二</p>
+<p>分厂三</p></div>
+  </div>
+</section>
+
+<section data-label="章節">
+  <div class="chapter"><div class="chapter-num">1-2</div><h2>客户需求</h2></div>
+</section>
+
+<!-- Slide 10 -->
+<section data-label="客戶需求">
+  <div class="content">
+    <div class="slide-header"><span class="label">客戶需求</span><h2>客户需求</h2></div>
+    <div class="body-left"><p>主排产</p></div>
+    <div class="body-right"><p style="color:#999">（見左側）</p></div>
+  </div>
+</section>
+
+<!-- Slide 11 -->
+<section data-label="客戶需求">
+  <div class="content">
+    <div class="slide-header"><span class="label">客戶需求</span><h2>客户需求</h2></div>
+    <div class="body-left"><p>业务模式：集中接单，集中采购。原料分厂供应、产品分散发货。</p>
+<p>分单考虑的因素：</p>
+<p>订单交期；</p>
+<p>定向分配：云铝股份、魏桥集团的单分到曲靖工厂等</p>
+<p>石油焦采购种类、量和价格约束；</p>
+<p>煅后焦预算成本；</p>
+<p>原料到各工厂费用；</p></div>
+    <div class="body-right"><p>产品从各厂到客户运输费用；</p>
+<p>大小块型比例；</p>
+<p>订单的质量指标约束；</p>
+<p>原料到产品质量指标的转换系数；</p>
+<p>各厂生产成本；</p>
+<p>各厂生产工艺流程；</p>
+<p>不同订单的工艺路线；</p>
+<p>工厂产能约束；</p></div>
+  </div>
+</section>
+
+<!-- Slide 12 -->
+<section data-label="客戶需求">
+  <div class="full-content">
+    <div class="slide-header"><span class="label">客戶需求</span><h2>客户需求</h2></div>
+    <div class="body"><p>原料成本</p>
+<p>利润约束</p>
+<p>根据集团121家供应商，提供的石油焦种类、价格、运费、质量等信息，匹配销售订单物料的质量要求，通过算法优化，核算出最优原料配比，作为订单的原料成本。</p>
+<p>制造费用</p>
+<p>各订单的在每个工厂的生产制造需要的制造费用</p>
+<p>运输费用</p>
+<p>产品到客户运输成本</p>
+<p>预算成本</p>
+<p>原料非石油焦的其他原料的成本</p>
+<table>
+<tr><th></th></tr>
+<tr><td>产能约束</td></tr>
+<tr><td>工艺约束</td></tr>
+<tr><td>定向约束</td></tr>
+<tr><td></td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<!-- Slide 13 -->
+<section data-label="客戶需求">
+  <div class="full-content">
+    <div class="slide-header"><span class="label">客戶需求</span><h2>客户需求</h2></div>
+    <div class="body"><p>各分厂总产能约束</p>
+<p>产能约束</p>
+<p>根据各分厂产能，进行销售订单的排产产能约束</p>
+<p>大小块产能约束</p>
+<p>根据各分厂设备情况，进行产品大小块产能分配约束</p>
+<p>交期约束</p>
+<p>根据销售订单的交期，进行产能匹配约束</p>
+<p>产能约束</p>
+<p>检修计划</p>
+<p>与设备集成，根据检修计划，核减产能</p>
+<table>
+<tr><th>利润约束</th></tr>
+<tr><td></td></tr>
+<tr><td>工艺约束</td></tr>
+<tr><td>并行排产</td></tr>
+<tr><td>定向约束</td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<!-- Slide 14 -->
+<section data-label="客戶需求">
+  <div class="full-content">
+    <div class="slide-header"><span class="label">客戶需求</span><h2>客户需求</h2></div>
+    <div class="body"><p>工艺路线约束</p>
+<p>工艺约束</p>
+<p>根据各分厂工艺路线不同，可以生产的产品不同</p>
+<p>工艺流程</p>
+<p>各产品不同的工艺流程不同</p>
+<p>质量约束</p>
+<p>根据产品质量，需要匹配统筹原料配比，同时设置配比转换系数</p>
+<p>工艺约束</p>
+<p>合格率</p>
+<p>根据工厂工艺情况，合格率不同，需要核减产能</p>
+<p>物料约束</p>
+<p>根据工厂工艺情况，可以生产的物料不同</p>
+<table>
+<tr><th>利润约束</th></tr>
+<tr><td>产能约束</td></tr>
+<tr><td>工艺约束</td></tr>
+<tr><td>并行排产</td></tr>
+<tr><td>定向约束</td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<!-- Slide 15 -->
+<section data-label="客戶需求">
+  <div class="full-content">
+    <div class="slide-header"><span class="label">客戶需求</span><h2>客户需求</h2></div>
+    <div class="body"><p>排产计划</p>
+<p>并行排产</p>
+<p>根据销售订单的排产计划，计划开始发货时间和计划结束发货时间，约束期间发货节奏，满足持续发货的要求</p>
+<p>并行排产</p>
+<p>根据发货计划，同时根据产能情况，对多订单进行并行排产，对每天的产能占用进行弹性调整</p>
+<p>并行排产</p>
+<p>大小块比例</p>
+<p>并行排产时，大小块比例要弹性调整</p>
+<table>
+<tr><th>利润约束</th></tr>
+<tr><td>产能约束</td></tr>
+<tr><td>工艺约束</td></tr>
+<tr><td>并行排产</td></tr>
+<tr><td>定向约束</td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<!-- Slide 16 -->
+<section data-label="客戶需求">
+  <div class="full-content">
+    <div class="slide-header"><span class="label">客戶需求</span><h2>客户需求</h2></div>
+    <div class="body"><p>客户定向匹配</p>
+<p>定向约束</p>
+<p>根据集团战略，部分客户产品是定向某个工厂进行生产的</p>
+<p>人工调整</p>
+<p>满足基本约束的情况下，可以进行人工调整计划时间、工厂等计划信息</p>
+<p>定向约束</p>
+<p>计划变更</p>
+<p>需要对计划订单进行变更处理</p>
+<table>
+<tr><th>利润约束</th></tr>
+<tr><td>产能约束</td></tr>
+<tr><td>工艺约束</td></tr>
+<tr><td>并行排产</td></tr>
+<tr><td>定向约束</td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<!-- Slide 17 -->
+<section data-label="客戶需求">
+  <div class="content">
+    <div class="slide-header"><span class="label">客戶需求</span><h2>项目背景与目标</h2></div>
+    <div class="body-left"><p>索通发展为集团型企业，下属多家分厂（嘉峪关、云南、湖北、陇西、山东、重庆等），主要产品为铝电解预焙阳极。</p>
+<p>业务模式：集中接单、集中采购、分散生产、分散发货。</p>
+<p>现有排产依赖人工经验，难以同时兼顾利润、产能、交期等多重约束。</p>
+<p>目标</p></div>
+    <div class="body-right"><p>建立多工厂协同排产体系，实现订单自动分配、利润最优。</p>
+<p>满足客户持续发货时间窗要求，支持多订单并行排产。</p>
+<p>与BIP、MES系统集成，形成计划-执行-回馈死循环。</p>
+<p>转型目标：保交付&amp;利润最优</p></div>
+  </div>
+</section>
+
+<!-- Slide 18 -->
+<section data-label="項目背景">
+  <div class="content">
+    <div class="slide-header"><span class="label">項目背景</span><h2>业务现状与核心需求</h2></div>
+    <div class="body-left"><p>原料采购：多家供货商提供石油焦等原料，每家供货商有最大供货量、价格、地理位置差异。</p>
+<p>生产：多家分厂，各厂产能、工艺、产品偏好、生产成本不同；产品有大小块型比例要求。</p></div>
+    <div class="body-right"><p>运输：原料从供货商到各分厂单位运费不同；成品从分厂到客户运费不同。</p>
+<p>业务现状</p>
+<table>
+<tr><th>核心需求</th><th>描述</th></tr>
+<tr><td>利润寻优</td><td>需同时考虑原料采购价、原料运费、成品运费、制造成本，且受供货商限量、配方比例约束。</td></tr>
+<tr><td>多工厂协同</td><td>订单分配需平衡产能、利润。</td></tr>
+<tr><td>并行发货排产</td><td>客户要求持续发货（如3月1日-30日每日发），需在有限产能下穿插排产多客户订单。</td></tr>
+<tr><td>多约束条件</td><td>产能、大小块比例、工艺路线、质量指针、检修计划、模具限制等。</td></tr>
+<tr><td>计划变更频繁</td><td>订单变更、紧急插单时需快速重排。</td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<section data-label="章節">
+  <div class="chapter"><div class="chapter-num">用友 APS 产品架构图</div><h2>第一层
+AI Agent 
+前置算料</h2><div class="chapter-sub">第一层</div></div>
+</section>
+
+<!-- Slide 20 -->
+<section data-label="解決方案">
+  <div class="content">
+    <div class="slide-header"><span class="label">解決方案</span><h2>解决方案总体架构</h2></div>
+    <div class="body-left"><p>各工厂的生产任务建议和原料采购建议。</p>
+<p>基于约束规划的短期计划（周/日）。它承接集团层下发的生产任务，并将其转化为“在哪条线、用哪个设备、按什么工序做”的工序级指令。它考虑了设备状态、炉室利用最大化、工作时间、连批生产等现场精细化工艺术。</p></div>
+    <div class="body-right"><p>两层计划体系</p>
+<p>集团层多工厂协同计划</p>
+<p>工厂层详细排程</p></div>
+  </div>
+</section>
+
+<!-- Slide 21 -->
+<section data-label="解決方案">
+  <div class="content">
+    <div class="slide-header"><span class="label">解決方案</span><h2>集团层统一规划</h2></div>
+    <div class="body-left"><p>集团规划层满足</p></div>
+    <div class="body-right"><p style="color:#999">（見左側）</p></div>
+  </div>
+</section>
+
+<!-- Slide 22 -->
+<section data-label="解決方案">
+  <div class="content">
+    <div class="slide-header"><span class="label">解決方案</span><h2>工厂层详细排程</h2></div>
+    <div class="body-left"><p>集团层排程包含工厂70%的逻辑</p></div>
+    <div class="body-right"><p style="color:#999">（見左側）</p></div>
+  </div>
+</section>
+
+<!-- Slide 23 -->
+<section data-label="解決方案">
+  <div class="content">
+    <div class="slide-header"><span class="label">解決方案</span><h2>实施方案</h2></div>
+    <div class="body-left"><p>降低实施成本：避免二次进场调研、重复数据采集、重复沟通，节省人力与顾问费用。</p>
+<p>数据一致性：一次调研获取完整产能、工艺、成本数据，确保集团层计划与工厂层执行无缝衔接。</p>
+<p>快速见效：系统上线即可实现全局优化+详细排产，提前释放整体效益。</p>
+<p>集团层调研</p>
+<p>分步实施：8个月</p>
+<p>同步实施：5.5个月</p>
+<p>工厂粗调研</p>
+<p>集团层实施</p>
+<p>第一阶段：4个月</p></div>
+    <div class="body-right"><p>工厂详细调研</p>
+<p>工厂层实施</p>
+<p>第二阶段：4个月</p>
+<p>重复工时</p>
+<p>重复工时</p>
+<p>集团层调研</p>
+<p>工厂详细调研</p>
+<p>集团层实施</p>
+<p>工厂层实施</p>
+<p>同步实施：时间最优、成本最低</p></div>
+  </div>
+</section>
+
+<section data-label=""><div class="full-content"><div class="slide-header"><span class="label"></span><h2>项目实施计划</h2></div><div class="body"><div class="value-cards"></div></div></div></section>
+
+<!-- Slide 25 -->
+<section data-label="解決方案">
+  <div class="content">
+    <div class="slide-header"><span class="label">解決方案</span><h2>系统集成方案</h2></div>
+    <div class="body-left"><p>读取数据：销售订单、客户主数据、物料主数据、BOM、工艺路线、供货商主数据</p>
+<p>输出数据：生产订单、采购建议、发货计划</p>
+<p>与MES系统集成</p></div>
+    <div class="body-right"><p>采用标准API或中间表方式进行数据交互</p>
+<p>根据业务需求灵活选择实时性处理或批处理模式，确保数据准确高效</p>
+<p>下发指令：工序级工单、派工指令</p>
+<p>接收回馈：报工数据、设备状态、在制品信息，实时更新计划进度</p></div>
+  </div>
+</section>
+
+<section data-label="章節">
+  <div class="chapter"><div class="chapter-num">10天開發Demo系统演示</div><h2>1-3</h2></div>
+</section>
+
+<!-- Slide 27 -->
+<section data-label="核心價值">
+  <div class="content">
+    <div class="slide-header"><span class="label">核心價值</span><h2>索通解决方案核心价值</h2></div>
+    <div class="body-left"><p>协同透明化：多工厂之间物料、产能一目了然，内部调拨高效透明</p>
+<p>执行可追溯：每一张销售订单可穿透至生产工序，进度可跟踪</p></div>
+    <div class="body-right"><p>风险预警：交期风险、产能超载自动预警，变“救火”为“预防”</p>
+<p>组织经验沉淀：将老师傅的经验转化为算法规则，降低对人的依赖</p>
+<table>
+<tr><th>维度</th><th>改善前</th><th>改善后</th><th>预期效益</th></tr>
+<tr><td>集团整体利润</td><td>各厂单独优化，局部最优</td><td>全局优化算法，综合考虑利润与交期</td><td>利润提升1.5%~2.5% （通过降本与优配）</td></tr>
+<tr><td>半成品/在制品库存</td><td>工序间积压</td><td>工序级排程，减少等待与积压</td><td>降低10%~15%</td></tr>
+<tr><td>插单响应时间</td><td>2~3天（人工重排）</td><td>系统分钟级重排，自动评估影响</td><td>缩短至半天内 （响应效率提升70%+）</td></tr>
+<tr><td>计划编制时间</td><td>每周2~3人天</td><td>系统自动生成，人工仅需审核调整</td><td>减少50%~60%</td></tr>
+<tr><td>产能利用率</td><td>局部瓶颈，部分设备闲置</td><td>全局负荷均衡，瓶颈资源优化</td><td>提升5%~8%</td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<section data-label=""><div class="full-content"><div class="slide-header"><span class="label"></span><h2>索通解决方案核心价值</h2></div><div class="body"><div class="value-cards"></div></div></div></section>
+
+<section data-label="章節">
+  <div class="chapter"><div class="chapter-num">售前快速响应APS项目      客户需求实战技巧</div><h2>2-1</h2></div>
+</section>
+
+<!-- Slide 30 -->
+<section data-label="售前">
+  <div class="content">
+    <div class="slide-header"><span class="label">售前</span><h2>YS</h2></div>
+    <div class="body-left"><p>以客戶資料建立標準版POC模型</p></div>
+    <div class="body-right"><p style="color:#999">（見左側）</p></div>
+  </div>
+</section>
+
+<section data-label="章節">
+  <div class="chapter"><div class="chapter-num">ESG双碳管理产品      如何帮助企业双碳合规</div><h2>3-1</h2></div>
+</section>
+
+<!-- Slide 32 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>政策与市场双重驱动—碳管理的挑战与机遇</h2></div>
+    <div class="body-left"><p>欧盟CBAM碳关税2027年全面实施，首批覆盖钢铁/铝/电力等行业；欧盟CSRD&amp;ESRS：强制要求披露范围1-3碳排放，覆盖在欧经营的中国企业，2025年起需提供碳足迹认证，2027年实施数字电池护照，国际碳壁垒形成倒逼企业建立全供应链碳数据体系，未达标者面临关税惩罚或退市风险。</p>
+<p>2030碳达峰、2060碳中和国家战略</p>
+<p>碳市场扩容</p></div>
+    <div class="body-right"><p>全国碳市场逐步纳入建材、有色等八大行业。覆盖45亿吨排放量，国家发改委等五部门要求2025年建立50+重点产品碳足迹标准，碳标识认证制度基本成型。</p>
+<p>地方强化监管及建设试点标杆</p>
+<p>碳核查违规最高罚款200万元+配额核减50%-100%，2024年查处ESG数据造假案件87起，单案平均罚款超500万元。常州对动力电池/光伏企业碳足迹认证最高补贴5万元，零碳工厂奖励100万元。</p></div>
+  </div>
+</section>
+
+<!-- Slide 33 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>政策与市场双重驱动—碳管理的挑战与机遇</h2></div>
+    <div class="body-left"><p>ESG投资倒逼碳数据透明化</p>
+<p>资本要求  全球ESG资管规模超40万亿美元，MSCI碳指标权重达15%，香港联交所将范围3碳排放列入强制披露</p></div>
+    <div class="body-right"><p>供应链压力  64%消费者将可持续性列为采购前三因素，苹果、沃尔玛等巨头等巨头要求供应商披露碳数据且必须实现供应商2030年实现碳中和，未达标者订单削减比例达40%。目前仅9%企业能完整计算范围3排放，错误率高达30-40%</p>
+<p>政策红利  中国多地推出“碳挂钩”金融工具：绿色信贷、碳中和债券依赖准确碳盘查数据碳足迹挂钩贷款利率直接关联企业减排绩效，ESG表现优异企业获低息贷款+税收优惠</p></div>
+  </div>
+</section>
+
+<!-- Slide 34 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>企业碳中和实施步骤</h2></div>
+    <div class="body-left"><p>2</p>
+<p>3</p>
+<p>4</p>
+<p>5</p></div>
+    <div class="body-right"><p>制定碳目标</p>
+<p>评价碳绩效</p>
+<p>摸清碳家底</p>
+<p>执行碳减排</p>
+<p>实现碳中和</p></div>
+  </div>
+</section>
+
+<section data-label="ESG"><div class="full-content"><div class="slide-header"><span class="label">ESG 雙碳</span><h2>品牌价值升级</h2></div><div class="body"><div class="steps"><div class="step"><span class="step-num">1</span><div><h4>碳盘查帮助企业精准掌握碳排放数据，满足碳市场交易、碳税缴纳等政策要求。随着"双碳"政策深化，重点行业均需参与碳排放管理。通过系统化盘查，企业可规避数据不清导致的合规风险，确保生产经营合法有序</h4></div></div><div class="step"><span class="step-num">2</span><div><h4>企业做碳盘查的必要性</h4></div></div><div class="step"><span class="step-num">3</span><div><h4>添加文本</h4></div></div><div class="step"><span class="step-num">4</span><div><h4>添加文本</h4></div></div><div class="step"><span class="step-num">5</span><div><h4>合规经营保障</h4></div></div><div class="step"><span class="step-num">6</span><div><h4>碳盘查帮助企业精准掌握碳排放数据，满足碳市场交易、碳税缴纳等政策要求。随着"双碳"政策深化，重点行业均需参与碳排放管理。通过系统化盘查，企业可规避数据不清导致的合规风险，确保生产经营合法有序</h4></div></div><div class="step"><span class="step-num">7</span><div><h4>降本增效利器</h4></div></div><div class="step"><span class="step-num">8</span><div><h4>碳盘查过程中，企业能够发现高耗能、高排放的环节和设备，通过技术改造、工艺优化等措施，在实现减排目标的同时，降低能源消耗和生产成本</h4></div></div><div class="step"><span class="step-num">9</span><div><h4>国际通行证</h4></div></div><div class="step"><span class="step-num">10</span><div><h4>面对欧盟CBAM等绿色贸易壁垒，碳盘查数据是产品出口的必要凭证，系统化的碳排放管理可确保企业符合国际碳足迹标准，避免因碳数据缺失损失海外订单，维护国际市场竞争力</h4></div></div><div class="step"><span class="step-num">11</span><div><h4>融资新优势</h4></div></div><div class="step"><span class="step-num">12</span><div><h4>金融机构将碳管理纳入信贷评估体系，碳盘查完善的企业可获得利率优惠。2023年绿色信贷数据显示，碳数据透明的企业平均融资成本降低1.2个百分点，绿色债券发行成功率提升40%</h4></div></div></div></div></div></section>
+
+<section data-label="章節">
+  <div class="chapter"><div class="chapter-num">企业双碳管理现状与挑战</div><h2>3-2</h2></div>
+</section>
+
+<!-- Slide 37 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>企业碳管理痛点分析</h2></div>
+    <div class="body-left"><p style="color:#999">（見右側）</p></div>
+    <div class="body-right"><p style="color:#999">（見左側）</p></div>
+  </div>
+</section>
+
+<!-- Slide 38 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>企业碳管理痛点分析</h2></div>
+    <div class="body-left"><p style="color:#999">（見右側）</p></div>
+    <div class="body-right"><p style="color:#999">（見左側）</p></div>
+  </div>
+</section>
+
+<section data-label="章節">
+  <div class="chapter"><div class="chapter-num">IMPACTs 双碳管理解决方案</div><h2>3-3</h2></div>
+</section>
+
+<!-- Slide 40 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>IMPACTs 双碳管理解决方案</h2></div>
+    <div class="body-left"><p>系统严格遵循ISO 14064、GHG Protocol等国际标准，全面覆盖范围1-3碳排放管理场景，满足集团型企业及供应链协同需求</p></div>
+    <div class="body-right"><p>作为用友ISV生态认证产品，深度对接用友ERP、APS、MES、SCM等核心业务系统，实现碳排放数据的自动化采集、智能化分析和全链路闭环管理，助力企业高效达成双碳目标，提升碳管理效能</p></div>
+  </div>
+</section>
+
+<!-- Slide 41 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>IMPACTs 双碳管理解决方案</h2></div>
+    <div class="body-left"><p style="color:#999">（見右側）</p></div>
+    <div class="body-right"><table>
+<tr><th></th><th>传统企业碳盘查</th><th>IMPACTs 碳盘查系统</th><th>企业收益提升</th></tr>
+<tr><td>数据准确性</td><td>依赖人工收集和Excel计算，易出现数据遗漏、输入错误或单位换算错误</td><td>自动采集数据（如对接能源系统、ERP等），标准化计算逻辑，减少人为误差</td><td>准确性提高50%+</td></tr>
+<tr><td>时间效率</td><td>耗时较长（需手动整理数据、反复核对），每年碳盘查可能需1-3个月</td><td>自动化生成报告，实时更新数据，盘查周期缩短至1-2周</td><td>效率提升80%+</td></tr>
+<tr><td>合规风险</td><td>难以满足国际标准（如ISO 14064）要求，审计时可能因数据不完整被质疑</td><td>符合ISO 14064、GHG Protocol等国际标准，支持第三方核查</td><td>合规性保障</td></tr>
+<tr><td>成本控制</td><td>人工成本高（需专职团队或外部顾问），长期投入大</td><td>数字化系统管理，减少人工依赖，定期业务培训，降低咨询费用，长期使用成本更低</td><td>成本降低30%-60%</td></tr>
+<tr><td>决策支持</td><td>数据滞后，无法实时监控碳排放变化，减排策略依赖经验判断</td><td>动态仪表盘分析排放热点，模拟减排路径</td><td>数据驱动决策</td></tr>
+<tr><td>供应链管理</td><td>难以追踪上下游碳排放（范围3），供应商数据难整合</td><td>协同供应链碳数据接入，支持计算产品碳足迹，满足客户ESG要求</td><td>供应链透明度提升</td></tr>
+<tr><td>品牌价值</td><td>被动响应监管，难以体现低碳领导力</td><td>自动生成碳盘查报告，支持碳标签认证，提升绿色品牌形象</td><td>竞争优势增强</td></tr>
+<tr><td>长期可持续性</td><td>数据分散，难以逐年对比优化</td><td>为企业建立碳资产数据库，追踪减排进度，支持碳管理方方面面</td><td>保护企业隐形资产，降本增效</td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<!-- Slide 42 -->
+<section data-label="ESG 雙碳">
+  <div class="full-content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>IMPACTs 双碳管理解决方案-综合解决方案体系</h2></div>
+    <div class="body"></div>
+  </div>
+</section>
+
+<!-- Slide 43 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>IMPACTs 双碳管理解决方案-主要适用行业</h2></div>
+    <div class="body-left"><p>电力能源行业</p>
+<p>交通运输业</p>
+<p>建筑房地产</p>
+<p>电子信息产业</p></div>
+    <div class="body-right"><p>零售服务业</p>
+<p>农林牧渔业</p>
+<p>医药化工业</p>
+<p>园区及公共机构</p></div>
+  </div>
+</section>
+
+<!-- Slide 44 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>IMPACTs 双碳管理解决方案</h2></div>
+    <div class="body-left"><p style="color:#999">（見右側）</p></div>
+    <div class="body-right"><p style="color:#999">（見左側）</p></div>
+  </div>
+</section>
+
+<!-- Slide 45 -->
+<section data-label="ESG 雙碳">
+  <div class="content">
+    <div class="slide-header"><span class="label">ESG 雙碳</span><h2>IMPACTs 双碳管理解决方案-核心功能</h2></div>
+    <div class="body-left"><p>支持来自不同来源的数据收集和分析，包括能源消耗、工业过程排放和废弃物处理等。</p>
+<p>精准碳排放核算</p></div>
+    <div class="body-right"><p>依据国际标准，对企业所有业务活动的碳排放进行核算</p>
+<p>深度数据分析与洞察​帮助企业识别减排机会，制定具体的减排措施。</p>
+<p>合规报告生成与管理生成符合国际标准的碳排放报告，并协助企业获得相关认证</p></div>
+  </div>
+</section>
+
+<section data-label="章節">
+  <div class="chapter"><div class="chapter-num">IMPACTs 双碳管理客户案例</div><h2>3-4</h2></div>
+</section>
+
+<section data-label="客戶案例"><div class="full-content"><div class="slide-header"><span class="label">客戶案例</span><h2>合作伙伴</h2></div><div class="body"></div></div></section>
+
+<section data-label=""><div class="full-content"><div class="slide-header"><span class="label">合作夥伴</span><h2>部分行业客户案例——某金属制品有限公司</h2></div><div class="body"><p style="text-align:center;color:#666;margin-bottom:20px">我們與行業領先企業深度合作</p><div class="partner-row"></div></div></div></section>
+
+<section data-label="客戶案例"><div class="full-content"><div class="slide-header"><span class="label">客戶案例</span><h2>部分行业客户案例——某金属制品有限公司</h2></div><div class="body"><p>实施成效</p>
+<p>战略价值</p>
+<p>获得沃尔沃"绿色供应商"认证</p>
+<p>通过欧盟CBAM首年核查</p>
+<p>入围某新能源车企核心供应商名单</p>
+</div></div></section>
+
+<!-- Slide 50 -->
+<section data-label="客戶案例">
+  <div class="content">
+    <div class="slide-header"><span class="label">客戶案例</span><h2>部分行业客户案例——某金属制品有限公司</h2></div>
+    <div class="body-left"><p>PLC/Sensor/SMB</p>
+<p>搜集数据</p>
+<p>云端生产能源</p>
+<p>碳排实时监控</p>
+<p>生产状况</p>
+<p>实时追踪</p>
+<p>设备碳排监控系统</p></div>
+    <div class="body-right"><p>(i-MCMS)</p>
+<p>分析</p>
+<p>分析</p>
+<p>设备升级，提升生产力</p>
+<p>软件系统建置</p>
+<p>硬设备基础升级</p>
+<p>1</p></div>
+  </div>
+</section>
+
+<section data-label="客戶案例"><div class="full-content"><div class="slide-header"><span class="label">客戶案例</span><h2>部分行业客户案例——某胶膜有限公司</h2></div><div class="body"></div></div></section>
+
+<!-- Slide 52 -->
+<section data-label="客戶案例">
+  <div class="content">
+    <div class="slide-header"><span class="label">客戶案例</span><h2>部分行业客户案例——某胶膜有限公司</h2></div>
+    <div class="body-left"><p>战略价值</p>
+<p>成为行业内碳足迹认证的胶膜企业</p></div>
+    <div class="body-right"><p>获得国际客户20%的绿色订单溢价</p>
+<p>入选省级"智能工厂"示范项目</p>
+<p>预计2.5年收回改造成本</p>
+<table>
+<tr><th>指标</th><th>实施前</th><th>实施后</th><th>提升幅度</th></tr>
+<tr><td>数据准确性</td><td>80%</td><td>98%</td><td>+18%</td></tr>
+<tr><td>单吨产品能耗</td><td>850kWh</td><td>620kWh</td><td>-27%</td></tr>
+<tr><td>溶剂使用量</td><td>15吨/月</td><td>0</td><td>100%</td></tr>
+<tr><td>年度碳减排量</td><td>9600吨</td><td>3200吨</td><td>66.67%</td></tr>
+</table>
+</div>
+  </div>
+</section>
+
+<section data-label="客戶案例"><div class="full-content"><div class="slide-header"><span class="label">客戶案例</span><h2>部分行业客户案例——某胶膜有限公司</h2></div><div class="body"><p>资料云</p>
+<p>PLC/Sensor/SMB</p>
+<p>搜集数据</p>
+<p>云端生产能源</p>
+<p>碳排实时监控</p>
+<div class="stats-row"><div class="stat-item"><div class="num">设备升级，提升生产力</div><div class="label"></div></div></div></div></div></section>
+
+<section data-label="封底"><div class="closing"><img class="logo" src="yonyou-logo.svg" alt="用友網絡" /><h2>感謝聆聽</h2><div class="sub">用友網絡 · AI-APS 解決方案</div></div></section>
+
+</deck-stage>
+</body>
+</html>
