@@ -1,0 +1,206 @@
+/* ============================================================
+   nicepage-presentation-patterns.css
+   Source: nicepage.com design system extraction
+   Authors: Wendy (classification) + Christopher (CSS extraction)
+   Usage: <link rel="stylesheet" href="nicepage-presentation-patterns.css">
+   ============================================================ */
+
+/* ── 19-Industry Color Systems ──────────────────────────── */
+:root {
+  --npg-brand: #3182CE;
+  --npg-accent: #48BB78;
+  --npg-text: #1A202C;
+  --npg-text-secondary: #4A5568;
+  --npg-text-muted: #A0AEC0;
+  --npg-surface: #FFFFFF;
+  --npg-surface-alt: #F7FAFC;
+  --npg-border: #E2E8F0;
+  --npg-shadow: rgba(0,0,0,0.08);
+  --npg-radius: 12px;
+  --npg-gradient-brand: linear-gradient(135deg, var(--npg-brand), #805AD5);
+}
+
+/* Industry override classes */
+.npg-finance  { --npg-brand: #1A365D; --npg-accent: #ECC94B; }
+.npg-tech     { --npg-brand: #6B46C1; --npg-accent: #00E5FF; --npg-surface: #0A0E27; --npg-text: #E2E8F0; }
+.npg-health   { --npg-brand: #276749; --npg-accent: #F6AD55; --npg-surface-alt: #F0FFF4; }
+.npg-edu      { --npg-brand: #C05621; --npg-accent: #3182CE; --npg-surface-alt: #FFFAF0; }
+.npg-creative { --npg-brand: #E53E3E; --npg-accent: #F6E05E; --npg-surface: #1A202C; --npg-text: #E2E8F0; }
+.npg-corp     { --npg-brand: #1A202C; --npg-accent: #3182CE; }
+.npg-fashion  { --npg-brand: #97266D; --npg-accent: #000000; }
+.npg-food     { --npg-brand: #C05621; --npg-accent: #38A169; }
+
+/* ── 1. Features Grid ───────────────────────────────────── */
+.npg-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+}
+.npg-features-grid.fixed-3 { grid-template-columns: repeat(3, 1fr); }
+.npg-features-grid.fixed-4 { grid-template-columns: repeat(4, 1fr); }
+
+.npg-feature-card {
+  background: var(--npg-surface);
+  border-radius: var(--npg-radius);
+  padding: 2rem;
+  box-shadow: 0 2px 12px var(--npg-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.npg-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.npg-feature-card .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.npg-feature-card .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+.npg-feature-card .desc { font-size: 0.95rem; color: var(--npg-text-secondary); line-height: 1.6; }
+
+/* ── 2. Split Layout ────────────────────────────────────── */
+.npg-split-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 60vh;
+  align-items: center;
+  gap: 3rem;
+  padding: 2rem 4rem;
+}
+.npg-split-hero.reversed { direction: rtl; }
+.npg-split-hero.reversed > * { direction: ltr; }
+
+.npg-split-text h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+}
+.npg-split-text p {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: var(--npg-text-secondary);
+  margin-bottom: 2rem;
+}
+
+.npg-hero-number {
+  font-size: clamp(4rem, 8vw, 7rem);
+  font-weight: 800;
+  line-height: 1;
+  background: var(--npg-gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── 3. Decorative Shapes ───────────────────────────────── */
+.npg-shape-circle {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: var(--npg-accent);
+  opacity: 0.15;
+  position: absolute;
+}
+.npg-shape-blob {
+  border-radius: 60% 40% 50% 45% / 55% 45% 55% 45%;
+  animation: npg-blob-morph 8s ease-in-out infinite;
+}
+@keyframes npg-blob-morph {
+  0%, 100% { border-radius: 60% 40% 50% 45% / 55% 45% 55% 45%; }
+  33% { border-radius: 45% 55% 40% 60% / 50% 60% 45% 55%; }
+  66% { border-radius: 55% 40% 60% 50% / 40% 55% 45% 60%; }
+}
+.npg-accent-bar {
+  width: 60px; height: 4px;
+  background: var(--npg-accent);
+  border-radius: 2px;
+  margin-bottom: 1.5rem;
+}
+
+/* ── 4. Grid Repeater ───────────────────────────────────── */
+.npg-grid-repeater {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+.npg-grid-repeater.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.npg-grid-repeater.cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+.npg-repeater-cell {
+  aspect-ratio: 1;
+  background: var(--npg-surface);
+  border: 1px solid var(--npg-border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+.npg-repeater-cell:hover {
+  background: var(--npg-accent);
+  color: white;
+  transform: scale(1.05);
+  border-color: var(--npg-accent);
+}
+
+/* ── 5. Slider / Carousel ───────────────────────────────── */
+.npg-slider-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  scrollbar-width: none;
+}
+.npg-slider-track::-webkit-scrollbar { display: none; }
+
+.npg-slider-card {
+  flex: 0 0 320px;
+  scroll-snap-align: start;
+  background: var(--npg-surface);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  transition: transform 0.2s;
+}
+.npg-slider-card:hover { transform: translateY(-2px); }
+
+/* ── Typography Scale ────────────────────────────────────── */
+.npg-scale-hero    { font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.1; font-weight: 800; }
+.npg-scale-h1      { font-size: clamp(2rem, 4vw, 3rem);     line-height: 1.15; font-weight: 700; }
+.npg-scale-h2      { font-size: clamp(1.5rem, 3vw, 2rem);   line-height: 1.25; font-weight: 600; }
+.npg-scale-h3      { font-size: 1.25rem; line-height: 1.4; font-weight: 600; }
+.npg-scale-body    { font-size: 1rem; line-height: 1.7; }
+.npg-scale-caption { font-size: 0.875rem; color: var(--npg-text-muted); }
+.npg-scale-small   { font-size: 0.75rem; color: var(--npg-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── Utilities ──────────────────────────────────────────── */
+.npg-section-pad  { padding: 4rem 2rem; }
+.npg-text-center  { text-align: center; }
+.npg-text-brand   { color: var(--npg-brand); }
+.npg-bg-alt       { background: var(--npg-surface-alt); }
+.npg-card          { background: var(--npg-surface); border-radius: var(--npg-radius); box-shadow: 0 2px 12px var(--npg-shadow); padding: 2rem; }
+
+/* ── Font Pairings (Google Fonts) ───────────────────────── */
+/* Pairing 1: Modern Geometric */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+.npg-font-geo    { font-family: 'Montserrat', 'Noto Sans TC', sans-serif; }  /* headings */
+.npg-font-geo-p  { font-family: 'Inter', 'Noto Sans TC', sans-serif; }       /* body */
+
+/* Pairing 2: Editorial Classic */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600;700&display=swap');
+.npg-font-editorial    { font-family: 'Playfair Display', serif; }
+.npg-font-editorial-p  { font-family: 'Lora', serif; }
+
+/* Pairing 3: Tech Sans */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap');
+.npg-font-tech    { font-family: 'Space Grotesk', sans-serif; }
+.npg-font-tech-p  { font-family: 'IBM Plex Sans', sans-serif; }
+
+/* Pairing 4: Corporate Clean */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@600;700&display=swap');
+.npg-font-corp    { font-family: 'Poppins', sans-serif; }
+.npg-font-corp-p  { font-family: 'Open Sans', sans-serif; }
+
+/* Pairing 5: Warm Humanist */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:wght@600;700&family=Nunito:wght@400;600&display=swap');
+.npg-font-warm    { font-family: 'Crimson Text', serif; }
+.npg-font-warm-p  { font-family: 'Nunito', sans-serif; }
