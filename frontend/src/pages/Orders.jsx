@@ -471,20 +471,21 @@ export default function Orders() {
             </div>
             <div className="fade-slide-up d2 grid grid-cols-2 gap-4">
               {[
-                ["計劃單號", "plan_no", "text"],
-                ["合約號", "contract_no", "text"],
-                ["電壓 (kV)", "voltage_kv", "number"],
-                ["電流 (A)", "current_a", "number"],
-                ["數量", "qty", "number"],
-                ["交期", "delivery_date", "date"],
-              ].map(([label, key, type]) => (
+                ["計劃單號", "plan_no", "text", true],
+                ["合約號", "contract_no", "text", false],
+                ["電壓 (kV)", "voltage_kv", "number", true],
+                ["電流 (A)", "current_a", "number", false],
+                ["數量", "qty", "number", true],
+                ["交期", "delivery_date", "date", true],
+              ].map(([label, key, type, required]) => (
                 <div key={key}>
                   <label htmlFor={`order-form-${key}`} className="block text-xs text-furnace-muted mb-1">
-                    {label}
+                    {label}{required ? <span aria-hidden="true" className="text-furnace-red ml-0.5">*</span> : ""}
                   </label>
                   <input
                     id={`order-form-${key}`}
                     type={type}
+                    required={required}
                     value={form[key] || ""}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, [key]: e.target.value }))
