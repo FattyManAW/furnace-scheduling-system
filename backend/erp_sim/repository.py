@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from erp_sim.models import ErpDelivery, ErpOrder
 
-
 # ── Order CRUD ──────────────────────────────────────────────────────────
 
 def create_order(

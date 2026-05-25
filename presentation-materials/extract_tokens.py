@@ -3,9 +3,14 @@
 
 Usage: python3 extract_tokens.py [template_dir] [output_dir]
 """
-import json, os, re, sys, html
-from pathlib import Path
+import html
+import json
+import os
+import re
+import sys
 from html.parser import HTMLParser
+from pathlib import Path
+
 
 class TokenExtractor(HTMLParser):
     """Extract CSS custom properties, color values, and font families from HTML/CSS."""
@@ -58,10 +63,10 @@ def extract_from_file(filepath: str) -> dict:
     """Extract tokens from an HTML file."""
     with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
         content = f.read()
-    
+
     extractor = TokenExtractor()
     extractor.feed(content)
-    
+
     return {
         "file": filepath,
         "css_variables": extractor.css_vars,
@@ -76,9 +81,9 @@ def extract_from_file(filepath: str) -> dict:
 def main():
     template_dir = sys.argv[1] if len(sys.argv) > 1 else "/tmp/beautiful-html-templates"
     output_dir = sys.argv[2] if len(sys.argv) > 2 else "presentation-materials/design-tokens"
-    
+
     os.makedirs(output_dir, exist_ok=True)
-    
+
     results = []
     for root, dirs, files in os.walk(template_dir):
         for f in files:
@@ -90,7 +95,7 @@ def main():
                     print(f"  {token['css_var_count']} vars | {token['color_count']} colors | {token['font_count']} fonts — {os.path.relpath(path, template_dir)}")
                 except Exception as e:
                     print(f"  ERROR: {f} — {e}")
-    
+
     # Aggregate
     all_vars = {}
     all_colors = set()
@@ -99,7 +104,7 @@ def main():
         all_vars.update(r['css_variables'])
         all_colors.update(r['colors'])
         all_fonts.update(r['fonts'])
-    
+
     # Save
     summary = {
         "source": "beautiful-html-templates",
@@ -112,7 +117,7 @@ def main():
         "fonts": sorted(all_fonts),
         "per_file": results,
     }
-    
+
     out = os.path.join(output_dir, "beautiful-html-templates-tokens.json")
     with open(out, 'w') as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)

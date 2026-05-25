@@ -21,7 +21,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 # ensure erp models registered before DB tables created in conftest
 import erp_sim.models  # noqa: E402, F401
 
-
 # ── Seed helpers (module-level for reuse across test classes) ──────────
 
 def _seed_minimal_kiln(client):
@@ -479,6 +478,7 @@ class TestScheduleEdgeCases:
     def test_kiln_name_null_id(self):
         """_kiln_name returns '' for falsy kiln_id (line 32)."""
         from api.schedule import _kiln_name
+
         from database import SessionLocal
         db = SessionLocal()
         try:

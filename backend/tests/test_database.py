@@ -8,7 +8,6 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-
 # ── get_db() generator ──────────────────────────────────────────────────────
 
 def test_get_db_yields_a_valid_session():
@@ -105,6 +104,7 @@ def test_db_dir_default_path():
     """When FURNACE_DB_URL is unset, DB_DIR lives in backend/data."""
     # Re-import fresh
     import importlib
+
     import database as _db
 
     old = os.environ.pop("FURNACE_DB_URL", None)
@@ -123,6 +123,7 @@ def test_db_dir_default_path():
 def test_db_url_env_override():
     """FURNACE_DB_URL env var overrides the default."""
     import importlib
+
     import database as _db
 
     old = os.environ.get("FURNACE_DB_URL")

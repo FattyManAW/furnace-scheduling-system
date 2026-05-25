@@ -1,8 +1,9 @@
 """Tests for main.py — root, health, CORS, exception handlers"""
 
 import os
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
@@ -69,6 +70,7 @@ class TestCORS:
         """L32-34: ALLOWED_ORIGINS set → custom origins list"""
         monkeypatch.setenv("ALLOWED_ORIGINS", "https://example.com,https://foo.bar")
         import importlib
+
         import main as _main
         importlib.reload(_main)
         assert "https://example.com" in str(_main._origins)
@@ -78,6 +80,7 @@ class TestCORS:
         """L32-35: ALLOWED_ORIGINS set to empty → fallback to defaults"""
         monkeypatch.setenv("ALLOWED_ORIGINS", "")
         import importlib
+
         import main as _main
         importlib.reload(_main)
         assert "http://localhost:5173" in _main._origins
@@ -88,9 +91,11 @@ class TestExceptionHandlers:
 
     def test_http_exception_handler(self, client):
         """L92-97: HTTPException → JSON response with type"""
-        import main as _main
-        from fastapi.requests import Request
         import asyncio
+
+        from fastapi.requests import Request
+
+        import main as _main
 
         req = MagicMock(spec=Request)
         exc = StarletteHTTPException(status_code=403, detail="forbidden")
@@ -114,10 +119,12 @@ class TestExceptionHandlers:
 
     def test_db_exception_handler_direct(self):
         """L106-111: SQLAlchemyError → 500"""
-        import main as _main
+        import asyncio
+
         from fastapi.requests import Request
         from sqlalchemy.exc import SQLAlchemyError
-        import asyncio
+
+        import main as _main
 
         req = MagicMock(spec=Request)
         exc = SQLAlchemyError("db error")
@@ -131,9 +138,11 @@ class TestExceptionHandlers:
 
     def test_generic_exception_handler_direct(self):
         """L113-118: generic Exception → 500"""
-        import main as _main
-        from fastapi.requests import Request
         import asyncio
+
+        from fastapi.requests import Request
+
+        import main as _main
 
         req = MagicMock(spec=Request)
         exc = ValueError("kaboom")
@@ -152,8 +161,8 @@ class TestMainBlock:
     def test_main_guard_block(self, monkeypatch):
         """L122-128: execute module as __main__ with mocked uvicorn.run"""
         monkeypatch.setenv("PORT", "9999")
-        import sys
         import importlib
+        import sys
 
         # Remove main from sys.modules so it re-executes with __name__='__main__'
         # under runpy

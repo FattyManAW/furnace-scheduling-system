@@ -1,7 +1,7 @@
 """Integration tests for erp_sim module"""
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -197,8 +197,8 @@ def test_list_orders_with_status_filter(db_session):
     from erp_sim.repository import create_order, list_orders, update_order_status
 
     o1 = create_order(db_session, "PO-SF-001", "spec A", 10, "normal")
-    o2 = create_order(db_session, "PO-SF-002", "spec B", 20, "high")
-    o3 = create_order(db_session, "PO-SF-003", "spec C", 30, "normal")
+    create_order(db_session, "PO-SF-002", "spec B", 20, "high")
+    create_order(db_session, "PO-SF-003", "spec C", 30, "normal")
     update_order_status(db_session, o1.id, "scheduled")
 
     pending = list_orders(db_session, status="pending")
@@ -264,8 +264,12 @@ def test_list_deliveries_with_order_id_filter(db_session):
 
 def test_list_deliveries_with_status_filter(db_session):
     """list_deliveries with status filter 應正確過濾"""
-    from erp_sim.repository import create_delivery, create_order, list_deliveries
-    from erp_sim.repository import update_delivery_status
+    from erp_sim.repository import (
+        create_delivery,
+        create_order,
+        list_deliveries,
+        update_delivery_status,
+    )
 
     o = create_order(db_session, "PO-LDS-001", "spec A", 10)
     create_delivery(db_session, order_id=o.id, order_no="PO-LDS-001", status="scheduled")
@@ -282,7 +286,12 @@ def test_list_deliveries_with_status_filter(db_session):
 
 def test_update_delivery_status_happy_path(db_session):
     """update_delivery_status 應正確更新交期狀態"""
-    from erp_sim.repository import create_delivery, create_order, update_delivery_status, list_deliveries
+    from erp_sim.repository import (
+        create_delivery,
+        create_order,
+        list_deliveries,
+        update_delivery_status,
+    )
 
     o = create_order(db_session, "PO-UDS-001", "spec A", 10)
     d = create_delivery(db_session, order_id=o.id, order_no="PO-UDS-001", status="scheduled")
@@ -302,8 +311,9 @@ def test_update_delivery_status_happy_path(db_session):
 
 def test_parse_date_invalid_fallback():
     """_compute_delivery_date with invalid date string → fallback to today"""
-    from erp_sim.sync import _compute_delivery_date
     from datetime import date
+
+    from erp_sim.sync import _compute_delivery_date
 
     result = _compute_delivery_date("not-a-date", 8.0)
     today = date.today().strftime("%Y-%m-%d")

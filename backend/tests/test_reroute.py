@@ -6,18 +6,19 @@
 from __future__ import annotations
 
 import json
-import sys
 import os
+import sys
 
 # Ensure backend is importable
 backend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, backend_dir)
 
-from database import SessionLocal, Base, engine
-from seed_data import seed_all
 from engine.data_layer import load_all_optimizer_data
-from engine.optimizer import schedule_orders, quality_report
+from engine.optimizer import quality_report, schedule_orders
 from engine.reroute import reroute_on_congestion, reroute_report
+from seed_data import seed_all
+
+from database import Base, SessionLocal, engine
 
 Base.metadata.create_all(bind=engine)
 
@@ -242,8 +243,8 @@ class TestFindAlternateKilns:
 
     def test_skip_congested_kiln(self, monkeypatch):
         """find_alternate_kilns skips kiln with usage_pct >= max_usage_pct (line 85)."""
-        from engine.reroute import find_alternate_kilns
         import engine.optimizer as opt
+        from engine.reroute import find_alternate_kilns
         # Make fit_score return a low value so kiln would normally qualify
         monkeypatch.setattr(opt, "fit_score", lambda *a, **kw: 0.0)
 
@@ -264,8 +265,8 @@ class TestFindAlternateKilns:
 
     def test_skip_full_kiln(self, monkeypatch):
         """find_alternate_kilns skips kiln with no slots (line 73-74)."""
-        from engine.reroute import find_alternate_kilns
         import engine.optimizer as opt
+        from engine.reroute import find_alternate_kilns
         monkeypatch.setattr(opt, "fit_score", lambda *a, **kw: 0.0)
 
         order = {"plan_no": "TEST", "voltage_kv": 220, "qty": 5,
@@ -281,8 +282,8 @@ class TestFindAlternateKilns:
 
     def test_fit_score_too_high_skipped(self, monkeypatch):
         """find_alternate_kilns skips when fit_score >= 999 (line 98)."""
-        from engine.reroute import find_alternate_kilns
         import engine.optimizer as opt
+        from engine.reroute import find_alternate_kilns
         monkeypatch.setattr(opt, "fit_score", lambda *a, **kw: 999.0)
 
         order = {"plan_no": "TEST", "voltage_kv": 220, "qty": 5,
@@ -353,8 +354,8 @@ class TestRerouteOnCongestionEdges:
 
     def test_no_alternate_kilns_found(self, monkeypatch):
         """reroute_on_congestion: order has no viable alternate kilns (line 182)."""
-        from engine.reroute import reroute_on_congestion
         import engine.optimizer as opt
+        from engine.reroute import reroute_on_congestion
         monkeypatch.setattr(opt, "fit_score", lambda *a, **kw: 999.0)  # always unfit
 
         order_schedule = [

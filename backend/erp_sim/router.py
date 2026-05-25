@@ -3,12 +3,13 @@
 from datetime import datetime
 from typing import Optional
 
-from database import get_db
-from erp_sim import repository as repo
-from erp_sim.sync import sync_schedule_to_erp
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, field_serializer
 from sqlalchemy.orm import Session
+
+from database import get_db
+from erp_sim import repository as repo
+from erp_sim.sync import sync_schedule_to_erp
 
 router = APIRouter(prefix="/erp", tags=["erp"])
 

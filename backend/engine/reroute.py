@@ -70,8 +70,8 @@ def find_alternate_kilns(
     from engine.optimizer import fit_score as _fit
 
     candidates = []
-    voltage = order.get("voltage_kv", 0)
-    qty = order.get("qty", 0)
+    order.get("voltage_kv", 0)
+    order.get("qty", 0)
 
     for kid, kdata in kiln_schedule.items():
         kid_str = str(kid)

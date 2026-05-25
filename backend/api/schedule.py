@@ -15,13 +15,13 @@ from engine.data_layer import load_all_optimizer_data
 from engine.optimizer import DAILY_HOUR_CAP, schedule_orders
 from engine.reroute import reroute_on_congestion
 from engine.validator import validate_schedule
-from erp_sim.sync import sync_schedule_to_erp
 from fastapi import APIRouter, Depends, HTTPException, Query
 from models import Kiln, Order, ScheduleEntry
 from schemas import PaginatedResponse, ScheduleEntryOut, ScheduleRequest, ScheduleResult
 from sqlalchemy.orm import Session
 
 from database import get_db
+from erp_sim.sync import sync_schedule_to_erp
 
 router = APIRouter(prefix="/api/v1/schedule", tags=["schedule"])
 
@@ -112,7 +112,7 @@ def run_schedule(request: ScheduleRequest, db: Session = Depends(get_db)):
             }
 
     # ── Sync to ERP ──
-    erp_sync_result = sync_schedule_to_erp(db, result)
+    sync_schedule_to_erp(db, result)
 
     clear_schedule(db)
     kiln_map = {str(k.kiln_no): k for k in get_kilns(db)}

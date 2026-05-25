@@ -64,7 +64,7 @@ class TestDashboard:
         _create_mold(client, "M-RPT-001")
 
         # Create schedule entries with today's date (via direct DB insert for est_hours)
-        from models import ScheduleEntry, Order
+        from models import Order, ScheduleEntry
         # Get the scheduled order id
         orders = db_session.query(Order).all()
         sched_order = [o for o in orders if o.plan_no == "RPT-003"][0]
@@ -163,7 +163,7 @@ class TestExportCSV:
         assert len(lines) >= 1  # at least header
 
     def test_export_schedule_csv_with_data(self, client, db_session):
-        from models import ScheduleEntry, Order
+        from models import Order, ScheduleEntry
         _create_order(client, "SCH-CSV-001", contract_no="C-SCH1", voltage_kv=220.0, current_a=100.0, qty=7, status="scheduled")
         o = db_session.query(Order).filter(Order.plan_no == "SCH-CSV-001").first()
         entry = ScheduleEntry(
