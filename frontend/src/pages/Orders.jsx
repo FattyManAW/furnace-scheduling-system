@@ -453,8 +453,12 @@ export default function Orders() {
         <div
           className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 modal-backdrop"
           onClick={() => setModalOpen(false)}
+          aria-hidden="true"
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={editOrder ? "編輯訂單" : "新增訂單"}
             className="modal-panel bg-furnace-card hover-lift border border-furnace-border rounded-2xl p-6 w-full max-w-lg"
             onClick={(e) => e.stopPropagation()}
           >

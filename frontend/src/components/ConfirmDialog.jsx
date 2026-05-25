@@ -1,7 +1,8 @@
 import { AlertTriangle } from "lucide-react";
+import { useEffect } from "react";
 
 /**
- * ConfirmDialog — styled alternative to window.confirm()
+ * ConfirmDialog — accessible modal alternative to window.confirm()
  * Usage:
  *   <ConfirmDialog open={showConfirm} title="確定刪除？" message="..." danger
  *     onConfirm={handleDelete} onCancel={() => setShowConfirm(false)} />
@@ -17,14 +18,26 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }) {
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") onCancel?.(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onCancel]);
+
   if (!open) return null;
 
   return (
     <div
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] modal-backdrop"
       onClick={onCancel}
+      aria-hidden="true"
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         className="modal-panel bg-furnace-card border border-furnace-border rounded-2xl p-6 w-full max-w-sm mx-4"
         onClick={(e) => e.stopPropagation()}
       >

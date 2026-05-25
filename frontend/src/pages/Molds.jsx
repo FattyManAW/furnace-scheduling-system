@@ -301,8 +301,12 @@ export default function Molds() {
         <div
           className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 modal-backdrop"
           onClick={() => setModalOpen(false)}
+          aria-hidden="true"
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={editMold ? "編輯模具" : "新增模具"}
             className="modal-panel bg-furnace-card hover-lift border border-furnace-border rounded-2xl p-6 w-full max-w-lg"
             onClick={(e) => e.stopPropagation()}
           >
@@ -311,20 +315,21 @@ export default function Molds() {
             </h2>
             <div className="fade-slide-up d2 grid grid-cols-2 gap-4">
               {[
-                ["模具編號", "mold_no", "text"],
-                ["外徑 OD", "outer_dia", "number"],
-                ["內徑 ID", "inner_dia", "number"],
-                ["長度 L", "length", "number"],
-                ["初始存量", "stock_qty", "number"],
-                ["位置", "location", "text"],
-              ].map(([l, k, t]) => (
+                ["模具編號", "mold_no", "text", true],
+                ["外徑 OD", "outer_dia", "number", true],
+                ["內徑 ID", "inner_dia", "number", false],
+                ["長度 L", "length", "number", true],
+                ["初始存量", "stock_qty", "number", true],
+                ["位置", "location", "text", false],
+              ].map(([l, k, t, r]) => (
                 <div key={k}>
                   <label htmlFor={`mold-form-${k}`} className="block text-xs text-furnace-muted mb-1">
-                    {l}
+                    {l}{r ? <span aria-hidden="true" className="text-furnace-red ml-0.5">*</span> : ""}
                   </label>
                   <input
                     id={`mold-form-${k}`}
                     type={t}
+                    required={r}
                     value={form[k] || ""}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, [k]: e.target.value }))
